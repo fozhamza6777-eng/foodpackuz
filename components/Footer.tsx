@@ -67,15 +67,39 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-ink text-sm mb-4">Aloqa</h4>
             <ul className="space-y-3 text-sm text-ink/55 font-medium">
-              <li className="flex items-center gap-2.5"><Phone className="w-4 h-4 text-brand-500" /> +998 71 200 03 04</li>
+              <li className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-brand-500 shrink-0" /> Toshkent: +998 95 872 83 83
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-brand-500 shrink-0" /> Qo'qon: +998 91 382 83 83
+              </li>
               <li className="flex items-center gap-2.5"><Mail className="w-4 h-4 text-brand-500" /> sales@foodbox.uz</li>
-              <li className="flex items-center gap-2.5"><MapPin className="w-4 h-4 text-brand-500" /> Toshkent, Sergeli tumani</li>
+              <li className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" />
+                <span>Toshkent, Uchtepa tumani, O'rikzor mahallasi, Bositxon ko'chasi 85-uy</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" />
+                <span>Qo'qon, Rais mahallasi, 2-uy</span>
+              </li>
             </ul>
             <div className="flex gap-3 mt-4">
-              <a href="#" aria-label="Telegram" className="p-2 border border-ink/10 rounded-full hover:bg-brand-500 hover:text-white hover:border-brand-500 transition-colors">
+              <a
+                href="https://t.me/fastfood_box"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Telegram"
+                className="p-2 border border-ink/10 rounded-full hover:bg-brand-500 hover:text-white hover:border-brand-500 transition-colors"
+              >
                 <Send className="w-4 h-4" />
               </a>
-              <a href="#" aria-label="Instagram" className="p-2 border border-ink/10 rounded-full hover:bg-brand-500 hover:text-white hover:border-brand-500 transition-colors">
+              <a
+                href="https://bit.ly/foodbox_uz"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="p-2 border border-ink/10 rounded-full hover:bg-brand-500 hover:text-white hover:border-brand-500 transition-colors"
+              >
                 <Instagram className="w-4 h-4" />
               </a>
             </div>

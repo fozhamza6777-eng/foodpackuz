@@ -25,14 +25,16 @@ import {
   Navigation,
   Check,
   Plus,
+  Minus,
   Trash2,
-  Star
+  Star,
+  Pencil
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useCart } from "./CartProvider";
 import { supabase } from "@/lib/supabase/client";
 import { uploadAvatar } from "@/lib/supabase/storage";
-import type { OrderRow, BranchRow } from "@/lib/supabase/types";
+import type { OrderRow, OrderItem, BranchRow } from "@/lib/supabase/types";
 import { fetchActiveProducts } from "@/lib/supabase/products";
 import { fetchUserComments, deleteComment, type MyComment } from "@/lib/supabase/comments";
 import type { Product } from "@/lib/types";
@@ -61,6 +63,10 @@ const CANCELLED_STATUSES = ["bekor", "bekor_sorovi"];
 
 function canRequestCancel(status: string) {
   return !CANCELLED_STATUSES.includes(status) && status !== "yetkazildi";
+}
+
+function canEditOrder(status: string) {
+  return status === "yangi";
 }
 
 function initialsOf(name: string) {
@@ -119,6 +125,11 @@ export default function ProfileDrawer({
   const [cancelReasonText, setCancelReasonText] = useState("");
   const [cancelSubmitting, setCancelSubmitting] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [editItems, setEditItems] = useState<OrderItem[] | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   // --- sharhlar ---
   const [reviews, setReviews] = useState<MyComment[] | null>(null);
@@ -366,6 +377,65 @@ export default function ProfileDrawer({
     setCancelReasonText("");
   };
 
+  const startEditOrder = (order: OrderRow) => {
+    setEditingOrderId(order.id);
+    setEditItems(order.items.map((it) => ({ ...it })));
+    setEditError(null);
+  };
+
+  const cancelEditOrder = () => {
+    setEditingOrderId(null);
+    setEditItems(null);
+    setEditError(null);
+  };
+
+  const editStepFor = (itemId: string) => {
+    const product = allProducts?.find((p) => p.id === itemId);
+    return product?.packSize && product.packSize > 0 ? product.packSize : 1;
+  };
+
+  const adjustEditQty = (itemId: string, direction: 1 | -1) => {
+    setEditItems((prev) =>
+      prev
+        ? prev.map((it) => {
+            if (it.id !== itemId) return it;
+            const step = editStepFor(itemId);
+            return { ...it, qty: Math.max(step, it.qty + direction * step) };
+          })
+        : prev
+    );
+  };
+
+  const removeEditItem = (itemId: string) => {
+    setEditItems((prev) => (prev ? prev.filter((it) => it.id !== itemId) : prev));
+  };
+
+  const handleSaveEdit = async (order: OrderRow) => {
+    if (!editItems || editItems.length === 0) {
+      setEditError(
+        "Buyurtmada kamida bitta mahsulot qolishi kerak. Butunlay bekor qilish uchun \"Bekor qilishni so'rash\"dan foydalaning."
+      );
+      return;
+    }
+    setEditSaving(true);
+    setEditError(null);
+    const newTotal = editItems.reduce((s, it) => s + it.price * it.qty, 0);
+    const { error } = await supabase
+      .from("orders")
+      .update({ items: editItems, total: newTotal })
+      .eq("id", order.id);
+    setEditSaving(false);
+    if (error) {
+      setEditError("Saqlashda xatolik yuz berdi. Qaytadan urinib ko'ring.");
+      return;
+    }
+    setOrders((prev) =>
+      prev ? prev.map((o) => (o.id === order.id ? { ...o, items: editItems, total: newTotal } : o)) : prev
+    );
+    setEditingOrderId(null);
+    setEditItems(null);
+  };
+
   const handleReorder = (order: OrderRow) => {
     if (!allProducts) return;
     let addedCount = 0;
@@ -466,28 +536,106 @@ export default function ProfileDrawer({
               className="overflow-hidden border-t border-ink/8"
             >
               <div className="p-4 flex flex-col gap-2 bg-surface/60">
-                {order.items.map((it, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <span className="text-ink/70 font-medium">
-                      {it.name} × {it.qty}
-                    </span>
-                    <span className="font-semibold text-ink">{(it.price * it.qty).toLocaleString("uz-UZ")} so'm</span>
+                {editingOrderId === order.id ? (
+                  <div className="flex flex-col gap-2">
+                    {(editItems ?? []).map((it) => (
+                      <div key={it.id} className="flex items-center justify-between gap-2 text-sm">
+                        <span className="text-ink/70 font-medium flex-1 min-w-0 truncate">{it.name}</span>
+                        <div className="flex items-center border border-ink/15 rounded-lg shrink-0">
+                          <button
+                            onClick={() => adjustEditQty(it.id, -1)}
+                            className="p-1.5 hover:bg-white"
+                            aria-label="Kamaytirish"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="px-2 text-center font-mono text-xs font-bold whitespace-nowrap">
+                            {it.qty} {it.unit}
+                          </span>
+                          <button
+                            onClick={() => adjustEditQty(it.id, 1)}
+                            className="p-1.5 hover:bg-white"
+                            aria-label="Ko'paytirish"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <span className="font-semibold text-ink w-20 text-right shrink-0">
+                          {(it.price * it.qty).toLocaleString("uz-UZ")} so'm
+                        </span>
+                        <button
+                          onClick={() => removeEditItem(it.id)}
+                          className="text-ink/30 hover:text-danger transition-colors shrink-0"
+                          aria-label="O'chirish"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+
+                    <div className="flex items-center justify-between text-sm font-bold text-ink pt-2 border-t border-ink/8 mt-1">
+                      <span>Yangi jami</span>
+                      <span>{(editItems ?? []).reduce((s, it) => s + it.price * it.qty, 0).toLocaleString("uz-UZ")} so'm</span>
+                    </div>
+
+                    {editError && <p className="text-xs text-danger font-semibold">{editError}</p>}
+
+                    <div className="flex gap-2 mt-1">
+                      <button
+                        onClick={cancelEditOrder}
+                        disabled={editSaving}
+                        className="flex-1 border-2 border-ink/15 text-ink/60 font-bold text-xs py-2 rounded-lg hover:bg-ink/5 transition-colors disabled:opacity-70"
+                      >
+                        Bekor qilish
+                      </button>
+                      <button
+                        onClick={() => handleSaveEdit(order)}
+                        disabled={editSaving}
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-brand-500 text-white font-bold text-xs py-2 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70"
+                      >
+                        {editSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                        Saqlash
+                      </button>
+                    </div>
                   </div>
-                ))}
-                {order.address && (
-                  <p className="text-xs text-ink/45 mt-2 pt-2 border-t border-ink/8">Manzil: {order.address}</p>
+                ) : (
+                  <>
+                    {order.items.map((it, i) => (
+                      <div key={i} className="flex items-center justify-between text-sm">
+                        <span className="text-ink/70 font-medium">
+                          {it.name} × {it.qty}
+                        </span>
+                        <span className="font-semibold text-ink">
+                          {(it.price * it.qty).toLocaleString("uz-UZ")} so'm
+                        </span>
+                      </div>
+                    ))}
+                    {order.address && (
+                      <p className="text-xs text-ink/45 mt-2 pt-2 border-t border-ink/8">Manzil: {order.address}</p>
+                    )}
+
+                    {order.status === "bekor_sorovi" && order.cancel_reason && (
+                      <p className="text-xs text-amber font-medium bg-amber-light rounded-lg p-2.5">
+                        Bekor qilish so'rovingiz ko'rib chiqilmoqda. Sabab: "{order.cancel_reason}"
+                      </p>
+                    )}
+                    {order.status === "bekor" && order.cancel_reason && (
+                      <p className="text-xs text-ink/40 font-medium">Bekor qilish sababi: {order.cancel_reason}</p>
+                    )}
+
+                    {canEditOrder(order.status) && (
+                      <button
+                        onClick={() => startEditOrder(order)}
+                        className="w-full flex items-center justify-center gap-2 border-2 border-brand-500/25 text-brand-600 font-bold text-xs py-2.5 rounded-lg hover:bg-brand-50 transition-colors mt-1"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        Buyurtmani tahrirlash
+                      </button>
+                    )}
+                  </>
                 )}
 
-                {order.status === "bekor_sorovi" && order.cancel_reason && (
-                  <p className="text-xs text-amber font-medium bg-amber-light rounded-lg p-2.5">
-                    Bekor qilish so'rovingiz ko'rib chiqilmoqda. Sabab: "{order.cancel_reason}"
-                  </p>
-                )}
-                {order.status === "bekor" && order.cancel_reason && (
-                  <p className="text-xs text-ink/40 font-medium">Bekor qilish sababi: {order.cancel_reason}</p>
-                )}
-
-                {canRequestCancel(order.status) && (
+                {editingOrderId !== order.id && canRequestCancel(order.status) && (
                   <div className="pt-1">
                     {cancelReasonOrderId === order.id ? (
                       <div className="flex flex-col gap-2">
@@ -536,12 +684,14 @@ export default function ProfileDrawer({
                   </div>
                 )}
 
-                <button
-                  onClick={() => handleReorder(order)}
-                  className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-brand-600 transition-colors mt-1"
-                >
-                  <RotateCcw className="w-4 h-4" /> Qayta buyurtma qilish
-                </button>
+                {editingOrderId !== order.id && (
+                  <button
+                    onClick={() => handleReorder(order)}
+                    className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-brand-600 transition-colors mt-1"
+                  >
+                    <RotateCcw className="w-4 h-4" /> Qayta buyurtma qilish
+                  </button>
+                )}
               </div>
             </motion.div>
           )}

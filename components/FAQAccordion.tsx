@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 const faqs = [
   {
     q: "Buyurtma uchun minimal summa bormi?",
-    a: "O'zingiz olib ketish uchun minimal summa yo'q. Toshkent bo'ylab yetkazib berish uchun buyurtma summasi kamida 300 000 so'm bo'lishi kerak."
+    a: "O'zingiz olib ketish uchun minimal summa yo'q. Toshkent va Qo'qon bo'ylab yetkazib berish uchun buyurtma summasi kamida 300 000 so'm bo'lishi kerak."
   },
   {
     q: "Nega ba'zi mahsulotlarni donalab emas, faqat qadoqda sotib olsa bo'ladi?",

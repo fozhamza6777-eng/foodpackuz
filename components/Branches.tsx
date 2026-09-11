@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Phone, Clock } from "lucide-react";
 
 const branches = [
-  { city: "Toshkent", address: "Sergeli tumani, Qatortol ko'chasi 17", phone: "+998 71 200 03 04" },
-  { city: "Samarqand", address: "Registon ko'chasi 45", phone: "+998 66 233 10 21" },
-  { city: "Andijon", address: "Bobur shoh ko'chasi 12", phone: "+998 74 223 45 67" },
-  { city: "Buxoro", address: "Mustaqillik ko'chasi 8", phone: "+998 65 221 09 90" }
+  {
+    city: "Toshkent",
+    address: "Uchtepa tumani, O'rikzor mahallasi, Bositxon ko'chasi 85-uy",
+    phone: "+998 95 872 83 83"
+  },
+  { city: "Qo'qon", address: "Rais mahallasi, 2-uy", phone: "+998 91 382 83 83" }
 ];
 
 export default function Branches() {

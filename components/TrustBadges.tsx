@@ -7,7 +7,7 @@ const items = [
   {
     icon: Truck,
     title: "Bepul yetkazib berish",
-    text: "Toshkent bo'ylab kuni bilan, 10 000 so'mdan yuqori buyurtmalarga"
+    text: "Toshkent va Qo'qon bo'ylab kuni bilan, 10 000 so'mdan yuqori buyurtmalarga"
   },
   {
     icon: FileCheck2,

@@ -102,7 +102,7 @@ export default function BulkCTA() {
                     <input
                       name="volume"
                       required
-                      placeholder="Oylik hajm (dona)"
+                      placeholder="Oylik aylanma (so'm)"
                       className="border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-400"
                     />
                   </div>

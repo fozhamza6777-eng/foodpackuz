@@ -4,11 +4,16 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Clock, ChevronDown, Send, Instagram } from "lucide-react";
 
-const cities = ["Toshkent", "Samarqand", "Andijon", "Buxoro", "Farg'ona"];
+const cityPhones: Record<string, string> = {
+  "Toshkent": "+998 95 872 83 83",
+  "Qo'qon": "+998 91 382 83 83"
+};
+const cities = Object.keys(cityPhones);
 
 export default function TopBar() {
   const [open, setOpen] = useState(false);
   const [city, setCity] = useState("Toshkent");
+  const phone = cityPhones[city];
 
   return (
     <div className="hidden md:block bg-ink text-white/85 text-[13px] font-medium relative z-50">
@@ -53,14 +58,29 @@ export default function TopBar() {
         </div>
 
         <div className="flex items-center gap-5">
-          <a href="tel:+998712000304" className="flex items-center gap-1.5 hover:text-white transition-colors">
-            <Phone className="w-3.5 h-3.5" /> +998 71 200 03 04
+          <a
+            href={`tel:${phone.replace(/\s+/g, "")}`}
+            className="flex items-center gap-1.5 hover:text-white transition-colors"
+          >
+            <Phone className="w-3.5 h-3.5" /> {phone}
           </a>
           <div className="flex items-center gap-3 text-white/60">
-            <a href="#" aria-label="Telegram" className="hover:text-white transition-colors">
+            <a
+              href="https://t.me/fastfood_box"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Telegram"
+              className="hover:text-white transition-colors"
+            >
               <Send className="w-3.5 h-3.5" />
             </a>
-            <a href="#" aria-label="Instagram" className="hover:text-white transition-colors">
+            <a
+              href="https://bit.ly/foodbox_uz"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="hover:text-white transition-colors"
+            >
               <Instagram className="w-3.5 h-3.5" />
             </a>
           </div>

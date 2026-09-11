@@ -209,6 +209,28 @@ Bu matn `lib/publicOfferText.ts` faylida — **haqiqiy yuridik matningiz bilan a
 unutmang (hozirgi matn — faqat namuna, yurist ko'rib chiqishi tavsiya etiladi). Sahifa
 `/oferta` manzilida ko'rinadi.
 
+### 2.10-qadam: Mijoz tomonidan buyurtmani tahrirlash (o'n birinchi migratsiya)
+
+1. **SQL Editor**'da yana **New query** tugmasini bosing.
+2. `supabase/migrations/0011_customer_order_edit.sql` faylining **butun mazmunini** nusxalab
+   joylashtiring.
+3. **Run** tugmasini bosing.
+
+Bu skript `orders` jadvalidagi mijoz UPDATE huquqini boshqaruvchi barcha eski trigerlarni
+bitta yangi trigerga almashtiradi va quyidagi ikkita qoidani ta'minlaydi:
+- **Bekor qilish so'rovi** — avvalgidek, faqat holat va sababni o'zgartirish mumkin.
+- **Tahrirlash** — faqat buyurtma hali **"Yangi"** holatida bo'lsa (kuryer hali chiqmagan,
+  to'lov hali olinmagan), mijoz mahsulotlar ro'yxatini (miqdorini kamaytirish/oshirish yoki
+  mahsulotni butunlay o'chirish) o'zgartira oladi. Boshqa barcha maydonlar (manzil, filial,
+  narx va h.k.) himoyalangan bo'lib qoladi, va jami summa mahsulotlar bilan mos kelishi
+  ma'lumotlar bazasi darajasida tekshiriladi.
+
+**Muhim:** saytda hozircha onlayn to'lov yo'q (to'lov kuryerga naqd/karta orqali qabul
+qilinadi), shuning uchun tahrirlash faqat pul hali olinmagan "Yangi" bosqichida ochiq —
+bu haqiqiy pul qaytarish muammosini butunlay oldini oladi. "Jarayonda" yoki undan keyingi
+holatdagi buyurtmalarni o'zgartirish kerak bo'lsa, mijoz "Bekor qilishni so'rash" orqali
+murojaat qiladi, admin buni ko'rib chiqadi.
+
 ## 3-qadam: Email tasdiqlashni o'chirish (muhim!)
 
 Sayt telefon raqam + parol orqali ro'yxatdan o'tkazadi (email so'ramaydi), shuning uchun Supabase'ning
@@ -414,6 +436,12 @@ bu yuridik jihatdan muhim hujjat.
 - Bularning barchasi ma'lumotlar bazasi darajasida (RLS + trigger) himoyalangan — mijoz faqat o'z
   buyurtmasini, faqat shu qoidalarga mos holatga o'zgartira oladi (sababsiz "bekor" holatiga
   o'zgartira olmaydi), boshqa hech qanday maydonni (narx, mahsulotlar va h.k.) o'zgartira olmaydi.
+- Buyurtma hali **"Yangi"** holatida ekan (kuryer hali chiqmagan), mijoz "Buyurtmani tahrirlash"
+  tugmasi orqali mahsulotlar miqdorini kamaytirishi/oshirishi yoki mahsulotni butunlay o'chirishi
+  mumkin — jami summa avtomatik qayta hisoblanadi. To'lov hali kuryerga naqd/karta orqali
+  olinmagani uchun bu yerda pul qaytarish muammosi yo'q: kuryer yetkazib berishda faqat oxirgi
+  (tahrirlangan) summani oladi. Buyurtma "Jarayonda" bosqichiga o'tgach, tahrirlash imkoni
+  yopiladi — bu holatda mijoz "Bekor qilishni so'rash" orqali murojaat qiladi.
 
 ## Savatga qo'shish tajribasi
 
