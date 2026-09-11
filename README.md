@@ -231,6 +231,17 @@ bu haqiqiy pul qaytarish muammosini butunlay oldini oladi. "Jarayonda" yoki unda
 holatdagi buyurtmalarni o'zgartirish kerak bo'lsa, mijoz "Bekor qilishni so'rash" orqali
 murojaat qiladi, admin buni ko'rib chiqadi.
 
+### 2.11-qadam: To'lov usuli (o'n ikkinchi migratsiya)
+
+1. **SQL Editor**'da yana **New query** tugmasini bosing.
+2. `supabase/migrations/0012_payment_method.sql` faylining **butun mazmunini** nusxalab
+   joylashtiring.
+3. **Run** tugmasini bosing.
+
+Bu skript `orders` jadvaliga `payment_method` ustunini ('naqd' yoki 'karta', standart —
+'naqd') qo'shadi va 2.10-qadamdagi trigerni shu ustunni ham himoya qiladigan qilib
+yangilaydi. **Diqqat:** bu migratsiya 0011-migratsiyadan **keyin** ishga tushirilishi kerak.
+
 ## 3-qadam: Email tasdiqlashni o'chirish (muhim!)
 
 Sayt telefon raqam + parol orqali ro'yxatdan o'tkazadi (email so'ramaydi), shuning uchun Supabase'ning
@@ -531,6 +542,14 @@ Saytdagi 12 ta boshlang'ich mahsulot `supabase/migrations/0003_admin_and_product
 avtomatik qo'shiladi. Eski `lib/products.ts` fayli (mahsulotlar kodga "qattiq yozilgan" davrdan
 qolgan) endi butunlay olib tashlangan — barcha yangi mahsulotlarni endi **Admin panel** orqali
 qo'shing.
+
+## To'lov usulini tanlash
+
+Buyurtma rasmiylashtirilayotganda mijoz **"Naqd pul"** yoki **"Karta orqali"** to'lov usulini
+tanlaydi — bu tanlov `orders.payment_method` ustunida saqlanadi va admin panelda ("Buyurtmalar"
+bo'limi) va "Kuryer uchun nusxalash" matnida ko'rinadi. **Haqiqiy to'lov hamon faqat yetkazib
+berish paytida kuryerga** (naqd yoki uning karta terminali orqali) amalga oshiriladi — sayt
+hech qanday pulni o'zi qabul qilmaydi.
 
 ## To'lov tizimini ulash (keyingi qadam)
 

@@ -94,6 +94,7 @@ export interface OrderRow {
   longitude: number | null;
   status: string;
   cancel_reason: string | null;
+  payment_method: string;
   created_at: string;
 }
 

@@ -613,6 +613,11 @@ export default function ProfileDrawer({
                     {order.address && (
                       <p className="text-xs text-ink/45 mt-2 pt-2 border-t border-ink/8">Manzil: {order.address}</p>
                     )}
+                    {order.payment_method && (
+                      <p className="text-xs text-ink/45">
+                        To'lov: {order.payment_method === "karta" ? "Karta orqali" : "Naqd pul"}
+                      </p>
+                    )}
 
                     {order.status === "bekor_sorovi" && order.cancel_reason && (
                       <p className="text-xs text-amber font-medium bg-amber-light rounded-lg p-2.5">

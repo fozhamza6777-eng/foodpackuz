@@ -18,7 +18,9 @@ import {
   Building2,
   MapPin,
   Navigation,
-  Check
+  Check,
+  Wallet,
+  CreditCard
 } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { useAuth } from "./AuthProvider";
@@ -44,6 +46,7 @@ export default function CartDrawer() {
   const [regForm, setRegForm] = useState({ name: "", phone: "", password: "", companyName: "" });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", note: "" });
+  const [paymentMethod, setPaymentMethod] = useState<"naqd" | "karta">("naqd");
 
   const [branches, setBranches] = useState<BranchRow[] | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string>("new");
@@ -64,6 +67,7 @@ export default function CartDrawer() {
       setGeo(null);
       setGeoStatus("idle");
       setAcceptedTerms(false);
+      setPaymentMethod("naqd");
     }, 300);
   };
 
@@ -147,6 +151,10 @@ export default function CartDrawer() {
       setStep("auth");
       return;
     }
+    if (items.length === 0) {
+      setOrderError("Savat bo'sh — buyurtma berish uchun kamida bitta mahsulot qoldiring.");
+      return;
+    }
     setOrderError(null);
     setSubmitting(true);
 
@@ -196,7 +204,8 @@ export default function CartDrawer() {
       branch_id: branchId,
       branch_name: branchName,
       latitude: geo?.lat ?? null,
-      longitude: geo?.lng ?? null
+      longitude: geo?.lng ?? null,
+      payment_method: paymentMethod
     });
 
     setSubmitting(false);
@@ -517,6 +526,60 @@ export default function CartDrawer() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+
+                  <div className="border border-ink/8 rounded-xl p-3.5 bg-surface/60">
+                    <p className="text-xs font-bold uppercase tracking-wide text-ink/40 mb-2">Buyurtma tarkibi</p>
+                    <div className="flex flex-col gap-2.5">
+                      {items.map((item) => {
+                        const packSize = item.product.packSize || 1;
+                        const packs = Math.round(item.qty / packSize);
+                        return (
+                          <div key={item.product.id} className="flex items-center gap-2 text-sm">
+                            <span className="text-ink/70 font-medium flex-1 min-w-0 truncate">
+                              {item.product.name}
+                            </span>
+                            <div className="flex items-center border border-ink/15 rounded-lg bg-white shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => setQty(item.product.id, item.qty - packSize)}
+                                className="p-1.5 hover:bg-surface"
+                                aria-label="Pachkani kamaytirish"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="px-2 text-center font-mono text-xs font-bold whitespace-nowrap">
+                                {packs} pachka
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setQty(item.product.id, item.qty + packSize)}
+                                className="p-1.5 hover:bg-surface"
+                                aria-label="Pachkani ko'paytirish"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <span className="font-semibold text-ink w-20 text-right shrink-0">
+                              {(item.qty * item.product.price).toLocaleString("uz-UZ")} so'm
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeItem(item.product.id)}
+                              className="text-ink/30 hover:text-danger transition-colors shrink-0"
+                              aria-label="O'chirish"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between text-sm font-bold text-ink pt-2 mt-2 border-t border-ink/8">
+                      <span>Jami</span>
+                      <span>{totalSum.toLocaleString("uz-UZ")} so'm</span>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Ism-familiya</label>
                     <input
@@ -628,6 +691,36 @@ export default function CartDrawer() {
                     </p>
                   </div>
                   <div>
+                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">To'lov usuli</label>
+                    <div className="flex gap-2 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("naqd")}
+                        className={`flex-1 flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-lg border-2 transition-colors ${
+                          paymentMethod === "naqd"
+                            ? "bg-ink text-white border-ink"
+                            : "border-ink/15 text-ink/60 hover:border-brand-400"
+                        }`}
+                      >
+                        <Wallet className="w-4 h-4" /> Naqd pul
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("karta")}
+                        className={`flex-1 flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-lg border-2 transition-colors ${
+                          paymentMethod === "karta"
+                            ? "bg-ink text-white border-ink"
+                            : "border-ink/15 text-ink/60 hover:border-brand-400"
+                        }`}
+                      >
+                        <CreditCard className="w-4 h-4" /> Karta orqali
+                      </button>
+                    </div>
+                    <p className="text-xs text-ink/40 mt-1.5">
+                      To'lov yetkazib berish payti kuryerga (naqd yoki karta terminali orqali) amalga oshiriladi.
+                    </p>
+                  </div>
+                  <div>
                     <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Izoh (ixtiyoriy)</label>
                     <textarea
                       value={form.note}
@@ -655,6 +748,13 @@ export default function CartDrawer() {
                   <p className="text-ink/50 text-sm mt-2 max-w-xs">
                     Buyurtmangiz xavfsiz saqlandi. Menejerimiz 15 daqiqa ichida{" "}
                     <span className="font-semibold text-ink">{form.phone}</span> raqamiga aloqaga chiqadi.
+                  </p>
+                  <p className="text-ink/40 text-xs mt-2 max-w-xs">
+                    To'lov yetkazib berishda{" "}
+                    <span className="font-semibold text-ink/60">
+                      {paymentMethod === "karta" ? "karta orqali" : "naqd pul bilan"}
+                    </span>{" "}
+                    kuryerga amalga oshiriladi.
                   </p>
                   <button
                     onClick={handleClose}
@@ -718,13 +818,15 @@ export default function CartDrawer() {
                 <button
                   form="checkout-form"
                   type="submit"
-                  disabled={submitting}
-                  className="w-full flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70"
+                  disabled={submitting || items.length === 0}
+                  className="w-full flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" /> Yuborilmoqda...
                     </>
+                  ) : items.length === 0 ? (
+                    "Savat bo'sh"
                   ) : (
                     "Buyurtmani tasdiqlash"
                   )}

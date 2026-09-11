@@ -12,7 +12,9 @@ import {
   ExternalLink,
   Phone,
   Building2,
-  Package
+  Package,
+  Wallet,
+  CreditCard
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { OrderRow, ProfileRow } from "@/lib/supabase/types";
@@ -87,6 +89,7 @@ export default function OrdersTab() {
       order.branch_name ? `Filial: ${order.branch_name}` : "",
       order.address ? `Manzil: ${order.address}` : "",
       order.latitude && order.longitude ? `Joylashuv: https://maps.google.com/?q=${order.latitude},${order.longitude}` : "",
+      `To'lov: ${order.payment_method === "karta" ? "Karta orqali" : "Naqd pul"}`,
       "",
       "Mahsulotlar:",
       ...order.items.map((it) => `• ${it.name} × ${it.qty}`),
@@ -251,6 +254,14 @@ export default function OrdersTab() {
                             </div>
                           )}
                           <p className="text-sm text-ink/60 font-medium">{order.address}</p>
+                          <div className="flex items-center gap-2 text-sm text-ink/80 font-medium mt-2">
+                            {order.payment_method === "karta" ? (
+                              <CreditCard className="w-3.5 h-3.5 text-ink/40" />
+                            ) : (
+                              <Wallet className="w-3.5 h-3.5 text-ink/40" />
+                            )}
+                            {order.payment_method === "karta" ? "Karta orqali" : "Naqd pul"}
+                          </div>
                           {order.note && (
                             <p className="text-xs text-ink/45 font-medium mt-2 italic">Izoh: {order.note}</p>
                           )}
