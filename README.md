@@ -242,6 +242,30 @@ Bu skript `orders` jadvaliga `payment_method` ustunini ('naqd' yoki 'karta', sta
 'naqd') qo'shadi va 2.10-qadamdagi trigerni shu ustunni ham himoya qiladigan qilib
 yangilaydi. **Diqqat:** bu migratsiya 0011-migratsiyadan **keyin** ishga tushirilishi kerak.
 
+### 2.12-qadam: Karta to'lovini tasdiqlash (o'n uchinchi migratsiya)
+
+1. **SQL Editor**'da yana **New query** tugmasini bosing.
+2. `supabase/migrations/0013_payment_verification.sql` faylining **butun mazmunini**
+   nusxalab joylashtiring.
+3. **Run** tugmasini bosing.
+
+Bu skript quyidagilarni qo'shadi:
+- `payment_cards` jadvali — admin panelda ("To'lov kartalari" bo'limi) kiritiladigan,
+  mijoz pul o'tkazadigan karta raqamlari
+- `orders` jadvaliga `payment_receipt_path` (chek skrinshotining Storage yo'li) va
+  `payment_status` ('kutilmoqda' / 'tasdiqlangan' / 'rad_etilgan') ustunlari
+- Chek skrinshotlari uchun **maxfiy** (public bo'lmagan) `payment-receipts` bucket'i —
+  faqat skrinshotni yuklagan mijozning o'zi va admin uni ko'ra oladi
+
+**Agar "insert into storage.buckets" qatori xatolik bersa:** Supabase panelida
+**Storage → New bucket** orqali qo'lda `payment-receipts` nomli, **Public bucket**
+belgisini **O'CHIRGAN** holda (maxfiy) bucket yarating, so'ng qolgan qismini (RLS
+siyosatlari va jadvallarni) alohida ishga tushiring.
+
+**Muhim:** ushbu migratsiyadan keyin admin panelda **"To'lov kartalari"** bo'limiga kirib,
+haqiqiy karta raqamingizni (masalan Humo yoki Uzcard) qo'shishni unutmang — aks holda
+mijoz "Karta orqali" to'lovni tanlaganda hech qanday karta ko'rmaydi.
+
 ## 3-qadam: Email tasdiqlashni o'chirish (muhim!)
 
 Sayt telefon raqam + parol orqali ro'yxatdan o'tkazadi (email so'ramaydi), shuning uchun Supabase'ning
@@ -406,6 +430,15 @@ Faqat `profiles.is_admin = true` bo'lgan hisoblar kira oladi (qarang: 2.2-qadam)
   telefoni, manzili, xarita havolasi va mahsulotlar ro'yxati bitta tayyor xabar sifatida nusxalanadi
   — shuni to'g'ridan-to'g'ri Telegram yoki WhatsApp orqali kuryerga yuborishingiz mumkin. Alohida
   "Google Maps'da ochish" havolasi ham mavjud.
+- "Karta orqali" to'lagan buyurtmalarda **"Chekni ko'rish"** tugmasi orqali mijoz yuklagan chek
+  skrinshoti ochiladi, so'ng **"To'lovni tasdiqlash"** yoki **"Rad etish"** bilan qaror qabul
+  qilinadi. Ro'yxatda hali tekshirilmagan to'lovlar "To'lov tekshirilmoqda" belgisi bilan
+  ajralib turadi.
+
+**"To'lov kartalari" bo'limi:**
+- Mijozlar "Karta orqali" to'lovni tanlaganda ko'rsatiladigan karta(lar)ni boshqarish
+- Bank nomi, karta egasi va raqamini kiritib yangi karta qo'shish
+- Kartani vaqtincha yashirish (mijozlarga ko'rsatilmay turadi) yoki butunlay o'chirish
 
 ## Profil sahifasi
 
@@ -546,10 +579,21 @@ qo'shing.
 ## To'lov usulini tanlash
 
 Buyurtma rasmiylashtirilayotganda mijoz **"Naqd pul"** yoki **"Karta orqali"** to'lov usulini
-tanlaydi — bu tanlov `orders.payment_method` ustunida saqlanadi va admin panelda ("Buyurtmalar"
-bo'limi) va "Kuryer uchun nusxalash" matnida ko'rinadi. **Haqiqiy to'lov hamon faqat yetkazib
-berish paytida kuryerga** (naqd yoki uning karta terminali orqali) amalga oshiriladi — sayt
-hech qanday pulni o'zi qabul qilmaydi.
+tanlaydi:
+
+- **Naqd pul** — to'lov yetkazib berish paytida kuryerga naqd qilinadi, sayt hech narsani
+  o'zi qabul qilmaydi.
+- **Karta orqali** — mijozga admin panelda kiritilgan karta raqami(lari) ko'rsatiladi
+  (nusxalash tugmasi bilan), mijoz o'sha kartaga o'tkazma qiladi va **to'lov chekining
+  skrinshotini** yuklaydi (bu shart — skrinshotsiz buyurtma yuborilmaydi). Buyurtma
+  **"To'lov tekshirilmoqda"** holatida saqlanadi.
+
+Admin "Buyurtmalar" bo'limida chekni ("Chekni ko'rish" tugmasi orqali) darhol ko'rib, **"To'lovni
+tasdiqlash"** yoki **"Rad etish"** tugmasi bilan qaror qabul qiladi. Chek skrinshoti maxfiy
+saqlanadi — uni faqat mijozning o'zi va admin ko'ra oladi.
+
+Karta raqamlarini boshqarish uchun admin panelda **"To'lov kartalari"** bo'limiga kiring —
+bank nomi, karta egasi va raqamini kiritib qo'shing, xohlagan vaqt yashirish/o'chirish mumkin.
 
 ## To'lov tizimini ulash (keyingi qadam)
 

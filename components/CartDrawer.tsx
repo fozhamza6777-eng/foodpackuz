@@ -17,12 +17,16 @@ import {
   Navigation,
   Check,
   Wallet,
-  CreditCard
+  CreditCard,
+  Upload,
+  Copy
 } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { useAuth } from "./AuthProvider";
 import { supabase } from "@/lib/supabase/client";
-import type { BranchRow } from "@/lib/supabase/types";
+import type { BranchRow, PaymentCardRow } from "@/lib/supabase/types";
+import { fetchActivePaymentCards } from "@/lib/supabase/paymentCards";
+import { uploadPaymentReceipt } from "@/lib/supabase/storage";
 import CartItemCard from "./CartItemCard";
 import TermsCheckbox from "./TermsCheckbox";
 
@@ -43,6 +47,10 @@ export default function CartDrawer() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", note: "" });
   const [paymentMethod, setPaymentMethod] = useState<"naqd" | "karta">("naqd");
+  const [paymentCards, setPaymentCards] = useState<PaymentCardRow[] | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const [copiedCardId, setCopiedCardId] = useState<string | null>(null);
 
   const [branches, setBranches] = useState<BranchRow[] | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string>("new");
@@ -50,6 +58,12 @@ export default function CartDrawer() {
   const [saveBranch, setSaveBranch] = useState(true);
   const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(null);
   const [geoStatus, setGeoStatus] = useState<GeoStatus>("idle");
+
+  useEffect(() => {
+    if (paymentMethod === "karta" && paymentCards === null) {
+      fetchActivePaymentCards().then(setPaymentCards);
+    }
+  }, [paymentMethod, paymentCards]);
 
   const handleClose = () => {
     closeCart();
@@ -64,7 +78,26 @@ export default function CartDrawer() {
       setGeoStatus("idle");
       setAcceptedTerms(false);
       setPaymentMethod("naqd");
+      setReceiptFile(null);
+      setReceiptPreview(null);
     }, 300);
+  };
+
+  const handleReceiptSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setReceiptFile(file);
+    setReceiptPreview(URL.createObjectURL(file));
+  };
+
+  const handleCopyCard = async (card: PaymentCardRow) => {
+    try {
+      await navigator.clipboard.writeText(card.card_number.replace(/\s+/g, ""));
+      setCopiedCardId(card.id);
+      window.setTimeout(() => setCopiedCardId(null), 1800);
+    } catch {
+      // clipboard mavjud bo'lmasa jimgina o'tkazamiz
+    }
   };
 
   useEffect(() => {
@@ -151,8 +184,23 @@ export default function CartDrawer() {
       setOrderError("Savat bo'sh — buyurtma berish uchun kamida bitta mahsulot qoldiring.");
       return;
     }
+    if (paymentMethod === "karta" && !receiptFile) {
+      setOrderError("Karta orqali to'laganingizni tasdiqlash uchun chek skrinshotini yuklang.");
+      return;
+    }
     setOrderError(null);
     setSubmitting(true);
+
+    let receiptPath: string | null = null;
+    if (paymentMethod === "karta" && receiptFile) {
+      const { path, error: uploadError } = await uploadPaymentReceipt(receiptFile, auth.session.user.id);
+      if (uploadError || !path) {
+        setSubmitting(false);
+        setOrderError(uploadError ?? "Chekni yuklashda xatolik yuz berdi.");
+        return;
+      }
+      receiptPath = path;
+    }
 
     let branchId: string | null = null;
     let branchName: string | null = null;
@@ -201,7 +249,9 @@ export default function CartDrawer() {
       branch_name: branchName,
       latitude: geo?.lat ?? null,
       longitude: geo?.lng ?? null,
-      payment_method: paymentMethod
+      payment_method: paymentMethod,
+      payment_receipt_path: receiptPath,
+      payment_status: paymentMethod === "karta" ? "kutilmoqda" : "none"
     });
 
     setSubmitting(false);
@@ -614,9 +664,80 @@ export default function CartDrawer() {
                         <CreditCard className="w-4 h-4" /> Karta orqali
                       </button>
                     </div>
-                    <p className="text-xs text-ink/40 mt-1.5">
-                      To'lov yetkazib berish payti kuryerga (naqd yoki karta terminali orqali) amalga oshiriladi.
-                    </p>
+                    {paymentMethod === "naqd" ? (
+                      <p className="text-xs text-ink/40 mt-1.5">
+                        To'lov yetkazib berish payti kuryerga naqd pul bilan amalga oshiriladi.
+                      </p>
+                    ) : (
+                      <div className="mt-3 flex flex-col gap-3">
+                        {paymentCards === null ? (
+                          <div className="flex items-center gap-2 text-sm text-ink/40 font-medium py-2">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Kartalar yuklanmoqda...
+                          </div>
+                        ) : paymentCards.length === 0 ? (
+                          <p className="text-xs text-danger font-medium bg-danger/10 rounded-lg p-3">
+                            Hozircha to'lov kartasi kiritilmagan. Iltimos, "Naqd pul" usulini tanlang yoki
+                            biz bilan bog'laning.
+                          </p>
+                        ) : (
+                          <div className="flex flex-col gap-2">
+                            {paymentCards.map((card) => (
+                              <div
+                                key={card.id}
+                                className="flex items-center justify-between gap-2 border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white"
+                              >
+                                <div className="min-w-0">
+                                  <p className="font-mono font-bold text-sm text-ink">{card.card_number}</p>
+                                  <p className="text-xs text-ink/45 font-medium truncate">
+                                    {[card.bank_name, card.card_holder].filter(Boolean).join(" · ") || " "}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyCard(card)}
+                                  className="flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 shrink-0"
+                                >
+                                  {copiedCardId === card.id ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5" /> Nusxalandi
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="w-3.5 h-3.5" /> Nusxalash
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                            To'lov chekining skrinshoti
+                          </label>
+                          <label className="mt-1 flex items-center gap-2 border-2 border-dashed border-ink/15 rounded-lg px-3.5 py-3 cursor-pointer hover:border-brand-400 transition-colors">
+                            <Upload className="w-4 h-4 text-ink/40 shrink-0" />
+                            <span className="text-sm text-ink/60 font-medium truncate">
+                              {receiptFile ? receiptFile.name : "Skrinshot tanlash..."}
+                            </span>
+                            <input type="file" accept="image/*" onChange={handleReceiptSelect} className="hidden" />
+                          </label>
+                          {receiptPreview && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={receiptPreview}
+                              alt=""
+                              className="mt-2 max-h-40 rounded-lg border border-ink/10 object-contain"
+                            />
+                          )}
+                          <p className="text-xs text-ink/40 mt-1.5">
+                            Yuqoridagi kartaga o'tkazma qilib, chekning skrinshotini yuklang — admin tez
+                            orada tekshirib tasdiqlaydi.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Izoh (ixtiyoriy)</label>
@@ -647,13 +768,15 @@ export default function CartDrawer() {
                     Buyurtmangiz xavfsiz saqlandi. Menejerimiz 15 daqiqa ichida{" "}
                     <span className="font-semibold text-ink">{form.phone}</span> raqamiga aloqaga chiqadi.
                   </p>
-                  <p className="text-ink/40 text-xs mt-2 max-w-xs">
-                    To'lov yetkazib berishda{" "}
-                    <span className="font-semibold text-ink/60">
-                      {paymentMethod === "karta" ? "karta orqali" : "naqd pul bilan"}
-                    </span>{" "}
-                    kuryerga amalga oshiriladi.
-                  </p>
+                  {paymentMethod === "karta" ? (
+                    <p className="text-ink/40 text-xs mt-2 max-w-xs">
+                      To'lov chekingiz qabul qilindi — admin tez orada tekshirib tasdiqlaydi.
+                    </p>
+                  ) : (
+                    <p className="text-ink/40 text-xs mt-2 max-w-xs">
+                      To'lov yetkazib berishda naqd pul bilan kuryerga amalga oshiriladi.
+                    </p>
+                  )}
                   <button
                     onClick={handleClose}
                     className="mt-6 bg-ink text-white font-bold px-6 py-3 rounded-lg hover:bg-brand-600 transition-colors"
@@ -716,7 +839,7 @@ export default function CartDrawer() {
                 <button
                   form="checkout-form"
                   type="submit"
-                  disabled={submitting || items.length === 0}
+                  disabled={submitting || items.length === 0 || (paymentMethod === "karta" && !receiptFile)}
                   className="w-full flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
@@ -725,6 +848,8 @@ export default function CartDrawer() {
                     </>
                   ) : items.length === 0 ? (
                     "Savat bo'sh"
+                  ) : paymentMethod === "karta" && !receiptFile ? (
+                    "Avval chek skrinshotini yuklang"
                   ) : (
                     "Buyurtmani tasdiqlash"
                   )}

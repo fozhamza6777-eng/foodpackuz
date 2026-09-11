@@ -3,15 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Package, ShoppingBag, LogOut, ArrowLeft, ShieldAlert, Loader2, Image as ImageIcon, Layers } from "lucide-react";
+import {
+  Package,
+  ShoppingBag,
+  LogOut,
+  ArrowLeft,
+  ShieldAlert,
+  Loader2,
+  Image as ImageIcon,
+  Layers,
+  CreditCard
+} from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import OrdersTab from "./OrdersTab";
 import ProductsTab from "./ProductsTab";
 import BannersTab from "./BannersTab";
 import CategoriesTab from "./CategoriesTab";
+import PaymentCardsTab from "./PaymentCardsTab";
 import AdminNotifications from "./AdminNotifications";
 
-type Tab = "orders" | "products" | "categories" | "banners";
+type Tab = "orders" | "products" | "categories" | "banners" | "payment-cards";
 
 export default function AdminPanel() {
   const auth = useAuth();
@@ -140,6 +151,21 @@ export default function AdminPanel() {
             )}
             <ImageIcon className="w-4 h-4" /> Bannerlar
           </button>
+          <button
+            onClick={() => setTab("payment-cards")}
+            className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+              tab === "payment-cards" ? "text-white" : "text-ink/50 hover:text-ink"
+            }`}
+          >
+            {tab === "payment-cards" && (
+              <motion.span
+                layoutId="admin-tab-pill"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                className="absolute inset-0 bg-brand-500 rounded-lg -z-10"
+              />
+            )}
+            <CreditCard className="w-4 h-4" /> To'lov kartalari
+          </button>
         </div>
       </header>
 
@@ -148,6 +174,7 @@ export default function AdminPanel() {
         {tab === "products" && <ProductsTab />}
         {tab === "categories" && <CategoriesTab />}
         {tab === "banners" && <BannersTab />}
+        {tab === "payment-cards" && <PaymentCardsTab />}
       </main>
     </div>
   );

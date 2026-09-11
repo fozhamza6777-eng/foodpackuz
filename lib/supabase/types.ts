@@ -95,6 +95,8 @@ export interface OrderRow {
   status: string;
   cancel_reason: string | null;
   payment_method: string;
+  payment_receipt_path: string | null;
+  payment_status: string;
   created_at: string;
 }
 
@@ -103,5 +105,15 @@ export interface BulkRequestRow {
   company: string;
   phone: string;
   volume: string;
+  created_at: string;
+}
+
+export interface PaymentCardRow {
+  id: string;
+  bank_name: string | null;
+  card_holder: string | null;
+  card_number: string;
+  is_active: boolean;
+  sort_order: number;
   created_at: string;
 }

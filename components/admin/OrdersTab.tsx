@@ -14,10 +14,21 @@ import {
   Building2,
   Package,
   Wallet,
-  CreditCard
+  CreditCard,
+  Image as ImageIcon,
+  ShieldCheck,
+  ShieldX,
+  Clock3
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { getReceiptSignedUrl } from "@/lib/supabase/storage";
 import type { OrderRow, ProfileRow } from "@/lib/supabase/types";
+
+const paymentStatusMeta: Record<string, { label: string; color: string }> = {
+  kutilmoqda: { label: "To'lov tekshirilmoqda", color: "bg-amber-light text-amber" },
+  tasdiqlangan: { label: "To'lov tasdiqlandi", color: "bg-success/10 text-success" },
+  rad_etilgan: { label: "To'lov rad etildi", color: "bg-danger/10 text-danger" }
+};
 
 const statusOptions = [
   { value: "yangi", label: "Yangi", color: "bg-brand-50 text-brand-600" },
@@ -39,6 +50,7 @@ export default function OrdersTab() {
   const [statusFilter, setStatusFilter] = useState<string>("barchasi");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [receiptLoadingId, setReceiptLoadingId] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -69,6 +81,19 @@ export default function OrdersTab() {
   const handleStatusChange = async (orderId: string, status: string) => {
     setOrders((prev) => (prev ? prev.map((o) => (o.id === orderId ? { ...o, status } : o)) : prev));
     await supabase.from("orders").update({ status }).eq("id", orderId);
+  };
+
+  const handlePaymentStatusChange = async (orderId: string, payment_status: string) => {
+    setOrders((prev) => (prev ? prev.map((o) => (o.id === orderId ? { ...o, payment_status } : o)) : prev));
+    await supabase.from("orders").update({ payment_status }).eq("id", orderId);
+  };
+
+  const handleViewReceipt = async (order: OrderRow) => {
+    if (!order.payment_receipt_path) return;
+    setReceiptLoadingId(order.id);
+    const url = await getReceiptSignedUrl(order.payment_receipt_path);
+    setReceiptLoadingId(null);
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const copyToClipboard = async (text: string, id: string) => {
@@ -202,6 +227,11 @@ export default function OrdersTab() {
                         E'tibor talab qiladi
                       </span>
                     )}
+                    {order.payment_method === "karta" && order.payment_status === "kutilmoqda" && (
+                      <span className="flex items-center gap-1 text-[11px] font-bold text-amber bg-amber-light px-2 py-0.5 rounded-full animate-pulse">
+                        <Clock3 className="w-3 h-3" /> To'lov tekshirilmoqda
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-ink/45 font-medium mt-1">
                     {new Date(order.created_at).toLocaleString("uz-UZ", {
@@ -262,6 +292,54 @@ export default function OrdersTab() {
                             )}
                             {order.payment_method === "karta" ? "Karta orqali" : "Naqd pul"}
                           </div>
+
+                          {order.payment_method === "karta" && (
+                            <div className="mt-2 flex flex-col gap-2">
+                              <span
+                                className={`inline-flex items-center gap-1.5 w-fit text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                                  paymentStatusMeta[order.payment_status]?.color ?? "bg-ink/5 text-ink/60"
+                                }`}
+                              >
+                                {order.payment_status === "tasdiqlangan" && <ShieldCheck className="w-3 h-3" />}
+                                {order.payment_status === "rad_etilgan" && <ShieldX className="w-3 h-3" />}
+                                {order.payment_status === "kutilmoqda" && <Clock3 className="w-3 h-3" />}
+                                {paymentStatusMeta[order.payment_status]?.label ?? order.payment_status}
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {order.payment_receipt_path && (
+                                  <button
+                                    onClick={() => handleViewReceipt(order)}
+                                    disabled={receiptLoadingId === order.id}
+                                    className="flex items-center gap-1.5 border border-ink/15 text-ink/70 font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-white transition-colors disabled:opacity-60"
+                                  >
+                                    {receiptLoadingId === order.id ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <ImageIcon className="w-3.5 h-3.5" />
+                                    )}
+                                    Chekni ko'rish
+                                  </button>
+                                )}
+                                {order.payment_status !== "tasdiqlangan" && (
+                                  <button
+                                    onClick={() => handlePaymentStatusChange(order.id, "tasdiqlangan")}
+                                    className="flex items-center gap-1.5 bg-success text-white font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-success/90 transition-colors"
+                                  >
+                                    <ShieldCheck className="w-3.5 h-3.5" /> To'lovni tasdiqlash
+                                  </button>
+                                )}
+                                {order.payment_status !== "rad_etilgan" && (
+                                  <button
+                                    onClick={() => handlePaymentStatusChange(order.id, "rad_etilgan")}
+                                    className="flex items-center gap-1.5 border border-danger/25 text-danger font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-danger/5 transition-colors"
+                                  >
+                                    <ShieldX className="w-3.5 h-3.5" /> Rad etish
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
                           {order.note && (
                             <p className="text-xs text-ink/45 font-medium mt-2 italic">Izoh: {order.note}</p>
                           )}

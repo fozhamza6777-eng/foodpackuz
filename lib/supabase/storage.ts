@@ -66,3 +66,46 @@ export async function uploadAvatar(file: File, userId: string): Promise<UploadRe
   const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
   return { url: data.publicUrl, error: null };
 }
+
+const RECEIPT_BUCKET = "payment-receipts";
+const MAX_RECEIPT_SIZE_MB = 8;
+
+export interface UploadReceiptResult {
+  path: string | null;
+  error: string | null;
+}
+
+/**
+ * To'lov chekining skrinshotini yuklaydi. Bucket maxfiy (public emas) —
+ * faqat egasi va admin ko'ra oladi. Havola emas, Storage YO'LI qaytariladi;
+ * ko'rish uchun `getReceiptSignedUrl` orqali vaqtinchalik havola olinadi.
+ */
+export async function uploadPaymentReceipt(file: File, userId: string): Promise<UploadReceiptResult> {
+  if (!file.type.startsWith("image/")) {
+    return { path: null, error: "Faqat rasm (skrinshot) fayllarini yuklash mumkin (JPG, PNG, WEBP)." };
+  }
+  if (file.size > MAX_RECEIPT_SIZE_MB * 1024 * 1024) {
+    return { path: null, error: `Fayl hajmi ${MAX_RECEIPT_SIZE_MB} MB dan oshmasligi kerak.` };
+  }
+
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
+
+  const { error } = await supabase.storage.from(RECEIPT_BUCKET).upload(path, file, {
+    upsert: false,
+    cacheControl: "3600"
+  });
+
+  if (error) {
+    return { path: null, error: "Chekni yuklashda xatolik: " + error.message };
+  }
+
+  return { path, error: null };
+}
+
+/** Chek skrinshotini ko'rish uchun vaqtinchalik (1 soatlik) havola yaratadi. */
+export async function getReceiptSignedUrl(path: string): Promise<string | null> {
+  const { data, error } = await supabase.storage.from(RECEIPT_BUCKET).createSignedUrl(path, 3600);
+  if (error || !data) return null;
+  return data.signedUrl;
+}

@@ -61,6 +61,18 @@ const statusColors: Record<string, string> = {
 
 const CANCELLED_STATUSES = ["bekor", "bekor_sorovi"];
 
+const paymentStatusLabels: Record<string, string> = {
+  kutilmoqda: "Tekshirilmoqda",
+  tasdiqlangan: "Tasdiqlandi",
+  rad_etilgan: "Rad etildi"
+};
+
+const paymentStatusColors: Record<string, string> = {
+  kutilmoqda: "text-amber",
+  tasdiqlangan: "text-success",
+  rad_etilgan: "text-danger"
+};
+
 function canRequestCancel(status: string) {
   return !CANCELLED_STATUSES.includes(status) && status !== "yetkazildi";
 }
@@ -616,6 +628,12 @@ export default function ProfileDrawer({
                     {order.payment_method && (
                       <p className="text-xs text-ink/45">
                         To'lov: {order.payment_method === "karta" ? "Karta orqali" : "Naqd pul"}
+                        {order.payment_method === "karta" && paymentStatusLabels[order.payment_status] && (
+                          <span className={`font-bold ${paymentStatusColors[order.payment_status] ?? ""}`}>
+                            {" "}
+                            · {paymentStatusLabels[order.payment_status]}
+                          </span>
+                        )}
                       </p>
                     )}
 
