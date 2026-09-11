@@ -19,11 +19,10 @@ export default function ProductDetailModal({
   product: Product | null;
   onClose: () => void;
 }) {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
   const { isLiked, toggleLike } = useLikes();
   const auth = useAuth();
   const [packQty, setPackQty] = useState(1);
-  const [justAdded, setJustAdded] = useState(false);
   const [unitMode, setUnitMode] = useState<"pack" | "carton">("pack");
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [newComment, setNewComment] = useState("");
@@ -32,7 +31,6 @@ export default function ProductDetailModal({
 
   useEffect(() => {
     setPackQty(1);
-    setJustAdded(false);
     setUnitMode("pack");
     setComments(null);
     setNewComment("");
@@ -52,12 +50,11 @@ export default function ProductDetailModal({
   const unitPrice = product.price * unitSize;
   const oldUnitPrice = product.oldPrice ? product.oldPrice * unitSize : undefined;
   const liked = isLiked(product.id);
+  const cartItem = items.find((i) => i.product.id === product.id);
+  const cartDona = cartItem ? cartItem.qty : 0;
 
   const handleAdd = () => {
     addItem(product, packQty * unitSize);
-    setJustAdded(true);
-    setPackQty(1);
-    window.setTimeout(() => setJustAdded(false), 1100);
   };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
@@ -213,7 +210,9 @@ export default function ProductDetailModal({
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    <span className="w-8 text-center font-mono font-bold text-sm">{packQty}</span>
+                    <span className="min-w-[2.75rem] px-0.5 text-center font-mono font-bold text-sm">
+                      {packQty * unitSize}
+                    </span>
                     <button
                       onClick={() => setPackQty((q) => q + 1)}
                       className="p-2.5 hover:bg-surface active:scale-90 transition-transform"
@@ -225,11 +224,11 @@ export default function ProductDetailModal({
                     onClick={handleAdd}
                     whileTap={{ scale: 0.96 }}
                     className={`flex-1 flex items-center justify-center gap-2 font-bold text-sm px-4 py-3 rounded-lg transition-colors ${
-                      justAdded ? "bg-success text-white" : "bg-brand-500 text-white hover:bg-brand-600"
+                      cartDona > 0 ? "bg-success text-white" : "bg-brand-500 text-white hover:bg-brand-600"
                     }`}
                   >
                     <ShoppingBag className="w-4 h-4" />
-                    {justAdded ? "Qo'shildi!" : "Savatga"}
+                    {cartDona > 0 ? "Qo'shildi!" : "Savatga"}
                   </motion.button>
                 </div>
 

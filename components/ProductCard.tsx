@@ -25,27 +25,28 @@ export default function ProductCard({
   const { isLiked, toggleLike } = useLikes();
   const auth = useAuth();
   const [packQty, setPackQty] = useState(1);
-  const [justAdded, setJustAdded] = useState(false);
   const [unitMode, setUnitMode] = useState<"pack" | "carton">("pack");
+  const [cartUnitMode, setCartUnitMode] = useState<"pack" | "carton">("pack");
 
   const discount = product.oldPrice
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
 
   const cartItem = items.find((i) => i.product.id === product.id);
-  const cartPacks = cartItem ? Math.round(cartItem.qty / product.packSize) : 0;
   const hasCarton = !!product.cartonSize;
   const unitSize = unitMode === "carton" && product.cartonSize ? product.cartonSize : product.packSize;
   const unitLabel = unitMode === "carton" ? "karobka" : "pachka";
+  const cartDona = cartItem ? cartItem.qty : 0;
+  const cartUnitSize = cartUnitMode === "carton" && product.cartonSize ? product.cartonSize : product.packSize;
+  const cartUnitLabel = cartUnitMode === "carton" ? "karobka" : "pachka";
+  const cartUnitQty = Math.round(cartDona / cartUnitSize);
   const unitPrice = product.price * unitSize;
   const oldUnitPrice = product.oldPrice ? product.oldPrice * unitSize : undefined;
   const liked = isLiked(product.id);
 
   const handleAdd = () => {
     addItem(product, packQty * unitSize);
-    setJustAdded(true);
-    setPackQty(1);
-    window.setTimeout(() => setJustAdded(false), 1100);
+    setCartUnitMode(unitMode);
   };
 
   const handleToggleLike = (e: React.MouseEvent) => {
@@ -65,7 +66,7 @@ export default function ProductCard({
       transition={{ duration: 0.4, delay: (index % 6) * 0.04 }}
       whileHover={{ y: -5 }}
       className={`group relative bg-white border rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 h-full flex flex-col ${
-        cartPacks > 0 ? "border-success ring-2 ring-success/25" : "border-ink/8"
+        cartDona > 0 ? "border-success ring-2 ring-success/25" : "border-ink/8"
       }`}
     >
       <div
@@ -104,9 +105,10 @@ export default function ProductCard({
           <Heart className={`w-3.5 h-3.5 ${liked ? "fill-danger text-danger" : "text-ink/40"}`} />
         </button>
 
-        {cartPacks > 0 && (
-          <div className="absolute bottom-0 inset-x-0 flex items-center justify-center gap-1.5 bg-success text-white text-xs font-extrabold uppercase py-1.5">
-            <PackageCheck className="w-3.5 h-3.5" /> Savatda: {cartPacks} pachka
+        {cartDona > 0 && (
+          <div className="absolute bottom-0 inset-x-0 flex items-center justify-center gap-1.5 bg-success text-white text-xs font-extrabold uppercase py-1.5 px-2 text-center">
+            <PackageCheck className="w-3.5 h-3.5 shrink-0" /> Savatda: {cartUnitQty} {cartUnitLabel} ({cartDona}{" "}
+            {product.unit})
           </div>
         )}
       </div>
@@ -188,7 +190,9 @@ export default function ProductCard({
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="w-6 text-center font-mono font-bold text-xs">{packQty}</span>
+              <span className="min-w-[2.25rem] px-0.5 text-center font-mono font-bold text-xs">
+                {packQty * unitSize}
+              </span>
               <button
                 onClick={() => setPackQty((q) => q + 1)}
                 className="p-2 hover:bg-surface active:scale-90 transition-transform"
@@ -202,10 +206,10 @@ export default function ProductCard({
               onClick={handleAdd}
               whileTap={{ scale: 0.94 }}
               className={`flex-1 flex items-center justify-center gap-1.5 font-bold text-xs px-2 py-2.5 rounded-lg transition-colors ${
-                justAdded ? "bg-success text-white" : "bg-brand-500 text-white hover:bg-brand-600"
+                cartDona > 0 ? "bg-success text-white" : "bg-brand-500 text-white hover:bg-brand-600"
               }`}
             >
-              {justAdded ? (
+              {cartDona > 0 ? (
                 <>
                   <Check className="w-3.5 h-3.5" /> Qo'shildi
                 </>
