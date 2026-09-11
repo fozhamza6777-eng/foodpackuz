@@ -36,6 +36,20 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
+const CART_STORAGE_KEY = "foodbox_cart_v1";
+
+function readStoredCart(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -45,11 +59,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cartStartedAt, setCartStartedAt] = useState<Date | null>(null);
   const hydratedFor = useRef<string | null>(null);
 
-  // Ro'yxatdan o'tgan foydalanuvchi uchun savatni Supabase'dan yuklab olish
+  // Mehmon (ro'yxatdan o'tmagan) foydalanuvchi uchun savat brauzerda
+  // (localStorage) saqlanadi, shunda sahifa yangilanganda savat yo'qolmaydi.
+  // Ro'yxatdan o'tgan foydalanuvchi uchun esa Supabase'dagi savat ustunlik
+  // qiladi (qurilmalar orasida sinxron bo'lishi uchun).
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
+    const stored = readStoredCart();
     const userId = auth.session?.user?.id;
-    if (!userId || hydratedFor.current === userId) return;
+
+    if (!userId || !isSupabaseConfigured) {
+      if (stored.length > 0) setItems(stored);
+      return;
+    }
+
+    if (hydratedFor.current === userId) return;
     hydratedFor.current = userId;
 
     (async () => {
@@ -59,15 +82,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
         .eq("user_id", userId);
 
       if (!data || data.length === 0) {
-        // Mehmon sifatida qo'shilgan narsalar bo'lsa, ularni serverga yozamiz
-        if (items.length > 0) {
-          for (const it of items) {
+        // Mehmon sifatida (brauzerda) qo'shilgan narsalar bo'lsa, ularni serverga yozamiz
+        if (stored.length > 0) {
+          for (const it of stored) {
             await supabase.from("cart_items").upsert({
               user_id: userId,
               product_id: it.product.id,
               qty: it.qty
             });
           }
+          setItems(stored);
           setCartStartedAt(new Date());
         }
         return;
@@ -84,7 +108,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       );
       setCartStartedAt(new Date(earliest));
     })();
-  }, [auth.session?.user?.id, items]);
+  }, [auth.session?.user?.id]);
+
+  // Savat har o'zgarganda brauzerda saqlanadi (mehmon uchun asosiy manba,
+  // ro'yxatdan o'tgan foydalanuvchi uchun esa zaxira nusxa)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // localStorage mavjud bo'lmasa (masalan xususiy rejim) — jimgina o'tkazib yuboramiz
+    }
+  }, [items]);
 
   const syncToServer = useCallback(
     (productId: string, qty: number) => {
