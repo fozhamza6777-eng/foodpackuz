@@ -44,13 +44,9 @@ export default function Header({ categories }: { categories: Category[] }) {
       }`}
     >
       <div className="mx-auto max-w-7xl px-5 lg:px-8 h-[72px] flex items-center gap-4 lg:gap-8">
-        <a href="#top" className="flex items-center gap-2 shrink-0">
-          <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center shadow-pop">
-            <Package className="w-5 h-5 text-white" strokeWidth={2.4} />
-          </span>
-          <span className="font-display font-extrabold text-lg lg:text-xl tracking-tight text-ink leading-none">
-            FOOD <span className="text-brand-500">BOX</span>
-          </span>
+        <a href="#top" className="flex items-center shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="FOOD BOX" className="h-9 lg:h-11 w-auto" />
         </a>
 
         {/* katalog tugmasi */}

@@ -1,4 +1,4 @@
-import { Package, Phone, Mail, MapPin, Instagram, Send, Smartphone } from "lucide-react";
+import { Phone, Mail, MapPin, Instagram, Send, Smartphone } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -31,13 +31,9 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-5 lg:px-8 pb-14">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-9 h-9 rounded-lg bg-brand-gradient flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
-              </span>
-              <span className="font-display font-extrabold text-lg text-ink leading-none">
-                FOOD <span className="text-brand-500">BOX</span>
-              </span>
+            <div className="mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.svg" alt="FOOD BOX" className="h-10 w-auto" />
             </div>
             <p className="text-sm text-ink/50 font-medium max-w-xs">
               Restoran, kafe va dostavka biznesi uchun bir martalik qadoqlash yechimlari. 2019 yildan beri
