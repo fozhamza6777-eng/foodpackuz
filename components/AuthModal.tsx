@@ -3,17 +3,9 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  UserPlus,
-  LogIn,
-  Lock,
-  Building2,
-  AlertCircle,
-  Loader2
-} from "lucide-react";
+import { X, UserPlus, LogIn, Lock, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import TermsCheckbox from "./TermsCheckbox";
+import RegisterForm from "./RegisterForm";
 
 type AuthMode = "register" | "login";
 
@@ -22,8 +14,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const [mode, setMode] = useState<AuthMode>("register");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [regForm, setRegForm] = useState({ name: "", phone: "", password: "", companyName: "" });
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [regForm, setRegForm] = useState({ phone: "", password: "" });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -36,24 +27,6 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
       setError(null);
       setLoading(false);
     }, 300);
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!acceptedTerms) {
-      setError("Davom etish uchun Ommaviy oferta shartlariga rozilik bildirishingiz kerak.");
-      return;
-    }
-    setError(null);
-    setLoading(true);
-    const { error: regError } = await auth.register(regForm);
-    setLoading(false);
-    if (regError) {
-      setError(regError);
-      return;
-    }
-    setAcceptedTerms(false);
-    handleClose();
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -153,68 +126,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 </AnimatePresence>
 
                 {mode === "register" ? (
-                  <form onSubmit={handleRegister} className="flex flex-col gap-4">
-                    <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                        Tashkilot nomi
-                      </label>
-                      <div className="relative mt-1">
-                        <input
-                          required
-                          value={regForm.companyName}
-                          onChange={(e) => setRegForm({ ...regForm, companyName: e.target.value })}
-                          className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                          placeholder="Masalan: «Tez Osh» fast-food"
-                        />
-                        <Building2 className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Ism-familiya</label>
-                      <input
-                        required
-                        value={regForm.name}
-                        onChange={(e) => setRegForm({ ...regForm, name: e.target.value })}
-                        className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                        placeholder="Ism Familiya"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Telefon raqam</label>
-                      <input
-                        required
-                        type="tel"
-                        value={regForm.phone}
-                        onChange={(e) => setRegForm({ ...regForm, phone: e.target.value })}
-                        className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                        placeholder="+998 90 123 45 67"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
-                      <div className="relative mt-1">
-                        <input
-                          required
-                          type="password"
-                          value={regForm.password}
-                          onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
-                          className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                          placeholder="Kamida 6 ta belgi"
-                          minLength={6}
-                        />
-                        <Lock className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
-                      </div>
-                    </div>
-                    <TermsCheckbox checked={acceptedTerms} onChange={setAcceptedTerms} />
-                    <button
-                      type="submit"
-                      disabled={loading || !acceptedTerms}
-                      className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
-                    >
-                      {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {loading ? "Yuborilmoqda..." : "Ro'yxatdan o'tish"}
-                    </button>
-                  </form>
+                  <RegisterForm onSuccess={handleClose} />
                 ) : (
                   <form onSubmit={handleLogin} className="flex flex-col gap-4">
                     <div>

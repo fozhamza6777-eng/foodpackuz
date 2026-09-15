@@ -24,12 +24,6 @@ interface AuthContextValue {
   session: Session | null;
   isAuthenticated: boolean;
   hydrated: boolean;
-  register: (input: {
-    name: string;
-    phone: string;
-    password: string;
-    companyName: string;
-  }) => Promise<AuthResult>;
   login: (input: { phone: string; password: string }) => Promise<AuthResult>;
   logout: () => Promise<void>;
   updateName: (name: string) => Promise<AuthResult>;
@@ -68,37 +62,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
-  const loadProfile = useCallback(
-    async (userId: string, fallback?: { name: string; phone: string; companyName?: string }) => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("full_name, phone, company_name, is_admin, avatar_url, birth_date, gender")
-        .eq("id", userId)
-        .maybeSingle();
+  const loadProfile = useCallback(async (userId: string) => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("full_name, phone, company_name, is_admin, avatar_url, birth_date, gender")
+      .eq("id", userId)
+      .maybeSingle();
 
-      if (!error && data) {
-        setUser({
-          id: userId,
-          name: data.full_name,
-          phone: data.phone,
-          companyName: data.company_name ?? "",
-          isAdmin: data.is_admin ?? false,
-          avatarUrl: data.avatar_url ?? undefined,
-          birthDate: data.birth_date ?? undefined,
-          gender: (data.gender as "male" | "female" | null) ?? undefined
-        });
-      } else if (fallback) {
-        setUser({
-          id: userId,
-          name: fallback.name,
-          phone: fallback.phone,
-          companyName: fallback.companyName ?? "",
-          isAdmin: false
-        });
-      }
-    },
-    []
-  );
+    if (!error && data) {
+      setUser({
+        id: userId,
+        name: data.full_name,
+        phone: data.phone,
+        companyName: data.company_name ?? "",
+        isAdmin: data.is_admin ?? false,
+        avatarUrl: data.avatar_url ?? undefined,
+        birthDate: data.birth_date ?? undefined,
+        gender: (data.gender as "male" | "female" | null) ?? undefined
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -123,43 +106,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => listener.subscription.unsubscribe();
   }, [loadProfile]);
-
-  const register = useCallback(
-    async ({
-      name,
-      phone,
-      password,
-      companyName
-    }: {
-      name: string;
-      phone: string;
-      password: string;
-      companyName: string;
-    }): Promise<AuthResult> => {
-      if (!isSupabaseConfigured) {
-        return { error: "Supabase ulanmagan. .env.local faylini README.md ko'rsatmasiga asosan to'ldiring." };
-      }
-      const email = phoneToPseudoEmail(phone);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: name, phone, company_name: companyName } }
-      });
-
-      if (error) return { error: translateAuthError(error.message) };
-
-      // Agar Supabase loyihasida "Confirm email" o'chirilgan bo'lsa, sessiya
-      // darhol qaytadi. Aks holda avtomatik kirishga urinamiz.
-      if (!data.session) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) return { error: translateAuthError(signInError.message) };
-      }
-
-      if (data.user) await loadProfile(data.user.id, { name, phone, companyName });
-      return { error: null };
-    },
-    [loadProfile]
-  );
 
   const login = useCallback(async ({ phone, password }: { phone: string; password: string }): Promise<AuthResult> => {
     if (!isSupabaseConfigured) {
@@ -240,7 +186,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         isAuthenticated: !!session,
         hydrated,
-        register,
         login,
         logout,
         updateName,

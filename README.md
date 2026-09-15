@@ -266,6 +266,22 @@ siyosatlari va jadvallarni) alohida ishga tushiring.
 haqiqiy karta raqamingizni (masalan Humo yoki Uzcard) qo'shishni unutmang — aks holda
 mijoz "Karta orqali" to'lovni tanlaganda hech qanday karta ko'rmaydi.
 
+### 2.13-qadam: SMS xabarnomalar (o'n to'rtinchi migratsiya)
+
+1. **SQL Editor**'da yana **New query** tugmasini bosing.
+2. `supabase/migrations/0014_sms_notifications.sql` faylining **butun mazmunini**
+   nusxalab joylashtiring.
+3. **Run** tugmasini bosing.
+
+Bu skript uchta jadval qo'shadi: `phone_otp_codes` (ro'yxatdan o'tishda SMS tasdiqlash
+kodlari), `checkout_sessions` (buyurtmani rasmiylashtirishni boshlab, to'lovsiz chiqib
+ketganlarni aniqlash uchun) va `cart_reminders_sent` (savat eslatmalari qaysi bosqichda
+allaqachon yuborilganini qayd etadi).
+
+Bu funksiya ishlashi uchun **[SMS xabarnomalarni sozlash](#sms-xabarnomalarni-sozlash)**
+bo'limidagi qadamlarni ham bajarishingiz kerak (Eskiz.uz hisobi, muhit o'zgaruvchilari,
+cron sozlash) — aks holda ro'yxatdan o'tish (SMS kod tasdiqlash) ishlamaydi.
+
 ## 3-qadam: Email tasdiqlashni o'chirish (muhim!)
 
 Sayt telefon raqam + parol orqali ro'yxatdan o'tkazadi (email so'ramaydi), shuning uchun Supabase'ning
@@ -311,6 +327,77 @@ to'g'ri xatti-harakat), shuning uchun kalitlarni Vercel panelida qo'lda kiritish
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` → Supabase anon key
 3. **Save** qiling, so'ng **Deployments** bo'limidan oxirgi joylashtirishni **Redeploy** qiling.
 
+## SMS xabarnomalarni sozlash
+
+Saytda uchta holatda SMS yuboriladi:
+1. **Ro'yxatdan o'tish** — telefon raqamni tasdiqlash uchun 6 xonali kod
+2. **Savatda qolgan mahsulotlar** — 2 soat / 24 soat / 7 kun / 30 kun bosqichlarida eslatma
+3. **To'lovsiz chiqib ketish** — buyurtmani rasmiylashtirishni boshlab, 20 daqiqa ichida
+   yakunlamagan mijozlarga eslatma
+
+SMS'lar [Eskiz.uz](https://eskiz.uz) shlyuzi orqali yuboriladi. Ishga tushirish uchun:
+
+### 1) Eskiz.uz hisobini sozlash
+
+1. [eskiz.uz](https://eskiz.uz) saytida ro'yxatdan o'ting (email + parol bilan).
+2. Profilingizda **haqiqiy mijozlarga** (nafaqat o'zingizning tasdiqlangan raqamingizga)
+   SMS yuborish uchun **sender ID (jo'natuvchi nomi)** so'rovini yuboring — masalan
+   "FOODBOX". Bu ariza Eskiz tomonidan ko'rib chiqiladi (odatda bir necha soatdan bir
+   necha kungacha).
+3. Eskiz talab qilsa, yuboriladigan SMS matnlarini (shablonlarni) ham tasdiqlashga
+   taqdim eting — kodda ishlatilgan matnlar quyidagilar:
+   - OTP: `FOOD BOX: tasdiqlash kodingiz - {kod}. Kodni hech kimga bermang.`
+   - Savat eslatmasi (masalan): `FOOD BOX: Savatingiz sizni sog'indi! ... Buyurtmani yakunlang: {havola}`
+   - To'lov eslatmasi: `FOOD BOX: buyurtmangizni yakunlashga oz qoldi, to'lovni tugating: {havola}`
+4. Tasdiqlangach, Eskiz profilingizda ro'yxatdan o'tgan **email va parolingiz** kerak
+   bo'ladi (keyingi qadamda muhit o'zgaruvchisi sifatida kiritiladi).
+
+**Diqqat:** hisobingiz hali tasdiqlanmagan (sinov) rejimida bo'lsa, Eskiz faqat sizning
+o'zingizning tasdiqlangan raqamingizga, standart test matni bilan SMS yuboradi — haqiqiy
+mijozlarga SMS yubormaydi. Sender ID tasdiqlanmaguncha bu funksiyalar ishlamaydi.
+
+### 2) Muhit o'zgaruvchilarini qo'shish
+
+`.env.local` faylingizga (va Vercel'da **Settings → Environment Variables** bo'limiga)
+quyidagilarni qo'shing:
+
+```
+ESKIZ_EMAIL=sizning-eskiz-emailingiz
+ESKIZ_PASSWORD=sizning-eskiz-parolingiz
+ESKIZ_SENDER_NAME=FOODBOX
+SUPABASE_SERVICE_ROLE_KEY=sizning-supabase-service-role-kalitingiz
+CRON_SECRET=o'zingiz-o'ylab-topgan-uzun-tasodifiy-matn
+NEXT_PUBLIC_SITE_URL=https://foodboxuz.vercel.app
+```
+
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase **Project Settings → API** bo'limida
+  **service_role** kaliti (⚠️ bu maxfiy kalit, faqat shu yerga, hech qachon
+  `NEXT_PUBLIC_`bilan boshlanmaydigan holda kiriting — u brauzerga chiqmaydi, faqat
+  server API route'larida ishlatiladi).
+- `CRON_SECRET` — o'zingiz o'ylab topgan istalgan uzun, tasodifiy matn (parol kabi) —
+  quyidagi cron sozlashda ishlatiladi.
+
+### 3) Cron (vaqti-vaqti bilan tekshirish) sozlash
+
+Savat va to'lov eslatmalari faqat **muntazam ishga tushiriladigan** `/api/cron/reminders`
+route'i orqali yuboriladi. Buni ishga tushirish uchun ikki yo'l bor:
+
+**A. Vercel Cron (loyihada `vercel.json` allaqachon sozlangan, har 30 daqiqada
+ishga tushadi):**
+- Vercel'ning **Hobby (bepul)** rejasida cron ishlash chastotasi cheklangan bo'lishi
+  mumkin (kamdan-kam holatlarda kuniga bir marta bilan cheklanadi) — agar eslatmalar
+  kutilganidek tez-tez kelmasa, **Pro** rejaga o'tish kerak bo'lishi mumkin.
+- Hech qanday qo'shimcha sozlash shart emas — `CRON_SECRET` muhit o'zgaruvchisini
+  qo'shsangiz, Vercel avtomatik ravishda so'rovga kerakli sarlavhani qo'shadi.
+
+**B. Tashqi bepul xizmat ([cron-job.org](https://cron-job.org) kabi) — Hobby rejada
+ishlaydi:**
+1. cron-job.org'da ro'yxatdan o'ting va yangi vazifa (cron job) yarating.
+2. URL: `https://<saytingiz>/api/cron/reminders`
+3. **Xohlagan chastotani** tanlang (masalan har 15-30 daqiqada).
+4. **Headers** bo'limiga qo'shing: `Authorization: Bearer <CRON_SECRET qiymati>`
+   (yuqorida o'zingiz o'ylab topgan matn bilan bir xil).
+
 ## Ma'lumotlar xavfsizligi qanday ta'minlangan?
 
 - **Parollar hech qachon ochiq holda saqlanmaydi.** Ro'yxatdan o'tishda parolni biz emas, Supabase
@@ -322,8 +409,11 @@ to'g'ri xatti-harakat), shuning uchun kalitlarni Vercel panelida qo'lda kiritish
 - **"anon" kalit xavfsiz ochiq kalit.** Brauzerga chiqadigan `NEXT_PUBLIC_SUPABASE_ANON_KEY` maxsus
   shunday ishlatilishi uchun mo'ljallangan — uning o'zi hech narsaga ruxsat bermaydi, faqat RLS
   siyosatlari ruxsat bergan amallarni bajara oladi.
-- **"service_role" (super-maxfiy) kalit bu loyihada umuman ishlatilmaydi**, shuning uchun uni hech
-  qayerga joylashtirmang va hech kimga bermang.
+- **"service_role" (super-maxfiy) kalit endi FAQAT server tomonida ishlatiladi** — SMS tasdiqlash
+  kodlari va SMS eslatmalarini yuborish uchun (`app/api/otp/*`, `app/api/register`,
+  `app/api/cron/reminders`). U hech qachon brauzerga chiqmaydi (`NEXT_PUBLIC_` prefiksisiz muhit
+  o'zgaruvchisi sifatida saqlanadi, Next.js buni avtomatik himoya qiladi) va hech qachon "use
+  client" componentga import qilinmaydi (qarang: `lib/supabase/admin.ts`, `lib/eskiz.ts`).
 - **Barcha ma'lumot almashinuvi HTTPS orqali** (Supabase va Vercel buni standart ravishda ta'minlaydi).
 - `bulk_requests` jadvalida atayin faqat **INSERT** (yozish) siyosati bor, **SELECT** (o'qish) yo'q —
   ya'ni hamkorlik so'rovlarini faqat siz (Supabase boshqaruv paneli orqali) ko'ra olasiz, saytdan
@@ -335,10 +425,14 @@ to'g'ri xatti-harakat), shuning uchun kalitlarni Vercel panelida qo'lda kiritish
 2. Yuqori panelda, savat tugmasi yonida doim **"Kirish"** tugmasi turadi — mijoz istalgan vaqt,
    savatga mahsulot qo'shmasdan ham, ro'yxatdan o'tishi yoki hisobiga kirishi mumkin.
 3. "Rasmiylashtirish" tugmasini bosganda:
-   - Ro'yxatdan o'tmagan bo'lsa → ism, telefon va parol so'raladi (yoki "Kirish" tugmasi orqali
-     avvalgi hisobiga kiradi).
-   - Ro'yxatdan o'tgach → sessiya brauzerda xavfsiz saqlanadi (Supabase avtomatik boshqaradi),
-     keyingi safar qayta ro'yxatdan o'tish shart emas.
+   - Ro'yxatdan o'tmagan bo'lsa → ism, tashkilot, telefon va parol so'raladi (yoki "Kirish"
+     tugmasi orqali avvalgi hisobiga kiradi).
+   - **"Kodni SMS orqali olish"** tugmasi bosilganda, kiritilgan telefon raqamiga 6 xonali
+     tasdiqlash kodi SMS orqali yuboriladi (Eskiz.uz shlyuzi orqali — qarang:
+     [SMS xabarnomalarni sozlash](#sms-xabarnomalarni-sozlash)).
+   - Mijoz kodni kiritib tasdiqlagach, hisob yaratiladi va avtomatik tizimga kiritiladi —
+     sessiya brauzerda xavfsiz saqlanadi (Supabase avtomatik boshqaradi), keyingi safar qayta
+     ro'yxatdan o'tish shart emas.
 4. Buyurtma tasdiqlanganda ma'lumotlar to'g'ridan-to'g'ri Supabase'dagi `orders` jadvaliga, faqat
    shu foydalanuvchining `user_id`si bilan yoziladi.
 
@@ -537,13 +631,17 @@ kelishidan oldin sahifada biror joyni (masalan, biror tabni) bir marta bosib qo'
 
 ## Savatni tashlab ketganlarga eslatma
 
-Agar ro'yxatdan o'tgan mijoz savatga mahsulot qo'shib, uni rasmiylashtirmasa, saytga **qaytganda**
-(faqat soat **9:00–20:00** oralig'ida) do'stona, hazilomuz eslatma banneri chiqadi — bosqichlar:
-2 soat, 24 soat, 7 kun, 30 kun. Har bir bosqich kuniga faqat bir marta ko'rsatiladi.
+Agar ro'yxatdan o'tgan mijoz savatga mahsulot qo'shib, uni rasmiylashtirmasa, ikki xil eslatma ishlaydi:
 
-**Muhim:** bu — saytga qaytganda ko'rinadigan banner, haqiqiy SMS yoki push-bildirishnoma emas
-(bular alohida, pullik/murakkabroq infratuzilma talab qiladi). Agar kelajakda chinakam push-
-bildirishnoma yoki SMS qo'shish kerak bo'lsa, buni alohida so'rab qoling.
+1. **Saytdagi banner** — saytga **qaytganda** (faqat soat 9:00–20:00 oralig'ida) do'stona,
+   hazilomuz eslatma banneri chiqadi. Har bir bosqich kuniga faqat bir marta ko'rsatiladi.
+2. **Haqiqiy SMS** — mijoz saytga qaytmasa ham, xuddi shu bosqichlarda (2 soat, 24 soat, 7 kun,
+   30 kun; 09:00–20:00 oralig'ida) Eskiz.uz orqali SMS yuboriladi. Buning uchun
+   [SMS xabarnomalarni sozlash](#sms-xabarnomalarni-sozlash) bo'limidagi qadamlar bajarilgan
+   bo'lishi kerak.
+
+Shuningdek, buyurtmani rasmiylashtirishni boshlab (manzil/to'lov formasiga kirib), 20 daqiqa
+ichida yakunlamagan mijozlarga ham alohida SMS eslatma yuboriladi.
 
 ## Pachka (ulgurji) hisob-kitobi
 

@@ -12,7 +12,6 @@ import {
   Lock,
   LogIn,
   AlertCircle,
-  Building2,
   MapPin,
   Navigation,
   Check,
@@ -28,7 +27,7 @@ import type { BranchRow, PaymentCardRow } from "@/lib/supabase/types";
 import { fetchActivePaymentCards } from "@/lib/supabase/paymentCards";
 import { uploadPaymentReceipt } from "@/lib/supabase/storage";
 import CartItemCard from "./CartItemCard";
-import TermsCheckbox from "./TermsCheckbox";
+import RegisterForm from "./RegisterForm";
 
 type Step = "cart" | "auth" | "checkout" | "success";
 type AuthMode = "register" | "login";
@@ -43,14 +42,14 @@ export default function CartDrawer() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
-  const [regForm, setRegForm] = useState({ name: "", phone: "", password: "", companyName: "" });
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [regForm, setRegForm] = useState({ phone: "", password: "" });
   const [form, setForm] = useState({ name: "", phone: "", address: "", note: "" });
   const [paymentMethod, setPaymentMethod] = useState<"naqd" | "karta">("naqd");
   const [paymentCards, setPaymentCards] = useState<PaymentCardRow[] | null>(null);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [copiedCardId, setCopiedCardId] = useState<string | null>(null);
+  const [checkoutSessionId, setCheckoutSessionId] = useState<string | null>(null);
 
   const [branches, setBranches] = useState<BranchRow[] | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string>("new");
@@ -76,10 +75,10 @@ export default function CartDrawer() {
       setNewBranchName("");
       setGeo(null);
       setGeoStatus("idle");
-      setAcceptedTerms(false);
       setPaymentMethod("naqd");
       setReceiptFile(null);
       setReceiptPreview(null);
+      setCheckoutSessionId(null);
     }, 300);
   };
 
@@ -115,6 +114,22 @@ export default function CartDrawer() {
     }
   }, [step, auth.session, branches]);
 
+  // Mijoz "Buyurtma ma'lumotlari" bosqichiga kirganini qayd etamiz — shu orqali
+  // to'lovsiz chiqib ketgan mijozlarga SMS eslatma yuborish mumkin bo'ladi
+  // (qarang: app/api/cron/reminders).
+  useEffect(() => {
+    if (step === "checkout" && auth.session?.user?.id && !checkoutSessionId) {
+      supabase
+        .from("checkout_sessions")
+        .insert({ user_id: auth.session.user.id })
+        .select("id")
+        .single()
+        .then(({ data }) => {
+          if (data) setCheckoutSessionId(data.id);
+        });
+    }
+  }, [step, auth.session?.user?.id, checkoutSessionId]);
+
   const handleShareLocation = () => {
     if (!navigator.geolocation) {
       setGeoStatus("error");
@@ -139,25 +154,6 @@ export default function CartDrawer() {
       setAuthError(null);
       setStep("auth");
     }
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!acceptedTerms) {
-      setAuthError("Davom etish uchun Ommaviy oferta shartlariga rozilik bildirishingiz kerak.");
-      return;
-    }
-    setAuthError(null);
-    setAuthLoading(true);
-    const { error } = await auth.register(regForm);
-    setAuthLoading(false);
-    if (error) {
-      setAuthError(error);
-      return;
-    }
-    setAcceptedTerms(false);
-    setForm((f) => ({ ...f, name: regForm.name, phone: regForm.phone }));
-    setStep("checkout");
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -259,6 +255,10 @@ export default function CartDrawer() {
     if (error) {
       setOrderError("Buyurtmani saqlashda xatolik yuz berdi: " + error.message);
       return;
+    }
+
+    if (checkoutSessionId) {
+      await supabase.from("checkout_sessions").update({ completed: true }).eq("id", checkoutSessionId);
     }
 
     clearCart();
@@ -408,60 +408,7 @@ export default function CartDrawer() {
                   </AnimatePresence>
 
                   {authMode === "register" ? (
-                    <form id="auth-form" onSubmit={handleRegister} className="flex flex-col gap-4">
-                      <div>
-                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                          Tashkilot nomi
-                        </label>
-                        <div className="relative mt-1">
-                          <input
-                            required
-                            value={regForm.companyName}
-                            onChange={(e) => setRegForm({ ...regForm, companyName: e.target.value })}
-                            className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                            placeholder="Masalan: «Tez Osh» fast-food"
-                          />
-                          <Building2 className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Ism-familiya</label>
-                        <input
-                          required
-                          value={regForm.name}
-                          onChange={(e) => setRegForm({ ...regForm, name: e.target.value })}
-                          className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                          placeholder="Ism Familiya"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Telefon raqam</label>
-                        <input
-                          required
-                          type="tel"
-                          value={regForm.phone}
-                          onChange={(e) => setRegForm({ ...regForm, phone: e.target.value })}
-                          className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                          placeholder="+998 90 123 45 67"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
-                        <div className="relative mt-1">
-                          <input
-                            required
-                            type="password"
-                            value={regForm.password}
-                            onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
-                            className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                            placeholder="Kamida 6 ta belgi"
-                            minLength={6}
-                          />
-                          <Lock className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
-                        </div>
-                      </div>
-                      <TermsCheckbox checked={acceptedTerms} onChange={setAcceptedTerms} />
-                    </form>
+                    <RegisterForm onSuccess={() => setStep("checkout")} />
                   ) : (
                     <form id="auth-form" onSubmit={handleLogin} className="flex flex-col gap-4">
                       <div>
@@ -804,26 +751,16 @@ export default function CartDrawer() {
               </div>
             )}
 
-            {step === "auth" && (
+            {step === "auth" && authMode === "login" && (
               <div className="border-t border-ink/8 p-5 bg-surface/60">
                 <button
                   form="auth-form"
                   type="submit"
-                  disabled={authLoading || (authMode === "register" && !acceptedTerms)}
+                  disabled={authLoading}
                   className="w-full flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {authLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : authMode === "register" ? (
-                    <UserPlus className="w-4 h-4" />
-                  ) : (
-                    <LogIn className="w-4 h-4" />
-                  )}
-                  {authLoading
-                    ? "Yuborilmoqda..."
-                    : authMode === "register"
-                    ? "Ro'yxatdan o'tish va davom etish"
-                    : "Kirish va davom etish"}
+                  {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                  {authLoading ? "Yuborilmoqda..." : "Kirish va davom etish"}
                 </button>
               </div>
             )}
