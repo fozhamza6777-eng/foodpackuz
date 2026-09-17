@@ -18,7 +18,8 @@ import {
   Wallet,
   CreditCard,
   Upload,
-  Copy
+  Copy,
+  KeyRound
 } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { useAuth } from "./AuthProvider";
@@ -28,9 +29,10 @@ import { fetchActivePaymentCards } from "@/lib/supabase/paymentCards";
 import { uploadPaymentReceipt } from "@/lib/supabase/storage";
 import CartItemCard from "./CartItemCard";
 import RegisterForm from "./RegisterForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
 
 type Step = "cart" | "auth" | "checkout" | "success";
-type AuthMode = "register" | "login";
+type AuthMode = "register" | "login" | "forgot";
 type GeoStatus = "idle" | "loading" | "granted" | "denied" | "error";
 
 export default function CartDrawer() {
@@ -68,6 +70,7 @@ export default function CartDrawer() {
     closeCart();
     window.setTimeout(() => {
       setStep("cart");
+      setAuthMode("register");
       setAuthError(null);
       setOrderError(null);
       setBranches(null);
@@ -355,43 +358,61 @@ export default function CartDrawer() {
 
               {step === "auth" && (
                 <div className="p-5">
-                  <div className="flex items-start gap-3 bg-brand-50 border border-brand-100 rounded-xl p-4 mb-5">
-                    {authMode === "register" ? (
-                      <UserPlus className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
-                    ) : (
-                      <LogIn className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
-                    )}
-                    <p className="text-sm text-ink/70 font-medium leading-relaxed">
-                      {authMode === "register"
-                        ? "Buyurtmani rasmiylashtirish uchun avval ro'yxatdan o'ting. Bu atigi 30 soniya vaqt oladi."
-                        : "Ro'yxatdan o'tgan bo'lsangiz, telefon raqam va parolingiz bilan kiring."}
-                    </p>
-                  </div>
-
-                  <div className="flex gap-2 mb-5 bg-surface rounded-lg p-1">
-                    <button
-                      onClick={() => {
-                        setAuthMode("register");
-                        setAuthError(null);
-                      }}
-                      className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
-                        authMode === "register" ? "bg-white text-ink shadow-sm" : "text-ink/50"
-                      }`}
-                    >
-                      Ro'yxatdan o'tish
-                    </button>
+                  {authMode === "forgot" ? (
                     <button
                       onClick={() => {
                         setAuthMode("login");
                         setAuthError(null);
                       }}
-                      className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
-                        authMode === "login" ? "bg-white text-ink shadow-sm" : "text-ink/50"
-                      }`}
+                      className="flex items-center gap-1.5 text-sm font-bold text-ink/50 hover:text-ink mb-5"
                     >
-                      Kirish
+                      <ArrowLeft className="w-4 h-4" /> Kirishga qaytish
                     </button>
+                  ) : null}
+
+                  <div className="flex items-start gap-3 bg-brand-50 border border-brand-100 rounded-xl p-4 mb-5">
+                    {authMode === "register" ? (
+                      <UserPlus className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
+                    ) : authMode === "login" ? (
+                      <LogIn className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <KeyRound className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
+                    )}
+                    <p className="text-sm text-ink/70 font-medium leading-relaxed">
+                      {authMode === "register"
+                        ? "Buyurtmani rasmiylashtirish uchun avval ro'yxatdan o'ting. Bu atigi 30 soniya vaqt oladi."
+                        : authMode === "login"
+                        ? "Ro'yxatdan o'tgan bo'lsangiz, telefon raqam va parolingiz bilan kiring."
+                        : "Telefon raqamingizga tasdiqlash kodi yuboramiz, so'ng yangi parol o'rnatasiz."}
+                    </p>
                   </div>
+
+                  {authMode !== "forgot" && (
+                    <div className="flex gap-2 mb-5 bg-surface rounded-lg p-1">
+                      <button
+                        onClick={() => {
+                          setAuthMode("register");
+                          setAuthError(null);
+                        }}
+                        className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
+                          authMode === "register" ? "bg-white text-ink shadow-sm" : "text-ink/50"
+                        }`}
+                      >
+                        Ro'yxatdan o'tish
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAuthMode("login");
+                          setAuthError(null);
+                        }}
+                        className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
+                          authMode === "login" ? "bg-white text-ink shadow-sm" : "text-ink/50"
+                        }`}
+                      >
+                        Kirish
+                      </button>
+                    </div>
+                  )}
 
                   <AnimatePresence>
                     {authError && (
@@ -409,6 +430,8 @@ export default function CartDrawer() {
 
                   {authMode === "register" ? (
                     <RegisterForm onSuccess={() => setStep("checkout")} />
+                  ) : authMode === "forgot" ? (
+                    <ForgotPasswordForm onSuccess={() => setStep("checkout")} />
                   ) : (
                     <form id="auth-form" onSubmit={handleLogin} className="flex flex-col gap-4">
                       <div>
@@ -423,7 +446,19 @@ export default function CartDrawer() {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuthMode("forgot");
+                              setAuthError(null);
+                            }}
+                            className="text-xs font-bold text-brand-600 hover:text-brand-700"
+                          >
+                            Parolni unutdingizmi?
+                          </button>
+                        </div>
                         <div className="relative mt-1">
                           <input
                             required

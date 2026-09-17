@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, UserPlus, LogIn, Lock, AlertCircle, Loader2 } from "lucide-react";
+import { X, UserPlus, LogIn, Lock, AlertCircle, Loader2, KeyRound, ArrowLeft } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import RegisterForm from "./RegisterForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
 
-type AuthMode = "register" | "login";
+type AuthMode = "register" | "login" | "forgot";
 
 export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const auth = useAuth();
@@ -24,6 +25,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const handleClose = () => {
     onClose();
     window.setTimeout(() => {
+      setMode("register");
       setError(null);
       setLoading(false);
     }, 300);
@@ -65,7 +67,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
             >
               <div className="flex items-center justify-between px-6 py-4 border-b border-ink/8">
                 <h3 className="font-display font-extrabold text-lg text-ink">
-                  {mode === "register" ? "Ro'yxatdan o'tish" : "Hisobga kirish"}
+                  {mode === "register" ? "Ro'yxatdan o'tish" : mode === "login" ? "Hisobga kirish" : "Parolni tiklash"}
                 </h3>
                 <button onClick={handleClose} className="p-1.5 hover:bg-surface rounded-lg">
                   <X className="w-5 h-5" />
@@ -73,43 +75,61 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
               </div>
 
               <div className="p-6">
-                <div className="flex items-start gap-3 bg-brand-50 border border-brand-100 rounded-xl p-4 mb-5">
-                  {mode === "register" ? (
-                    <UserPlus className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
-                  ) : (
-                    <LogIn className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
-                  )}
-                  <p className="text-sm text-ink/70 font-medium leading-relaxed">
-                    {mode === "register"
-                      ? "Ro'yxatdan o'ting — bu atigi 30 soniya vaqt oladi va buyurtmalaringizni kuzatib borasiz."
-                      : "Ro'yxatdan o'tgan bo'lsangiz, telefon raqam va parolingiz bilan kiring."}
-                  </p>
-                </div>
-
-                <div className="flex gap-2 mb-5 bg-surface rounded-lg p-1">
-                  <button
-                    onClick={() => {
-                      setMode("register");
-                      setError(null);
-                    }}
-                    className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
-                      mode === "register" ? "bg-white text-ink shadow-sm" : "text-ink/50"
-                    }`}
-                  >
-                    Ro'yxatdan o'tish
-                  </button>
+                {mode === "forgot" ? (
                   <button
                     onClick={() => {
                       setMode("login");
                       setError(null);
                     }}
-                    className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
-                      mode === "login" ? "bg-white text-ink shadow-sm" : "text-ink/50"
-                    }`}
+                    className="flex items-center gap-1.5 text-sm font-bold text-ink/50 hover:text-ink mb-5"
                   >
-                    Kirish
+                    <ArrowLeft className="w-4 h-4" /> Kirishga qaytish
                   </button>
+                ) : null}
+
+                <div className="flex items-start gap-3 bg-brand-50 border border-brand-100 rounded-xl p-4 mb-5">
+                  {mode === "register" ? (
+                    <UserPlus className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
+                  ) : mode === "login" ? (
+                    <LogIn className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <KeyRound className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
+                  )}
+                  <p className="text-sm text-ink/70 font-medium leading-relaxed">
+                    {mode === "register"
+                      ? "Ro'yxatdan o'ting — bu atigi 30 soniya vaqt oladi va buyurtmalaringizni kuzatib borasiz."
+                      : mode === "login"
+                      ? "Ro'yxatdan o'tgan bo'lsangiz, telefon raqam va parolingiz bilan kiring."
+                      : "Telefon raqamingizga tasdiqlash kodi yuboramiz, so'ng yangi parol o'rnatasiz."}
+                  </p>
                 </div>
+
+                {mode !== "forgot" && (
+                  <div className="flex gap-2 mb-5 bg-surface rounded-lg p-1">
+                    <button
+                      onClick={() => {
+                        setMode("register");
+                        setError(null);
+                      }}
+                      className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
+                        mode === "register" ? "bg-white text-ink shadow-sm" : "text-ink/50"
+                      }`}
+                    >
+                      Ro'yxatdan o'tish
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMode("login");
+                        setError(null);
+                      }}
+                      className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
+                        mode === "login" ? "bg-white text-ink shadow-sm" : "text-ink/50"
+                      }`}
+                    >
+                      Kirish
+                    </button>
+                  </div>
+                )}
 
                 <AnimatePresence>
                   {error && (
@@ -127,6 +147,8 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
 
                 {mode === "register" ? (
                   <RegisterForm onSuccess={handleClose} />
+                ) : mode === "forgot" ? (
+                  <ForgotPasswordForm onSuccess={handleClose} />
                 ) : (
                   <form onSubmit={handleLogin} className="flex flex-col gap-4">
                     <div>
@@ -141,7 +163,19 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMode("forgot");
+                            setError(null);
+                          }}
+                          className="text-xs font-bold text-brand-600 hover:text-brand-700"
+                        >
+                          Parolni unutdingizmi?
+                        </button>
+                      </div>
                       <div className="relative mt-1">
                         <input
                           required
