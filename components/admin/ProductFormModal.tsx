@@ -281,12 +281,12 @@ export default function ProductFormModal({
                 Haqiqiy mahsulot rasmi (tavsiya etiladi)
               </label>
               <div className="flex items-center gap-3 mt-1">
-                <div className="w-16 h-16 shrink-0 bg-surface rounded-lg overflow-hidden flex items-center justify-center border border-ink/10 p-2">
+                <div className="w-36 h-36 shrink-0 bg-surface rounded-lg overflow-hidden flex items-center justify-center border border-ink/10 p-2">
                   {form.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={form.imageUrl} alt="" className="w-full h-full object-cover rounded-md" />
+                    <img src={form.imageUrl} alt="" className="w-full h-full object-contain rounded-md" />
                   ) : (
-                    <ImageOff className="w-5 h-5 text-ink/25" />
+                    <ImageOff className="w-6 h-6 text-ink/25" />
                   )}
                 </div>
                 <div className="flex-1">

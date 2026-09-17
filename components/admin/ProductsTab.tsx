@@ -100,8 +100,8 @@ export default function ProductsTab() {
             }`}
           >
             <div className="flex items-center gap-3 p-4">
-              <div className="w-14 h-14 shrink-0 bg-surface rounded-lg p-2.5 overflow-hidden">
-                <ProductImage imageUrl={p.image_url} art={p.image} />
+              <div className="w-24 h-24 shrink-0 bg-surface rounded-lg p-2 overflow-hidden">
+                <ProductImage imageUrl={p.image_url} art={p.image} fit="contain" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
