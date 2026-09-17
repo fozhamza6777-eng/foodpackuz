@@ -71,17 +71,23 @@ export default function ProductCard({
     >
       <div
         onClick={() => onOpenDetail?.(product)}
-        className={`relative h-40 sm:h-44 bg-surface flex items-center justify-center overflow-hidden ${
-          onOpenDetail ? "cursor-pointer" : ""
-        }`}
+        className={`relative h-40 sm:h-44 bg-surface overflow-hidden ${onOpenDetail ? "cursor-pointer" : ""}`}
       >
-        <motion.div
-          className="w-24 h-24 sm:w-28 sm:h-28"
-          whileHover={{ scale: 1.08 }}
-          transition={{ duration: 0.3 }}
-        >
-          <ProductImage imageUrl={product.imageUrl} art={product.image} />
-        </motion.div>
+        {product.imageUrl ? (
+          <motion.div className="absolute inset-0" whileHover={{ scale: 1.06 }} transition={{ duration: 0.3 }}>
+            <ProductImage imageUrl={product.imageUrl} art={product.image} className="w-full h-full" />
+          </motion.div>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.div
+              className="w-24 h-24 sm:w-28 sm:h-28"
+              whileHover={{ scale: 1.08 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ProductImage imageUrl={product.imageUrl} art={product.image} />
+            </motion.div>
+          </div>
+        )}
 
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start">
           {product.isNew && (

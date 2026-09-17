@@ -175,17 +175,17 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05, duration: 0.4 }}
                 whileHover={{ y: -4 }}
-                className="flex flex-col items-center gap-2 bg-white rounded-xl shadow-card p-4 hover:shadow-card-hover transition-shadow"
+                className="flex flex-col bg-white rounded-xl shadow-card overflow-hidden hover:shadow-card-hover transition-shadow"
               >
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-surface flex items-center justify-center">
+                <div className="w-full aspect-square bg-surface flex items-center justify-center overflow-hidden">
                   {c.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={c.imageUrl} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <Package className="w-5 h-5 md:w-6 md:h-6 text-ink/25" />
+                    <Package className="w-8 h-8 md:w-10 md:h-10 text-ink/25" />
                   )}
                 </div>
-                <span className="text-[11px] md:text-xs font-bold text-ink/70 text-center leading-tight">
+                <span className="text-[11px] md:text-xs font-bold text-ink/70 text-center leading-tight px-2 py-2.5">
                   {c.name}
                 </span>
               </motion.a>
