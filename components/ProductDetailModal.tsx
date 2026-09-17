@@ -108,10 +108,16 @@ export default function ProductDetailModal({
 
             <div className="flex-1 overflow-y-auto">
               <div className="p-5">
-                <div className="relative h-48 bg-surface rounded-xl flex items-center justify-center overflow-hidden mb-4">
-                  <div className="w-32 h-32">
-                    <ProductImage imageUrl={product.imageUrl} art={product.image} />
-                  </div>
+                <div className="relative h-64 sm:h-72 bg-surface rounded-xl overflow-hidden mb-4">
+                  {product.imageUrl ? (
+                    <ProductImage imageUrl={product.imageUrl} art={product.image} className="w-full h-full" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-32 h-32">
+                        <ProductImage imageUrl={product.imageUrl} art={product.image} />
+                      </div>
+                    </div>
+                  )}
                   <button
                     onClick={() => (auth.session ? toggleLike(product.id) : setAuthOpen(true))}
                     className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow-card flex items-center justify-center"
