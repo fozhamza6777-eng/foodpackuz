@@ -40,6 +40,7 @@ import { fetchUserComments, deleteComment, type MyComment } from "@/lib/supabase
 import type { Product } from "@/lib/types";
 import ProductImage from "./ProductImage";
 import { useLanguage } from "./LanguageProvider";
+import { formatNumber } from "@/lib/formatNumber";
 
 type Screen = "home" | "settings" | "orders" | "cancelled" | "reviews" | "branches";
 type GeoStatus = "idle" | "loading" | "granted" | "denied" | "error";
@@ -524,7 +525,7 @@ export default function ProfileDrawer({
               })}
             </p>
             <p className="text-xs text-ink/45 font-medium mt-0.5">
-              {order.items.length} {t("profile.product_unit")} · {order.total.toLocaleString("uz-UZ")}{" "}
+              {order.items.length} {t("profile.product_unit")} · {formatNumber(order.total)}{" "}
               {t("common.som")}
             </p>
           </div>
@@ -575,7 +576,7 @@ export default function ProfileDrawer({
                           </button>
                         </div>
                         <span className="font-semibold text-ink w-20 text-right shrink-0">
-                          {(it.price * it.qty).toLocaleString("uz-UZ")} {t("common.som")}
+                          {formatNumber(it.price * it.qty)} {t("common.som")}
                         </span>
                         <button
                           onClick={() => removeEditItem(it.id)}
@@ -590,7 +591,7 @@ export default function ProfileDrawer({
                     <div className="flex items-center justify-between text-sm font-bold text-ink pt-2 border-t border-ink/8 mt-1">
                       <span>{t("profile.new_total")}</span>
                       <span>
-                        {(editItems ?? []).reduce((s, it) => s + it.price * it.qty, 0).toLocaleString("uz-UZ")}{" "}
+                        {formatNumber((editItems ?? []).reduce((s, it) => s + it.price * it.qty, 0))}{" "}
                         {t("common.som")}
                       </span>
                     </div>
@@ -623,7 +624,7 @@ export default function ProfileDrawer({
                           {it.name} × {it.qty}
                         </span>
                         <span className="font-semibold text-ink">
-                          {(it.price * it.qty).toLocaleString("uz-UZ")} {t("common.som")}
+                          {formatNumber(it.price * it.qty)} {t("common.som")}
                         </span>
                       </div>
                     ))}
@@ -823,7 +824,7 @@ export default function ProfileDrawer({
                             {t("profile.orders_count", { count: activeOrders.length })}
                           </p>
                           <p className="text-xs text-ink/45 font-medium mt-0.5">
-                            {t("profile.total_spent", { sum: totalSpent.toLocaleString("uz-UZ") })}
+                            {t("profile.total_spent", { sum: formatNumber(totalSpent) })}
                           </p>
                         </>
                       )}

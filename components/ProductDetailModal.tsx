@@ -12,6 +12,7 @@ import ProductInfoBadge from "./ProductInfoBadge";
 import AuthModal from "./AuthModal";
 import { useLanguage } from "./LanguageProvider";
 import { fetchComments, addComment, deleteComment, type Comment } from "@/lib/supabase/comments";
+import { formatNumber } from "@/lib/formatNumber";
 
 export default function ProductDetailModal({
   product,
@@ -191,14 +192,14 @@ export default function ProductDetailModal({
                 <div className="flex flex-col gap-0.5 mb-4">
                   <div className="flex items-baseline gap-2 flex-wrap">
                     <span className="font-display font-extrabold text-xl text-ink">
-                      {unitPrice.toLocaleString("uz-UZ")}
+                      {formatNumber(unitPrice)}
                     </span>
                     <span className="text-xs font-semibold text-ink/40">
                       {t("common.som")} / {unitLabel} ({unitSize} {product.unit})
                     </span>
                     {oldUnitPrice && (
                       <span className="text-xs font-semibold text-ink/35 line-through">
-                        {oldUnitPrice.toLocaleString("uz-UZ")}
+                        {formatNumber(oldUnitPrice)}
                       </span>
                     )}
                     {discount > 0 && (
@@ -209,7 +210,7 @@ export default function ProductDetailModal({
                   </div>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-[11px] font-semibold text-ink/45">
-                      ({product.price.toLocaleString("uz-UZ")} {t("common.som")}/{product.unit})
+                      ({formatNumber(product.price)} {t("common.som")}/{product.unit})
                     </span>
                   </div>
                 </div>

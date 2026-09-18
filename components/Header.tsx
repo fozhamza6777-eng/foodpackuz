@@ -14,6 +14,7 @@ import { useLikes } from "./LikesProvider";
 import { useLanguage } from "./LanguageProvider";
 import { useCatalogFilter } from "./CatalogFilterProvider";
 import type { Category } from "@/lib/supabase/categories";
+import { formatNumber } from "@/lib/formatNumber";
 
 const navLinks = [
   { href: "#yangiliklar", key: "header.nav_news" },
@@ -188,7 +189,7 @@ export default function Header({ categories }: { categories: Category[] }) {
           >
             <ShoppingBag className="w-5 h-5" />
             <span className="hidden sm:inline">
-              {totalCount > 0 ? `${totalSum.toLocaleString("uz-UZ")} ${t("common.som")}` : t("header.cart_default")}
+              {totalCount > 0 ? `${formatNumber(totalSum)} ${t("common.som")}` : t("header.cart_default")}
             </span>
             <AnimatePresence>
               {totalCount > 0 && (

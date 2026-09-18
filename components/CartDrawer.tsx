@@ -27,6 +27,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { BranchRow, PaymentCardRow } from "@/lib/supabase/types";
 import { fetchActivePaymentCards } from "@/lib/supabase/paymentCards";
 import { uploadPaymentReceipt } from "@/lib/supabase/storage";
+import { formatNumber } from "@/lib/formatNumber";
 import CartItemCard from "./CartItemCard";
 import RegisterForm from "./RegisterForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
@@ -505,7 +506,7 @@ export default function CartDrawer() {
                     <div className="flex items-center justify-between text-sm font-bold text-ink pt-3 mt-1 border-t border-ink/8">
                       <span>{t("product.total")}</span>
                       <span>
-                        {totalSum.toLocaleString("uz-UZ")} {t("common.som")}
+                        {formatNumber(totalSum)} {t("common.som")}
                       </span>
                     </div>
                   </div>
@@ -764,7 +765,7 @@ export default function CartDrawer() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="font-bold text-ink/60 text-sm">{t("product.total")}</span>
                   <span className="font-display font-extrabold text-xl text-ink">
-                    {totalSum.toLocaleString("uz-UZ")} {t("common.som")}
+                    {formatNumber(totalSum)} {t("common.som")}
                   </span>
                 </div>
                 <button
@@ -795,7 +796,7 @@ export default function CartDrawer() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="font-bold text-ink/60 text-sm">{t("product.total")}</span>
                   <span className="font-display font-extrabold text-xl text-ink">
-                    {totalSum.toLocaleString("uz-UZ")} {t("common.som")}
+                    {formatNumber(totalSum)} {t("common.som")}
                   </span>
                 </div>
                 <button

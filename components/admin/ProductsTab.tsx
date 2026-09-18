@@ -8,6 +8,7 @@ import { fetchAllProductsAdmin } from "@/lib/supabase/products";
 import type { ProductRow } from "@/lib/supabase/types";
 import ProductImage from "@/components/ProductImage";
 import ProductFormModal from "./ProductFormModal";
+import { formatNumber } from "@/lib/formatNumber";
 
 export default function ProductsTab() {
   const [products, setProducts] = useState<ProductRow[] | null>(null);
@@ -113,12 +114,12 @@ export default function ProductsTab() {
                 </p>
                 <div className="flex items-baseline gap-1.5 mt-1">
                   <span className="font-display font-extrabold text-sm text-ink">
-                    {p.price.toLocaleString("uz-UZ")}
+                    {formatNumber(p.price)}
                   </span>
                   <span className="text-[11px] text-ink/40 font-semibold">so'm</span>
                   {p.old_price && (
                     <span className="text-[11px] text-ink/35 line-through">
-                      {p.old_price.toLocaleString("uz-UZ")}
+                      {formatNumber(p.old_price)}
                     </span>
                   )}
                 </div>

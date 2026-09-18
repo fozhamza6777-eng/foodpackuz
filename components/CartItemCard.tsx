@@ -6,6 +6,7 @@ import ProductImage from "./ProductImage";
 import ProductInfoBadge from "./ProductInfoBadge";
 import { useLanguage } from "./LanguageProvider";
 import { useCategoryLabels } from "./CategoryLabelsProvider";
+import { formatNumber } from "@/lib/formatNumber";
 
 export default function CartItemCard({
   item,
@@ -56,10 +57,10 @@ export default function CartItemCard({
         </p>
         <p className="text-[11px] text-ink/45 font-medium mt-0.5">
           {t("product.selected")}: {item.qty} {item.product.unit} ·{" "}
-          {item.product.price.toLocaleString("uz-UZ")} {t("common.som")}/{item.product.unit}
+          {formatNumber(item.product.price)} {t("common.som")}/{item.product.unit}
         </p>
         <p className="text-sm font-bold text-ink mt-1">
-          {t("product.total")}: {(item.qty * item.product.price).toLocaleString("uz-UZ")} {t("common.som")}
+          {t("product.total")}: {formatNumber(item.qty * item.product.price)} {t("common.som")}
         </p>
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center border border-ink/15 rounded-lg">

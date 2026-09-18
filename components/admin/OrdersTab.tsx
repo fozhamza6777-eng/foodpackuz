@@ -23,6 +23,7 @@ import {
 import { supabase } from "@/lib/supabase/client";
 import { getReceiptSignedUrl } from "@/lib/supabase/storage";
 import type { OrderRow, ProfileRow } from "@/lib/supabase/types";
+import { formatNumber } from "@/lib/formatNumber";
 
 const paymentStatusMeta: Record<string, { label: string; color: string }> = {
   kutilmoqda: { label: "To'lov tekshirilmoqda", color: "bg-amber-light text-amber" },
@@ -119,7 +120,7 @@ export default function OrdersTab() {
       "Mahsulotlar:",
       ...order.items.map((it) => `• ${it.name} × ${it.qty}`),
       "",
-      `Jami: ${order.total.toLocaleString("uz-UZ")} so'm`,
+      `Jami: ${formatNumber(order.total)} so'm`,
       order.note ? `Izoh: ${order.note}` : ""
     ].filter(Boolean);
     return lines.join("\n");
@@ -241,7 +242,7 @@ export default function OrdersTab() {
                       minute: "2-digit"
                     })}
                     {" · "}
-                    {order.items.length} mahsulot · {order.total.toLocaleString("uz-UZ")} so'm
+                    {order.items.length} mahsulot · {formatNumber(order.total)} so'm
                   </p>
                 </div>
 
@@ -359,7 +360,7 @@ export default function OrdersTab() {
                                   {it.name} × {it.qty}
                                 </span>
                                 <span className="font-semibold text-ink">
-                                  {(it.price * it.qty).toLocaleString("uz-UZ")} so'm
+                                  {formatNumber(it.price * it.qty)} so'm
                                 </span>
                               </div>
                             ))}

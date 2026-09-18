@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useInView, useMotionValue, useSpring } from "framer-motion";
+import { formatNumber } from "@/lib/formatNumber";
 
 export default function Counter({
   to,
@@ -26,7 +27,7 @@ export default function Counter({
   useEffect(() => {
     return spring.on("change", (v) => {
       if (ref.current) {
-        ref.current.textContent = `${prefix}${Math.round(v).toLocaleString("uz-UZ")}${suffix}`;
+        ref.current.textContent = `${prefix}${formatNumber(v)}${suffix}`;
       }
     });
   }, [spring, prefix, suffix]);

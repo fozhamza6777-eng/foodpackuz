@@ -10,6 +10,7 @@ import { fetchActiveProducts } from "@/lib/supabase/products";
 import ProductImage from "./ProductImage";
 import type { Product } from "@/lib/types";
 import { useLanguage } from "./LanguageProvider";
+import { formatNumber } from "@/lib/formatNumber";
 
 export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { likedIds, toggleLike } = useLikes();
@@ -92,9 +93,9 @@ export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; 
                         {tr(product.name, product.nameRu)}
                       </p>
                       <p className="text-xs text-ink/45 font-medium mt-0.5">
-                        {(product.price * product.packSize).toLocaleString("uz-UZ")} {t("favorites.per_pack")} ·{" "}
+                        {formatNumber(product.price * product.packSize)} {t("favorites.per_pack")} ·{" "}
                         <span className="text-ink/35">
-                          {product.price.toLocaleString("uz-UZ")} {t("common.som")}/{product.unit}
+                          {formatNumber(product.price)} {t("common.som")}/{product.unit}
                         </span>
                       </p>
                       <div className="flex items-center gap-2 mt-2">

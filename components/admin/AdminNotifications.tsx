@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, ShoppingBag, AlertTriangle, X } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { formatNumber } from "@/lib/formatNumber";
 
 interface NotificationItem {
   id: string;
@@ -60,7 +61,7 @@ export default function AdminNotifications({ onGoToOrders }: { onGoToOrders: () 
         const item: NotificationItem = {
           id: `new-${order.id}-${Date.now()}`,
           type: "new_order",
-          text: `Yangi buyurtma tushdi — ${Number(order.total ?? 0).toLocaleString("uz-UZ")} so'm`
+          text: `Yangi buyurtma tushdi — ${formatNumber(Number(order.total ?? 0))} so'm`
         };
         setItems((prev) => [item, ...prev].slice(0, 20));
         setToast(item);
