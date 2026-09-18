@@ -7,6 +7,7 @@ import { LikesProvider } from "@/components/LikesProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { CategoryLabelsProvider } from "@/components/CategoryLabelsProvider";
 import { CatalogFilterProvider } from "@/components/CatalogFilterProvider";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const display = Sora({
   subsets: ["latin"],
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${display.variable} ${body.variable} ${mono.variable} font-body bg-surface text-ink antialiased`}
       >
+        <ServiceWorkerRegister />
         <LanguageProvider>
           <CategoryLabelsProvider>
             <CatalogFilterProvider>

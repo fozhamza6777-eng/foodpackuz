@@ -23,7 +23,7 @@ export default function OfferPage() {
       <main className="mx-auto max-w-3xl px-5 py-10">
         <div className="bg-white rounded-2xl shadow-card p-6 sm:p-10">
           <pre className="whitespace-pre-wrap font-body text-sm text-ink/75 leading-relaxed">
-            {PUBLIC_OFFER_TEXT}
+            {PUBLIC_OFFER_TEXT.trim()}
           </pre>
         </div>
       </main>
