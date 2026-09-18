@@ -346,7 +346,10 @@ SMS'lar [Eskiz.uz](https://eskiz.uz) shlyuzi orqali yuboriladi. Ishga tushirish 
    necha kungacha).
 3. Eskiz talab qilsa, yuboriladigan SMS matnlarini (shablonlarni) ham tasdiqlashga
    taqdim eting — kodda ishlatilgan matnlar quyidagilar:
-   - OTP: `FOOD BOX: tasdiqlash kodingiz - {kod}. Kodni hech kimga bermang.`
+   - OTP (ro'yxatdan o'tish va parolni tiklash uchun bir xil): `foodbox.uz sayti FOOD
+     BOXga ro'yxatdan o'tishda telefon raqamni tasdiqlash uchun FOOD BOX: tasdiqlash
+     kodingiz - {kod}.` — **bu matn Eskiz moderatsiyasidan aynan shu ko'rinishda
+     o'tgan, o'zgartirmang**
    - Savat eslatmasi (masalan): `FOOD BOX: Savatingiz sizni sog'indi! ... Buyurtmani yakunlang: {havola}`
    - To'lov eslatmasi: `FOOD BOX: buyurtmangizni yakunlashga oz qoldi, to'lovni tugating: {havola}`
 4. Tasdiqlangach, Eskiz profilingizda ro'yxatdan o'tgan **email va parolingiz** kerak

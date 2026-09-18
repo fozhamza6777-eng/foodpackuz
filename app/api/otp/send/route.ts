@@ -49,9 +49,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Kodni saqlashda xatolik." }, { status: 500 });
   }
 
+  // Diqqat: bu matn Eskiz moderatsiyasidan aynan shu ko'rinishda o'tgan —
+  // o'zgartirilsa, shablon qayta tasdiqlanishi kerak bo'ladi.
   const { ok, error } = await sendSms(
     normalized,
-    `FOOD BOX: tasdiqlash kodingiz - ${code}. Kodni hech kimga bermang.`
+    `foodbox.uz sayti FOOD BOXga ro'yxatdan o'tishda telefon raqamni tasdiqlash uchun FOOD BOX: tasdiqlash kodingiz - ${code}.`
   );
   if (!ok) {
     return NextResponse.json({ ok: false, error: error ?? "SMS yuborishda xatolik." }, { status: 502 });
