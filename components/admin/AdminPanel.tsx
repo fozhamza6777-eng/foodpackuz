@@ -12,7 +12,8 @@ import {
   Loader2,
   Image as ImageIcon,
   Layers,
-  CreditCard
+  CreditCard,
+  Handshake
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import OrdersTab from "./OrdersTab";
@@ -20,9 +21,10 @@ import ProductsTab from "./ProductsTab";
 import BannersTab from "./BannersTab";
 import CategoriesTab from "./CategoriesTab";
 import PaymentCardsTab from "./PaymentCardsTab";
+import BulkRequestsTab from "./BulkRequestsTab";
 import AdminNotifications from "./AdminNotifications";
 
-type Tab = "orders" | "products" | "categories" | "banners" | "payment-cards";
+type Tab = "orders" | "products" | "categories" | "banners" | "payment-cards" | "bulk-requests";
 
 export default function AdminPanel() {
   const auth = useAuth();
@@ -166,6 +168,21 @@ export default function AdminPanel() {
             )}
             <CreditCard className="w-4 h-4" /> To'lov kartalari
           </button>
+          <button
+            onClick={() => setTab("bulk-requests")}
+            className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+              tab === "bulk-requests" ? "text-white" : "text-ink/50 hover:text-ink"
+            }`}
+          >
+            {tab === "bulk-requests" && (
+              <motion.span
+                layoutId="admin-tab-pill"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                className="absolute inset-0 bg-brand-500 rounded-lg -z-10"
+              />
+            )}
+            <Handshake className="w-4 h-4" /> Hamkorlik so'rovlari
+          </button>
         </div>
       </header>
 
@@ -175,6 +192,7 @@ export default function AdminPanel() {
         {tab === "categories" && <CategoriesTab />}
         {tab === "banners" && <BannersTab />}
         {tab === "payment-cards" && <PaymentCardsTab />}
+        {tab === "bulk-requests" && <BulkRequestsTab />}
       </main>
     </div>
   );

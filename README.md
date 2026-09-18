@@ -282,6 +282,18 @@ Bu funksiya ishlashi uchun **[SMS xabarnomalarni sozlash](#sms-xabarnomalarni-so
 bo'limidagi qadamlarni ham bajarishingiz kerak (Eskiz.uz hisobi, muhit o'zgaruvchilari,
 cron sozlash) — aks holda ro'yxatdan o'tish (SMS kod tasdiqlash) ishlamaydi.
 
+### 2.14-qadam: Hamkorlik so'rovlarini admin panelda ko'rish (o'n beshinchi migratsiya)
+
+1. **SQL Editor**'da yana **New query** tugmasini bosing.
+2. `supabase/migrations/0015_bulk_requests_admin_read.sql` faylining **butun mazmunini**
+   nusxalab joylashtiring.
+3. **Run** tugmasini bosing.
+
+Bu skript `bulk_requests` jadvaliga faqat admin uchun **SELECT** (o'qish) siyosatini
+qo'shadi — shundan keyin "Hamkorlik" bo'limidan kelgan so'rovlar admin panelidagi
+**"Hamkorlik so'rovlari"** bo'limida ko'rinadi. Oddiy mijozlar hamon bu ma'lumotlarni
+o'qiy olmaydi.
+
 ## 3-qadam: Email tasdiqlashni o'chirish (muhim!)
 
 Sayt telefon raqam + parol orqali ro'yxatdan o'tkazadi (email so'ramaydi), shuning uchun Supabase'ning
@@ -418,9 +430,10 @@ ishlaydi:**
   o'zgaruvchisi sifatida saqlanadi, Next.js buni avtomatik himoya qiladi) va hech qachon "use
   client" componentga import qilinmaydi (qarang: `lib/supabase/admin.ts`, `lib/eskiz.ts`).
 - **Barcha ma'lumot almashinuvi HTTPS orqali** (Supabase va Vercel buni standart ravishda ta'minlaydi).
-- `bulk_requests` jadvalida atayin faqat **INSERT** (yozish) siyosati bor, **SELECT** (o'qish) yo'q —
-  ya'ni hamkorlik so'rovlarini faqat siz (Supabase boshqaruv paneli orqali) ko'ra olasiz, saytdan
-  hech kim boshqa birovning so'rovini o'qiy olmaydi.
+- `bulk_requests` jadvalida mijozlar uchun faqat **INSERT** (yozish) siyosati bor — ular boshqa
+  hech kimning so'rovini o'qiy olmaydi. **SELECT** (o'qish) esa faqat admin uchun ochiq (qarang:
+  2.14-qadam) — shuning uchun hamkorlik so'rovlari admin panelida ko'rinadi, lekin oddiy
+  mijozlar uchun yopiq.
 
 ## Ro'yxatdan o'tish qanday ishlaydi
 
@@ -536,6 +549,12 @@ Faqat `profiles.is_admin = true` bo'lgan hisoblar kira oladi (qarang: 2.2-qadam)
 - Mijozlar "Karta orqali" to'lovni tanlaganda ko'rsatiladigan karta(lar)ni boshqarish
 - Bank nomi, karta egasi va raqamini kiritib yangi karta qo'shish
 - Kartani vaqtincha yashirish (mijozlarga ko'rsatilmay turadi) yoki butunlay o'chirish
+
+**"Hamkorlik so'rovlari" bo'limi:**
+- Bosh sahifadagi "Hamkorlik" formasi orqali qoldirilgan barcha so'rovlar ro'yxati
+  (tashkilot nomi, telefon raqami, oylik aylanma)
+- Tashkilot yoki telefon raqam bo'yicha qidirish
+- Telefon raqamiga bosib to'g'ridan-to'g'ri qo'ng'iroq qilish
 
 ## Profil sahifasi
 
