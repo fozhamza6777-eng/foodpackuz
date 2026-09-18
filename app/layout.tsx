@@ -6,6 +6,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { LikesProvider } from "@/components/LikesProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { CategoryLabelsProvider } from "@/components/CategoryLabelsProvider";
+import { CatalogFilterProvider } from "@/components/CatalogFilterProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const display = Sora({
@@ -65,11 +66,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ServiceWorkerRegister />
         <LanguageProvider>
           <CategoryLabelsProvider>
-            <AuthProvider>
-              <LikesProvider>
-                <CartProvider>{children}</CartProvider>
-              </LikesProvider>
-            </AuthProvider>
+            <CatalogFilterProvider>
+              <AuthProvider>
+                <LikesProvider>
+                  <CartProvider>{children}</CartProvider>
+                </LikesProvider>
+              </AuthProvider>
+            </CatalogFilterProvider>
           </CategoryLabelsProvider>
         </LanguageProvider>
       </body>

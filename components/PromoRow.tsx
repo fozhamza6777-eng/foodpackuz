@@ -8,6 +8,7 @@ import ProductCard from "./ProductCard";
 import ProductDetailModal from "./ProductDetailModal";
 import AuthModal from "./AuthModal";
 import { useLanguage } from "./LanguageProvider";
+import { useCatalogFilter } from "./CatalogFilterProvider";
 
 export default function PromoRow({
   id,
@@ -19,6 +20,7 @@ export default function PromoRow({
   products: Product[];
 }) {
   const { t } = useLanguage();
+  const { goToCategory } = useCatalogFilter();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<Product | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -85,6 +87,10 @@ export default function PromoRow({
 
           <a
             href="#katalog"
+            onClick={(e) => {
+              e.preventDefault();
+              goToCategory("Barchasi");
+            }}
             className="min-w-[160px] scroll-snap-item flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ink/15 text-ink/50 hover:text-brand-500 hover:border-brand-300 transition-colors font-bold text-sm"
           >
             {t("promo.view_all")}

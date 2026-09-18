@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { Product } from "@/lib/types";
@@ -10,6 +10,7 @@ import CategoryFilter from "./CategoryFilter";
 import ProductDetailModal from "./ProductDetailModal";
 import AuthModal from "./AuthModal";
 import { useLanguage } from "./LanguageProvider";
+import { useCatalogFilter } from "./CatalogFilterProvider";
 
 type SortOption = "popular" | "price_asc" | "price_desc";
 
@@ -23,17 +24,20 @@ const perPageOptions = [12, 24, 48];
 
 export default function ProductGrid({ products, categories }: { products: Product[]; categories: Category[] }) {
   const { t } = useLanguage();
-  const [active, setActive] = useState<string>("Barchasi");
+  const { activeCategory, setActiveCategory } = useCatalogFilter();
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [perPage, setPerPage] = useState<number>(24);
   const [page, setPage] = useState(1);
   const [sortOpen, setSortOpen] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
+  const stickySentinelRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(
-    () => (active === "Barchasi" ? products : products.filter((p) => p.categories.includes(active))),
-    [active, products]
+    () =>
+      activeCategory === "Barchasi" ? products : products.filter((p) => p.categories.includes(activeCategory)),
+    [activeCategory, products]
   );
 
   const sorted = useMemo(() => {
@@ -56,7 +60,21 @@ export default function ProductGrid({ products, categories }: { products: Produc
 
   useEffect(() => {
     setPage(1);
-  }, [active, sortBy, perPage]);
+  }, [activeCategory, sortBy, perPage]);
+
+  // Kategoriya panelini "yopishtirilgan" (sticky) holatga o'tganida ixcham
+  // ko'rinishga almashtiradi — foydalanuvchi katalogni ko'rishni boshlashi
+  // bilanoq (sarlavha matnidan o'tgach) panel darhol ixchamlashadi.
+  useEffect(() => {
+    const sentinel = stickySentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(([entry]) => setIsCompact(!entry.isIntersecting), {
+      rootMargin: "-73px 0px 0px 0px",
+      threshold: 0
+    });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
 
   const goToPage = (p: number) => {
     setPage(p);
@@ -78,10 +96,15 @@ export default function ProductGrid({ products, categories }: { products: Produc
           <p className="max-w-sm text-ink/50 text-sm font-medium">{t("grid.description")}</p>
         </div>
 
-        <div className="mb-7 sticky top-[72px] z-20 py-3 bg-white/95 backdrop-blur border-b border-ink/8">
+        <div ref={stickySentinelRef} />
+        <div
+          className={`mb-7 sticky top-[72px] z-20 bg-white/95 backdrop-blur border-b transition-[padding,box-shadow] duration-200 ${
+            isCompact ? "py-1.5 border-ink/10 shadow-card" : "py-3 border-ink/8"
+          }`}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <CategoryFilter active={active} onChange={setActive} categories={categories} />
+              <CategoryFilter active={activeCategory} onChange={setActiveCategory} categories={categories} />
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
@@ -123,19 +146,21 @@ export default function ProductGrid({ products, categories }: { products: Produc
                 </AnimatePresence>
               </div>
 
-              <div className="hidden sm:flex items-center gap-1 border border-ink/15 rounded-lg p-1">
-                {perPageOptions.map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setPerPage(n)}
-                    className={`px-2.5 py-1 rounded-md text-xs font-bold transition-colors ${
-                      perPage === n ? "bg-ink text-white" : "text-ink/50 hover:bg-surface"
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
+              {!isCompact && (
+                <div className="hidden sm:flex items-center gap-1 border border-ink/15 rounded-lg p-1">
+                  {perPageOptions.map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setPerPage(n)}
+                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-colors ${
+                        perPage === n ? "bg-ink text-white" : "text-ink/50 hover:bg-surface"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

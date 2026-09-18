@@ -8,9 +8,11 @@ import Counter from "./Counter";
 import type { Banner } from "@/lib/supabase/banners";
 import type { Category } from "@/lib/supabase/categories";
 import { useLanguage } from "./LanguageProvider";
+import { useCatalogFilter } from "./CatalogFilterProvider";
 
 export default function Hero({ banners, categories }: { banners: Banner[]; categories: Category[] }) {
   const { t, tr } = useLanguage();
+  const { goToCategory } = useCatalogFilter();
   const fallbackBanner: Banner = {
     id: "fallback",
     tag: "FOOD BOX",
@@ -173,6 +175,10 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
               <motion.a
                 key={c.id}
                 href="#katalog"
+                onClick={(e) => {
+                  e.preventDefault();
+                  goToCategory(c.name);
+                }}
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

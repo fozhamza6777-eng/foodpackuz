@@ -12,6 +12,7 @@ import FavoritesDrawer from "./FavoritesDrawer";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLikes } from "./LikesProvider";
 import { useLanguage } from "./LanguageProvider";
+import { useCatalogFilter } from "./CatalogFilterProvider";
 import type { Category } from "@/lib/supabase/categories";
 
 const navLinks = [
@@ -32,6 +33,7 @@ export default function Header({ categories }: { categories: Category[] }) {
   const { totalCount, totalSum, openCart, lastAdded } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { t, tr } = useLanguage();
+  const { goToCategory } = useCatalogFilter();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -78,7 +80,11 @@ export default function Header({ categories }: { categories: Category[] }) {
                     <motion.a
                       key={c.id}
                       href="#katalog"
-                      onClick={() => setCatalogOpen(false)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCatalogOpen(false);
+                        goToCategory(c.name);
+                      }}
                       initial={{ opacity: 0, x: -6 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.03 }}
@@ -221,7 +227,16 @@ export default function Header({ categories }: { categories: Category[] }) {
               </div>
               <p className="text-xs uppercase tracking-wide text-ink/40 mb-1 mt-1">{t("header.catalog")}</p>
               {categories.map((c) => (
-                  <a key={c.id} href="#katalog" onClick={() => setMenuOpen(false)} className="py-2 text-ink/80">
+                  <a
+                    key={c.id}
+                    href="#katalog"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMenuOpen(false);
+                      goToCategory(c.name);
+                    }}
+                    className="py-2 text-ink/80"
+                  >
                     {tr(c.name, c.nameRu)}
                   </a>
                 ))}
