@@ -163,10 +163,12 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
           ))}
         </div>
 
-        {/* tezkor kategoriyalar */}
+        {/* tezkor kategoriyalar — dizaynni saqlab qolish uchun faqat birinchi
+            7 ta asosiy bo'lim ko'rsatiladi; qolganlari header'dagi "Katalog"
+            tugmasi orqali to'liq ro'yxatda ko'rinadi */}
         {categories.length > 0 && (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-3 md:gap-4 mt-8 mb-4">
-            {categories.map((c, i) => (
+            {categories.slice(0, 7).map((c, i) => (
               <motion.a
                 key={c.id}
                 href="#katalog"
