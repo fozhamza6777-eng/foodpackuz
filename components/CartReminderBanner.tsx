@@ -5,12 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, X } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { useAuth } from "./AuthProvider";
+import { useLanguage } from "./LanguageProvider";
 
 interface Stage {
   key: string;
   ms: number;
   emoji: string;
-  messages: string[];
+  messageKeys: string[];
 }
 
 const STAGES: Stage[] = [
@@ -18,44 +19,33 @@ const STAGES: Stage[] = [
     key: "2h",
     ms: 2 * 60 * 60 * 1000,
     emoji: "🛒",
-    messages: [
-      "Savatingiz sizni sog'indi! Mahsulotlar hali ham u yerda kutib turibdi.",
-      "Hey, savatchangizda bir nechta mahsulot yolg'iz qolib ketdi. Ularni uyiga (rasmiylashtirishga) olib ketasizmi?"
-    ]
+    messageKeys: ["reminder.2h_1", "reminder.2h_2"]
   },
   {
     key: "24h",
     ms: 24 * 60 * 60 * 1000,
     emoji: "😴",
-    messages: [
-      "Kechagi savatingiz hali ham tayyor turibdi... juda sabrli ekan!",
-      "Bir kun o'tdi, savatingiz esa hamon sizni kutmoqda. Yakunlab qo'yaylikmi?"
-    ]
+    messageKeys: ["reminder.24h_1", "reminder.24h_2"]
   },
   {
     key: "7d",
     ms: 7 * 24 * 60 * 60 * 1000,
     emoji: "📦",
-    messages: [
-      "Bir haftadan beri savatingiz \"meni unutmang\" deb pichirlab turibdi.",
-      "7 kun o'tdi! Savatingizdagi mahsulotlar sizni sog'inib, sabr kosasi to'lay deb qolgan."
-    ]
+    messageKeys: ["reminder.7d_1", "reminder.7d_2"]
   },
   {
     key: "30d",
     ms: 30 * 24 * 60 * 60 * 1000,
     emoji: "🗓️",
-    messages: [
-      "30 kun! Savatingiz endi deyarli oilaviy xotiraga aylandi. Yangilab, nihoyasiga yetkazaylikmi?",
-      "Bir oy avval boshlagan xaridingiz hali tugamagan — ehtimol biroz yordam kerakdir?"
-    ]
+    messageKeys: ["reminder.30d_1", "reminder.30d_2"]
   }
 ];
 
 export default function CartReminderBanner() {
   const { items, cartStartedAt, openCart } = useCart();
   const auth = useAuth();
-  const [reminder, setReminder] = useState<{ emoji: string; text: string } | null>(null);
+  const { t } = useLanguage();
+  const [reminder, setReminder] = useState<{ emoji: string; textKey: string } | null>(null);
 
   useEffect(() => {
     const userId = auth.session?.user?.id;
@@ -80,8 +70,8 @@ export default function CartReminderBanner() {
       return;
     }
 
-    const text = matched.messages[Math.floor(Math.random() * matched.messages.length)];
-    const delay = window.setTimeout(() => setReminder({ emoji: matched!.emoji, text }), 1200);
+    const textKey = matched.messageKeys[Math.floor(Math.random() * matched.messageKeys.length)];
+    const delay = window.setTimeout(() => setReminder({ emoji: matched!.emoji, textKey }), 1200);
     return () => window.clearTimeout(delay);
   }, [auth.session?.user?.id, items.length, cartStartedAt]);
 
@@ -98,7 +88,7 @@ export default function CartReminderBanner() {
           <div className="bg-white rounded-xl shadow-2xl border border-ink/8 p-4 flex items-start gap-3">
             <span className="text-2xl shrink-0">{reminder.emoji}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-ink leading-snug">{reminder.text}</p>
+              <p className="text-sm font-semibold text-ink leading-snug">{t(reminder.textKey)}</p>
               <button
                 onClick={() => {
                   openCart();
@@ -106,13 +96,13 @@ export default function CartReminderBanner() {
                 }}
                 className="mt-2 inline-flex items-center gap-1.5 bg-brand-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-brand-600 transition-colors"
               >
-                <ShoppingBag className="w-3.5 h-3.5" /> Savatni ko'rish
+                <ShoppingBag className="w-3.5 h-3.5" /> {t("reminder.view_cart")}
               </button>
             </div>
             <button
               onClick={() => setReminder(null)}
               className="p-1 text-ink/30 hover:text-ink/60 shrink-0"
-              aria-label="Yopish"
+              aria-label={t("common.close")}
             >
               <X className="w-4 h-4" />
             </button>

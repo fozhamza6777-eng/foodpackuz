@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Phone, Clock } from "lucide-react";
+import { useLanguage } from "./LanguageProvider";
 
 const branches = [
   {
@@ -13,7 +14,13 @@ const branches = [
   { city: "Qo'qon", address: "Rais mahallasi, 2-uy", phone: "+998 91 382 83 83" }
 ];
 
+const cityLabelKeys: Record<string, string> = {
+  "Toshkent": "topbar.city_tashkent",
+  "Qo'qon": "topbar.city_qoqon"
+};
+
 export default function Branches() {
+  const { t } = useLanguage();
   const [active, setActive] = useState(0);
 
   return (
@@ -21,10 +28,10 @@ export default function Branches() {
       <div className="mx-auto max-w-5xl px-5 lg:px-8">
         <div className="text-center mb-10">
           <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-brand-500">
-            Filiallar
+            {t("branches.eyebrow")}
           </span>
           <h2 className="font-display font-extrabold text-2xl md:text-[32px] text-ink mt-1">
-            Sizga yaqin filialni tanlang
+            {t("branches.heading")}
           </h2>
         </div>
 
@@ -44,7 +51,7 @@ export default function Branches() {
                   className="absolute inset-0 bg-brand-500 rounded-lg -z-10"
                 />
               )}
-              {b.city}
+              {t(cityLabelKeys[b.city])}
             </button>
           ))}
         </div>
@@ -61,22 +68,22 @@ export default function Branches() {
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-bold text-ink/40 uppercase mb-1">Manzil</p>
+                <p className="text-xs font-bold text-ink/40 uppercase mb-1">{t("branches.address")}</p>
                 <p className="font-semibold text-sm text-ink">{branches[active].address}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Phone className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-bold text-ink/40 uppercase mb-1">Telefon</p>
+                <p className="text-xs font-bold text-ink/40 uppercase mb-1">{t("branches.phone")}</p>
                 <p className="font-semibold text-sm text-ink">{branches[active].phone}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Clock className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-bold text-ink/40 uppercase mb-1">Ish vaqti</p>
-                <p className="font-semibold text-sm text-ink">Har kuni 09:00–18:00</p>
+                <p className="text-xs font-bold text-ink/40 uppercase mb-1">{t("branches.hours")}</p>
+                <p className="font-semibold text-sm text-ink">{t("topbar.hours")}</p>
               </div>
             </div>
           </motion.div>

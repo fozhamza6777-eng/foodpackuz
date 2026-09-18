@@ -2,38 +2,25 @@
 
 import { motion } from "framer-motion";
 import { Truck, ShieldCheck, FileCheck2, Wallet } from "lucide-react";
+import { useLanguage } from "./LanguageProvider";
 
 const items = [
-  {
-    icon: Truck,
-    title: "Bepul yetkazib berish",
-    text: "Toshkent va Qo'qon bo'ylab kuni bilan, 10 000 so'mdan yuqori buyurtmalarga"
-  },
-  {
-    icon: FileCheck2,
-    title: "7 yillik tajriba",
-    text: "HoReCa sohasida ulgurji va chakana savdo bo'yicha"
-  },
-  {
-    icon: ShieldCheck,
-    title: "QQS bilan ishlaymiz",
-    text: "To'liq hisobot hujjatlari paketini taqdim etamiz"
-  },
-  {
-    icon: Wallet,
-    title: "Qabul qilishda to'lov",
-    text: "Kuryerga naqd yoki karta orqali to'lash imkoniyati"
-  }
+  { icon: Truck, titleKey: "trust.free_delivery_title", textKey: "trust.free_delivery_text" },
+  { icon: FileCheck2, titleKey: "trust.experience_title", textKey: "trust.experience_text" },
+  { icon: ShieldCheck, titleKey: "trust.vat_title", textKey: "trust.vat_text" },
+  { icon: Wallet, titleKey: "trust.payment_title", textKey: "trust.payment_text" }
 ];
 
 export default function TrustBadges() {
+  const { t } = useLanguage();
+
   return (
     <section id="nega-biz" className="py-12 md:py-16">
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
           {items.map((it, i) => (
             <motion.div
-              key={it.title}
+              key={it.titleKey}
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
@@ -45,8 +32,8 @@ export default function TrustBadges() {
                 <it.icon className="w-5 h-5 text-brand-500" strokeWidth={2.2} />
               </span>
               <div>
-                <h3 className="font-bold text-sm text-ink mb-1">{it.title}</h3>
-                <p className="text-xs text-ink/50 font-medium leading-relaxed">{it.text}</p>
+                <h3 className="font-bold text-sm text-ink mb-1">{t(it.titleKey)}</h3>
+                <p className="text-xs text-ink/50 font-medium leading-relaxed">{t(it.textKey)}</p>
               </div>
             </motion.div>
           ))}

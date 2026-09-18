@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { Loader2, Lock, AlertCircle, ShieldCheck, Phone } from "lucide-react";
 import { useAuth } from "./AuthProvider";
+import { useLanguage } from "./LanguageProvider";
 
 type Phase = "phone" | "otp";
 
 export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => void }) {
   const auth = useAuth();
+  const { t } = useLanguage();
   const [phase, setPhase] = useState<Phase>("phone");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -45,7 +47,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
     const data = await requestCode();
     setLoading(false);
     if (!data.ok) {
-      setError(data.error ?? "Kod yuborishda xatolik yuz berdi.");
+      setError(data.error ?? t("auth.otp_send_error"));
       return;
     }
     setPhase("otp");
@@ -59,7 +61,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
     const data = await requestCode();
     setLoading(false);
     if (!data.ok) {
-      setError(data.error ?? "Kod yuborishda xatolik yuz berdi.");
+      setError(data.error ?? t("auth.otp_send_error"));
       return;
     }
     startCooldown();
@@ -78,7 +80,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
     const verifyData = await verifyRes.json();
     if (!verifyData.ok) {
       setLoading(false);
-      setError(verifyData.error ?? "Kod noto'g'ri.");
+      setError(verifyData.error ?? t("auth.otp_code_wrong"));
       return;
     }
 
@@ -90,7 +92,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
     const resetData = await resetRes.json();
     if (!resetData.ok) {
       setLoading(false);
-      setError(resetData.error ?? "Parolni tiklashda xatolik yuz berdi.");
+      setError(resetData.error ?? t("auth.reset_error"));
       return;
     }
 
@@ -109,8 +111,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
         <div className="flex items-start gap-3 bg-brand-50 border border-brand-100 rounded-xl p-4">
           <ShieldCheck className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
           <p className="text-sm text-ink/70 font-medium leading-relaxed">
-            <span className="font-bold">{phone}</span> raqamiga tasdiqlash kodi yuborildi. Kodni va yangi
-            parolingizni kiriting.
+            <span className="font-bold">{phone}</span> {t("auth.otp_sent_reset")}
           </p>
         </div>
 
@@ -122,7 +123,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
         )}
 
         <div>
-          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tasdiqlash kodi</label>
+          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.otp_code")}</label>
           <input
             required
             autoFocus
@@ -136,7 +137,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
         </div>
 
         <div>
-          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Yangi parol</label>
+          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.new_password")}</label>
           <div className="relative mt-1">
             <input
               required
@@ -144,7 +145,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-              placeholder="Kamida 6 ta belgi"
+              placeholder={t("auth.password_placeholder")}
               minLength={6}
             />
             <Lock className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -157,7 +158,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
           className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-          {loading ? "Yangilanmoqda..." : "Parolni yangilash"}
+          {loading ? t("auth.updating") : t("auth.update_password")}
         </button>
 
         <div className="flex items-center justify-between text-sm">
@@ -170,7 +171,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
             }}
             className="font-medium text-ink/40 hover:text-ink/60"
           >
-            Raqamni tahrirlash
+            {t("auth.edit_phone")}
           </button>
           <button
             type="button"
@@ -178,7 +179,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
             disabled={resendCooldown > 0 || loading}
             className="font-bold text-brand-600 disabled:text-ink/30 disabled:cursor-not-allowed"
           >
-            {resendCooldown > 0 ? `Qayta yuborish (${resendCooldown}s)` : "Kodni qayta yuborish"}
+            {resendCooldown > 0 ? `${t("auth.resend_in")} (${resendCooldown}s)` : t("auth.resend_code")}
           </button>
         </div>
       </form>
@@ -194,7 +195,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
         </div>
       )}
       <div>
-        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Telefon raqam</label>
+        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.phone")}</label>
         <div className="relative mt-1">
           <input
             required
@@ -206,9 +207,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
           />
           <Phone className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
-        <p className="text-xs text-ink/40 mt-1.5">
-          Ro'yxatdan o'tgan telefon raqamingizga tasdiqlash kodi yuboriladi.
-        </p>
+        <p className="text-xs text-ink/40 mt-1.5">{t("auth.reset_phone_hint")}</p>
       </div>
       <button
         type="submit"
@@ -216,7 +215,7 @@ export default function ForgotPasswordForm({ onSuccess }: { onSuccess: () => voi
         className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        {loading ? "Yuborilmoqda..." : "Kodni SMS orqali olish"}
+        {loading ? t("common.sending") : t("auth.get_code")}
       </button>
     </form>
   );

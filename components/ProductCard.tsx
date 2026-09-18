@@ -9,6 +9,7 @@ import { useLikes } from "./LikesProvider";
 import { useAuth } from "./AuthProvider";
 import ProductImage from "./ProductImage";
 import ProductInfoBadge from "./ProductInfoBadge";
+import { useLanguage } from "./LanguageProvider";
 
 export default function ProductCard({
   product,
@@ -24,6 +25,7 @@ export default function ProductCard({
   const { addItem, items } = useCart();
   const { isLiked, toggleLike } = useLikes();
   const auth = useAuth();
+  const { t } = useLanguage();
   const [packQty, setPackQty] = useState(1);
   const [unitMode, setUnitMode] = useState<"pack" | "carton">("pack");
   const [cartUnitMode, setCartUnitMode] = useState<"pack" | "carton">("pack");
@@ -35,10 +37,10 @@ export default function ProductCard({
   const cartItem = items.find((i) => i.product.id === product.id);
   const hasCarton = !!product.cartonSize;
   const unitSize = unitMode === "carton" && product.cartonSize ? product.cartonSize : product.packSize;
-  const unitLabel = unitMode === "carton" ? "karobka" : "pachka";
+  const unitLabel = t(unitMode === "carton" ? "product.carton" : "product.pack").toLowerCase();
   const cartDona = cartItem ? cartItem.qty : 0;
   const cartUnitSize = cartUnitMode === "carton" && product.cartonSize ? product.cartonSize : product.packSize;
-  const cartUnitLabel = cartUnitMode === "carton" ? "karobka" : "pachka";
+  const cartUnitLabel = t(cartUnitMode === "carton" ? "product.carton" : "product.pack").toLowerCase();
   const cartUnitQty = Math.round(cartDona / cartUnitSize);
   const unitPrice = product.price * unitSize;
   const oldUnitPrice = product.oldPrice ? product.oldPrice * unitSize : undefined;
@@ -92,7 +94,7 @@ export default function ProductCard({
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start">
           {product.isNew && (
             <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase bg-brand-500 text-white px-2 py-1 rounded-md">
-              <Sparkles className="w-3 h-3" /> Yangi
+              <Sparkles className="w-3 h-3" /> {t("product.new")}
             </span>
           )}
           {discount > 0 && (
@@ -106,14 +108,14 @@ export default function ProductCard({
         <button
           onClick={handleToggleLike}
           className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 shadow-sm flex items-center justify-center hover:scale-110 transition-transform"
-          aria-label="Yoqtirish"
+          aria-label={t("product.like")}
         >
           <Heart className={`w-3.5 h-3.5 ${liked ? "fill-danger text-danger" : "text-ink/40"}`} />
         </button>
 
         {cartDona > 0 && (
           <div className="absolute bottom-0 inset-x-0 flex items-center justify-center gap-1.5 bg-success text-white text-xs font-extrabold uppercase py-1.5 px-2 text-center">
-            <PackageCheck className="w-3.5 h-3.5 shrink-0" /> Savatda: {cartUnitQty} {cartUnitLabel} ({cartDona}{" "}
+            <PackageCheck className="w-3.5 h-3.5 shrink-0" /> {t("product.in_cart")}: {cartUnitQty} {cartUnitLabel} ({cartDona}{" "}
             {product.unit})
           </div>
         )}
@@ -130,8 +132,11 @@ export default function ProductCard({
         </h3>
         <p className="text-xs text-ink/45 font-medium mb-3">
           {product.sizes[0]}
-          {product.sizes.length > 1 ? ` +${product.sizes.length - 1}` : ""} · qadoq {product.packSize} {product.unit}
-          {product.cartonSize ? ` · karobka ${product.cartonSize} ${product.unit}` : ""}
+          {product.sizes.length > 1 ? ` +${product.sizes.length - 1}` : ""} · {t("product.package_size_label")}{" "}
+          {product.packSize} {product.unit}
+          {product.cartonSize
+            ? ` · ${t("product.carton").toLowerCase()} ${product.cartonSize} ${product.unit}`
+            : ""}
         </p>
 
         <div className="mt-auto">
@@ -148,7 +153,7 @@ export default function ProductCard({
                     : "border-ink/15 text-ink/50 hover:border-ink/30"
                 }`}
               >
-                Pachka ({product.packSize})
+                {t("product.pack")} ({product.packSize})
               </button>
               <button
                 onClick={() => {
@@ -161,7 +166,7 @@ export default function ProductCard({
                     : "border-ink/15 text-ink/50 hover:border-ink/30"
                 }`}
               >
-                Karobka ({product.cartonSize})
+                {t("product.carton")} ({product.cartonSize})
               </button>
             </div>
           )}
@@ -172,7 +177,7 @@ export default function ProductCard({
                 {unitPrice.toLocaleString("uz-UZ")}
               </span>
               <span className="text-xs font-semibold text-ink/40">
-                so'm / {unitLabel} ({unitSize} {product.unit})
+                {t("common.som")} / {unitLabel} ({unitSize} {product.unit})
               </span>
               {oldUnitPrice && (
                 <span className="text-xs font-semibold text-ink/35 line-through">
@@ -182,7 +187,7 @@ export default function ProductCard({
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-[11px] font-semibold text-ink/45">
-                ({product.price.toLocaleString("uz-UZ")} so'm/{product.unit})
+                ({product.price.toLocaleString("uz-UZ")} {t("common.som")}/{product.unit})
               </span>
             </div>
           </div>
@@ -192,7 +197,7 @@ export default function ProductCard({
               <button
                 onClick={() => setPackQty((q) => Math.max(1, q - 1))}
                 className="p-2 hover:bg-surface active:scale-90 transition-transform"
-                aria-label="Kamaytirish"
+                aria-label={t("product.decrease")}
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -202,7 +207,7 @@ export default function ProductCard({
               <button
                 onClick={() => setPackQty((q) => q + 1)}
                 className="p-2 hover:bg-surface active:scale-90 transition-transform"
-                aria-label="Ko'paytirish"
+                aria-label={t("product.increase")}
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -217,12 +222,12 @@ export default function ProductCard({
             >
               {cartDona > 0 ? (
                 <>
-                  <Check className="w-3.5 h-3.5" /> Qo'shildi
+                  <Check className="w-3.5 h-3.5" /> {t("product.added")}
                 </>
               ) : (
                 <>
                   <ShoppingBag className="w-3.5 h-3.5" />
-                  Savatga
+                  {t("product.add_to_cart")}
                 </>
               )}
             </motion.button>

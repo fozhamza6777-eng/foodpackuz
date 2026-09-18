@@ -1,31 +1,34 @@
+"use client";
+
 import { AlertTriangle, Truck, Plane, Wrench, LucideIcon } from "lucide-react";
+import { useLanguage } from "./LanguageProvider";
 
 interface BadgeConfig {
   icon: LucideIcon;
   className: string;
-  defaultText: string;
+  defaultTextKey: string;
 }
 
 const CONFIG: Record<string, BadgeConfig> = {
   low_stock: {
     icon: AlertTriangle,
     className: "bg-danger/10 text-danger border-danger/20",
-    defaultText: "Tugab qolyapti"
+    defaultTextKey: "badge.low_stock"
   },
   ships_in: {
     icon: Truck,
     className: "bg-brand-50 text-brand-600 border-brand-100",
-    defaultText: "Bir necha kunda yetkaziladi"
+    defaultTextKey: "badge.ships_in"
   },
   imported: {
     icon: Plane,
     className: "bg-purple-50 text-purple-600 border-purple-100",
-    defaultText: "Chet eldan olib kelinadi"
+    defaultTextKey: "badge.imported"
   },
   manufacturing: {
     icon: Wrench,
     className: "bg-amber-light text-amber border-amber/30",
-    defaultText: "Ishlab chiqarilmoqda"
+    defaultTextKey: "badge.manufacturing"
   }
 };
 
@@ -38,6 +41,7 @@ export default function ProductInfoBadge({
   text?: string;
   className?: string;
 }) {
+  const { t } = useLanguage();
   if (!type || !CONFIG[type]) return null;
   const cfg = CONFIG[type];
   const Icon = cfg.icon;
@@ -47,7 +51,7 @@ export default function ProductInfoBadge({
         className ?? ""
       }`}
     >
-      <Icon className="w-3 h-3" /> {text || cfg.defaultText}
+      <Icon className="w-3 h-3" /> {text || t(cfg.defaultTextKey)}
     </span>
   );
 }

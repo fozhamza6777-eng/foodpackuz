@@ -1,6 +1,11 @@
+"use client";
+
 import { Phone, Mail, MapPin, Instagram, Send, Smartphone } from "lucide-react";
+import { useLanguage } from "./LanguageProvider";
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer id="aloqa" className="bg-white border-t border-ink/8">
       {/* ilova banneri */}
@@ -11,10 +16,8 @@ export default function Footer() {
               <Smartphone className="w-6 h-6" />
             </span>
             <div>
-              <h3 className="font-display font-extrabold text-lg">FOOD BOX ilovasi doim yoningizda</h3>
-              <p className="text-white/60 text-sm font-medium mt-0.5">
-                Buyurtmalarni telefoningizdan kuzating va tezroq qayta buyurtma bering.
-              </p>
+              <h3 className="font-display font-extrabold text-lg">{t("footer.app_title")}</h3>
+              <p className="text-white/60 text-sm font-medium mt-0.5">{t("footer.app_text")}</p>
             </div>
           </div>
           <div className="flex gap-3 shrink-0">
@@ -35,48 +38,45 @@ export default function Footer() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.svg" alt="FOOD BOX" className="h-10 w-auto" />
             </div>
-            <p className="text-sm text-ink/50 font-medium max-w-xs">
-              Restoran, kafe va dostavka biznesi uchun bir martalik qadoqlash yechimlari. 2019 yildan beri
-              O'zbekiston bozorida.
-            </p>
+            <p className="text-sm text-ink/50 font-medium max-w-xs">{t("footer.about")}</p>
           </div>
 
           <div>
-            <h4 className="font-bold text-ink text-sm mb-4">Katalog</h4>
+            <h4 className="font-bold text-ink text-sm mb-4">{t("footer.catalog")}</h4>
             <ul className="space-y-2.5 text-sm text-ink/55 font-medium">
-              <li><a href="#katalog" className="hover:text-brand-500 transition-colors">Klamshell qutilar</a></li>
-              <li><a href="#katalog" className="hover:text-brand-500 transition-colors">Stakanlar</a></li>
-              <li><a href="#katalog" className="hover:text-brand-500 transition-colors">Pitsa qutilari</a></li>
-              <li><a href="#katalog" className="hover:text-brand-500 transition-colors">Termo konteynerlar</a></li>
+              <li><a href="#katalog" className="hover:text-brand-500 transition-colors">{t("footer.cat_clamshell")}</a></li>
+              <li><a href="#katalog" className="hover:text-brand-500 transition-colors">{t("footer.cat_cups")}</a></li>
+              <li><a href="#katalog" className="hover:text-brand-500 transition-colors">{t("footer.cat_pizza")}</a></li>
+              <li><a href="#katalog" className="hover:text-brand-500 transition-colors">{t("footer.cat_thermo")}</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-ink text-sm mb-4">Kompaniya</h4>
+            <h4 className="font-bold text-ink text-sm mb-4">{t("footer.company")}</h4>
             <ul className="space-y-2.5 text-sm text-ink/55 font-medium">
-              <li><a href="#nega-biz" className="hover:text-brand-500 transition-colors">Nega FOOD BOX</a></li>
-              <li><a href="#mijozlar" className="hover:text-brand-500 transition-colors">Mijozlar fikri</a></li>
-              <li><a href="#hamkorlik" className="hover:text-brand-500 transition-colors">Hamkorlik shartlari</a></li>
+              <li><a href="#nega-biz" className="hover:text-brand-500 transition-colors">{t("footer.why_us")}</a></li>
+              <li><a href="#mijozlar" className="hover:text-brand-500 transition-colors">{t("footer.reviews")}</a></li>
+              <li><a href="#hamkorlik" className="hover:text-brand-500 transition-colors">{t("footer.partnership_terms")}</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-ink text-sm mb-4">Aloqa</h4>
+            <h4 className="font-bold text-ink text-sm mb-4">{t("footer.contact")}</h4>
             <ul className="space-y-3 text-sm text-ink/55 font-medium">
               <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-brand-500 shrink-0" /> Toshkent: +998 95 872 83 83
+                <Phone className="w-4 h-4 text-brand-500 shrink-0" /> {t("topbar.city_tashkent")}: +998 95 872 83 83
               </li>
               <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-brand-500 shrink-0" /> Qo'qon: +998 91 382 83 83
+                <Phone className="w-4 h-4 text-brand-500 shrink-0" /> {t("topbar.city_qoqon")}: +998 91 382 83 83
               </li>
               <li className="flex items-center gap-2.5"><Mail className="w-4 h-4 text-brand-500" /> sales@foodbox.uz</li>
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" />
-                <span>Toshkent, Uchtepa tumani, O'rikzor mahallasi, Bositxon ko'chasi 85-uy</span>
+                <span>{t("topbar.city_tashkent")}, Uchtepa tumani, O'rikzor mahallasi, Bositxon ko'chasi 85-uy</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" />
-                <span>Qo'qon, Rais mahallasi, 2-uy</span>
+                <span>{t("topbar.city_qoqon")}, Rais mahallasi, 2-uy</span>
               </li>
             </ul>
             <div className="flex gap-3 mt-4">
@@ -103,8 +103,8 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-ink/8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink/40 font-medium">
-          <span>© {new Date().getFullYear()} FOOD BOX MCHJ. Barcha huquqlar himoyalangan.</span>
-          <span className="font-mono">HoReCa uchun qadoqlash yechimlari</span>
+          <span>© {new Date().getFullYear()} FOOD BOX MCHJ. {t("footer.rights")}</span>
+          <span className="font-mono">{t("footer.tagline")}</span>
         </div>
       </div>
     </footer>

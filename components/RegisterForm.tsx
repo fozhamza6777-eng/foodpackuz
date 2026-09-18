@@ -4,11 +4,13 @@ import { useState } from "react";
 import { Loader2, Building2, Lock, AlertCircle, ShieldCheck } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import TermsCheckbox from "./TermsCheckbox";
+import { useLanguage } from "./LanguageProvider";
 
 type Phase = "form" | "otp";
 
 export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   const auth = useAuth();
+  const { t } = useLanguage();
   const [phase, setPhase] = useState<Phase>("form");
   const [form, setForm] = useState({ name: "", phone: "", password: "", companyName: "" });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -42,7 +44,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!acceptedTerms) {
-      setError("Davom etish uchun Ommaviy oferta shartlariga rozilik bildirishingiz kerak.");
+      setError(t("auth.terms_required"));
       return;
     }
     setError(null);
@@ -50,7 +52,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     const data = await requestCode();
     setLoading(false);
     if (!data.ok) {
-      setError(data.error ?? "Kod yuborishda xatolik yuz berdi.");
+      setError(data.error ?? t("auth.otp_send_error"));
       return;
     }
     setPhase("otp");
@@ -64,7 +66,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     const data = await requestCode();
     setLoading(false);
     if (!data.ok) {
-      setError(data.error ?? "Kod yuborishda xatolik yuz berdi.");
+      setError(data.error ?? t("auth.otp_send_error"));
       return;
     }
     startCooldown();
@@ -83,7 +85,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     const verifyData = await verifyRes.json();
     if (!verifyData.ok) {
       setLoading(false);
-      setError(verifyData.error ?? "Kod noto'g'ri.");
+      setError(verifyData.error ?? t("auth.otp_code_wrong"));
       return;
     }
 
@@ -95,7 +97,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     const registerData = await registerRes.json();
     if (!registerData.ok) {
       setLoading(false);
-      setError(registerData.error ?? "Ro'yxatdan o'tishda xatolik yuz berdi.");
+      setError(registerData.error ?? t("auth.register_error"));
       return;
     }
 
@@ -114,7 +116,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         <div className="flex items-start gap-3 bg-brand-50 border border-brand-100 rounded-xl p-4">
           <ShieldCheck className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
           <p className="text-sm text-ink/70 font-medium leading-relaxed">
-            <span className="font-bold">{form.phone}</span> raqamiga tasdiqlash kodi yuborildi. Kodni kiriting.
+            <span className="font-bold">{form.phone}</span> {t("auth.otp_sent")}
           </p>
         </div>
 
@@ -126,7 +128,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         )}
 
         <div>
-          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tasdiqlash kodi</label>
+          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.otp_code")}</label>
           <input
             required
             autoFocus
@@ -145,7 +147,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-          {loading ? "Tekshirilmoqda..." : "Tasdiqlash va ro'yxatdan o'tish"}
+          {loading ? t("auth.checking") : t("auth.confirm_and_register")}
         </button>
 
         <div className="flex items-center justify-between text-sm">
@@ -158,7 +160,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
             }}
             className="font-medium text-ink/40 hover:text-ink/60"
           >
-            Ma'lumotlarni tahrirlash
+            {t("auth.edit_details")}
           </button>
           <button
             type="button"
@@ -166,7 +168,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
             disabled={resendCooldown > 0 || loading}
             className="font-bold text-brand-600 disabled:text-ink/30 disabled:cursor-not-allowed"
           >
-            {resendCooldown > 0 ? `Qayta yuborish (${resendCooldown}s)` : "Kodni qayta yuborish"}
+            {resendCooldown > 0 ? `${t("auth.resend_in")} (${resendCooldown}s)` : t("auth.resend_code")}
           </button>
         </div>
       </form>
@@ -182,30 +184,30 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
       )}
       <div>
-        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tashkilot nomi</label>
+        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.company_name")}</label>
         <div className="relative mt-1">
           <input
             required
             value={form.companyName}
             onChange={(e) => setForm({ ...form, companyName: e.target.value })}
             className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-            placeholder="Masalan: «Tez Osh» fast-food"
+            placeholder={t("auth.company_placeholder")}
           />
           <Building2 className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
         </div>
       </div>
       <div>
-        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Ism-familiya</label>
+        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.full_name")}</label>
         <input
           required
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-          placeholder="Ism Familiya"
+          placeholder={t("auth.full_name_placeholder")}
         />
       </div>
       <div>
-        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Telefon raqam</label>
+        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.phone")}</label>
         <input
           required
           type="tel"
@@ -216,7 +218,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div>
-        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
+        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.password")}</label>
         <div className="relative mt-1">
           <input
             required
@@ -224,7 +226,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-            placeholder="Kamida 6 ta belgi"
+            placeholder={t("auth.password_placeholder")}
             minLength={6}
           />
           <Lock className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -237,7 +239,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        {loading ? "Yuborilmoqda..." : "Kodni SMS orqali olish"}
+        {loading ? t("common.sending") : t("auth.get_code")}
       </button>
     </form>
   );

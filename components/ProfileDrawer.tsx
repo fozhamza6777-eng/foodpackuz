@@ -39,16 +39,17 @@ import { fetchActiveProducts } from "@/lib/supabase/products";
 import { fetchUserComments, deleteComment, type MyComment } from "@/lib/supabase/comments";
 import type { Product } from "@/lib/types";
 import ProductImage from "./ProductImage";
+import { useLanguage } from "./LanguageProvider";
 
 type Screen = "home" | "settings" | "orders" | "cancelled" | "reviews" | "branches";
 type GeoStatus = "idle" | "loading" | "granted" | "denied" | "error";
 
-const statusLabels: Record<string, string> = {
-  yangi: "Yangi",
-  jarayonda: "Jarayonda",
-  yetkazildi: "Yetkazildi",
-  bekor: "Bekor qilindi",
-  bekor_sorovi: "Bekor so'ralgan"
+const statusLabelKeys: Record<string, string> = {
+  yangi: "profile.status_new",
+  jarayonda: "profile.status_processing",
+  yetkazildi: "profile.status_delivered",
+  bekor: "profile.status_cancelled",
+  bekor_sorovi: "profile.status_cancel_requested"
 };
 
 const statusColors: Record<string, string> = {
@@ -61,10 +62,10 @@ const statusColors: Record<string, string> = {
 
 const CANCELLED_STATUSES = ["bekor", "bekor_sorovi"];
 
-const paymentStatusLabels: Record<string, string> = {
-  kutilmoqda: "Tekshirilmoqda",
-  tasdiqlangan: "Tasdiqlandi",
-  rad_etilgan: "Rad etildi"
+const paymentStatusLabelKeys: Record<string, string> = {
+  kutilmoqda: "profile.payment_status_pending",
+  tasdiqlangan: "profile.payment_status_confirmed",
+  rad_etilgan: "profile.payment_status_rejected"
 };
 
 const paymentStatusColors: Record<string, string> = {
@@ -101,6 +102,8 @@ export default function ProfileDrawer({
 }) {
   const auth = useAuth();
   const cart = useCart();
+  const { t, locale } = useLanguage();
+  const dateLocale = locale === "ru" ? "ru-RU" : "uz-UZ";
   const [screen, setScreen] = useState<Screen>("home");
   const [mounted, setMounted] = useState(false);
 
@@ -274,7 +277,7 @@ export default function ProfileDrawer({
   };
 
   const handleLogout = async () => {
-    if (window.confirm("Hisobingizdan chiqmoqchimisiz?")) {
+    if (window.confirm(t("profile.logout_confirm"))) {
       await auth.logout();
       handleClose();
     }
@@ -355,7 +358,7 @@ export default function ProfileDrawer({
   };
 
   const handleDeleteBranch = async (id: string) => {
-    if (!window.confirm("Bu filialni o'chirmoqchimisiz?")) return;
+    if (!window.confirm(t("profile.delete_branch_confirm"))) return;
     const { error } = await supabase.from("branches").delete().eq("id", id);
     if (!error) {
       setBranches((prev) => (prev ? prev.filter((b) => b.id !== id) : prev));
@@ -364,7 +367,7 @@ export default function ProfileDrawer({
 
   const handleCancelWithReason = async (order: OrderRow) => {
     if (!cancelReasonText.trim()) {
-      setCancelError("Iltimos, sababni yozing.");
+      setCancelError(t("profile.cancel_reason_required"));
       return;
     }
     setCancelSubmitting(true);
@@ -375,7 +378,7 @@ export default function ProfileDrawer({
       .eq("id", order.id);
     setCancelSubmitting(false);
     if (error) {
-      setCancelError("Xatolik yuz berdi, qaytadan urinib ko'ring.");
+      setCancelError(t("profile.cancel_error"));
       return;
     }
     setOrders((prev) =>
@@ -424,9 +427,7 @@ export default function ProfileDrawer({
 
   const handleSaveEdit = async (order: OrderRow) => {
     if (!editItems || editItems.length === 0) {
-      setEditError(
-        "Buyurtmada kamida bitta mahsulot qolishi kerak. Butunlay bekor qilish uchun \"Bekor qilishni so'rash\"dan foydalaning."
-      );
+      setEditError(t("profile.edit_min_item_error"));
       return;
     }
     setEditSaving(true);
@@ -438,7 +439,7 @@ export default function ProfileDrawer({
       .eq("id", order.id);
     setEditSaving(false);
     if (error) {
-      setEditError("Saqlashda xatolik yuz berdi. Qaytadan urinib ko'ring.");
+      setEditError(t("profile.edit_save_error"));
       return;
     }
     setOrders((prev) =>
@@ -466,11 +467,11 @@ export default function ProfileDrawer({
     if (addedCount > 0) {
       setReorderNotice(
         missingCount > 0
-          ? `${addedCount} ta mahsulot savatga qo'shildi, ${missingCount} tasi endi mavjud emas.`
-          : `${addedCount} ta mahsulot savatga qo'shildi.`
+          ? t("profile.reorder_partial", { added: addedCount, missing: missingCount })
+          : t("profile.reorder_success", { added: addedCount })
       );
     } else {
-      setReorderNotice("Afsuski, bu buyurtmadagi mahsulotlar endi mavjud emas.");
+      setReorderNotice(t("profile.reorder_none"));
     }
 
     window.setTimeout(() => setReorderNotice(null), 3000);
@@ -484,7 +485,7 @@ export default function ProfileDrawer({
   };
 
   const handleDeleteReview = async (id: string) => {
-    if (!window.confirm("Bu sharhni o'chirmoqchimisiz?")) return;
+    if (!window.confirm(t("profile.delete_review_confirm"))) return;
     await deleteComment(id);
     setReviews((prev) => (prev ? prev.filter((r) => r.id !== id) : prev));
   };
@@ -494,11 +495,11 @@ export default function ProfileDrawer({
   const totalSpent = activeOrders.reduce((s, o) => s + o.total, 0);
 
   const screenTitles: Record<Exclude<Screen, "home">, string> = {
-    settings: "Sozlamalar",
-    orders: "Buyurtmalarim",
-    cancelled: "Bekor qilingan buyurtmalar",
-    reviews: "Sharhlarim",
-    branches: "Filiallarim"
+    settings: t("profile.screen_settings"),
+    orders: t("profile.screen_orders"),
+    cancelled: t("profile.screen_cancelled"),
+    reviews: t("profile.screen_reviews"),
+    branches: t("profile.screen_branches")
   };
 
   const renderOrderRow = (order: OrderRow) => {
@@ -516,14 +517,15 @@ export default function ProfileDrawer({
         >
           <div>
             <p className="font-bold text-sm text-ink">
-              {new Date(order.created_at).toLocaleDateString("uz-UZ", {
+              {new Date(order.created_at).toLocaleDateString(dateLocale, {
                 day: "2-digit",
                 month: "long",
                 year: "numeric"
               })}
             </p>
             <p className="text-xs text-ink/45 font-medium mt-0.5">
-              {order.items.length} mahsulot · {order.total.toLocaleString("uz-UZ")} so'm
+              {order.items.length} {t("profile.product_unit")} · {order.total.toLocaleString("uz-UZ")}{" "}
+              {t("common.som")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -532,7 +534,7 @@ export default function ProfileDrawer({
                 statusColors[order.status] ?? "bg-ink/5 text-ink/60"
               }`}
             >
-              {statusLabels[order.status] ?? order.status}
+              {statusLabelKeys[order.status] ? t(statusLabelKeys[order.status]) : order.status}
             </span>
             <motion.span animate={{ rotate: expanded ? 180 : 0 }}>
               <ChevronDown className="w-4 h-4 text-ink/40" />
@@ -557,7 +559,7 @@ export default function ProfileDrawer({
                           <button
                             onClick={() => adjustEditQty(it.id, -1)}
                             className="p-1.5 hover:bg-white"
-                            aria-label="Kamaytirish"
+                            aria-label={t("profile.decrease")}
                           >
                             <Minus className="w-3 h-3" />
                           </button>
@@ -567,18 +569,18 @@ export default function ProfileDrawer({
                           <button
                             onClick={() => adjustEditQty(it.id, 1)}
                             className="p-1.5 hover:bg-white"
-                            aria-label="Ko'paytirish"
+                            aria-label={t("profile.increase")}
                           >
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
                         <span className="font-semibold text-ink w-20 text-right shrink-0">
-                          {(it.price * it.qty).toLocaleString("uz-UZ")} so'm
+                          {(it.price * it.qty).toLocaleString("uz-UZ")} {t("common.som")}
                         </span>
                         <button
                           onClick={() => removeEditItem(it.id)}
                           className="text-ink/30 hover:text-danger transition-colors shrink-0"
-                          aria-label="O'chirish"
+                          aria-label={t("profile.remove")}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -586,8 +588,11 @@ export default function ProfileDrawer({
                     ))}
 
                     <div className="flex items-center justify-between text-sm font-bold text-ink pt-2 border-t border-ink/8 mt-1">
-                      <span>Yangi jami</span>
-                      <span>{(editItems ?? []).reduce((s, it) => s + it.price * it.qty, 0).toLocaleString("uz-UZ")} so'm</span>
+                      <span>{t("profile.new_total")}</span>
+                      <span>
+                        {(editItems ?? []).reduce((s, it) => s + it.price * it.qty, 0).toLocaleString("uz-UZ")}{" "}
+                        {t("common.som")}
+                      </span>
                     </div>
 
                     {editError && <p className="text-xs text-danger font-semibold">{editError}</p>}
@@ -598,7 +603,7 @@ export default function ProfileDrawer({
                         disabled={editSaving}
                         className="flex-1 border-2 border-ink/15 text-ink/60 font-bold text-xs py-2 rounded-lg hover:bg-ink/5 transition-colors disabled:opacity-70"
                       >
-                        Bekor qilish
+                        {t("common.cancel")}
                       </button>
                       <button
                         onClick={() => handleSaveEdit(order)}
@@ -606,7 +611,7 @@ export default function ProfileDrawer({
                         className="flex-1 flex items-center justify-center gap-1.5 bg-brand-500 text-white font-bold text-xs py-2 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70"
                       >
                         {editSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                        Saqlash
+                        {t("profile.save")}
                       </button>
                     </div>
                   </div>
@@ -618,20 +623,23 @@ export default function ProfileDrawer({
                           {it.name} × {it.qty}
                         </span>
                         <span className="font-semibold text-ink">
-                          {(it.price * it.qty).toLocaleString("uz-UZ")} so'm
+                          {(it.price * it.qty).toLocaleString("uz-UZ")} {t("common.som")}
                         </span>
                       </div>
                     ))}
                     {order.address && (
-                      <p className="text-xs text-ink/45 mt-2 pt-2 border-t border-ink/8">Manzil: {order.address}</p>
+                      <p className="text-xs text-ink/45 mt-2 pt-2 border-t border-ink/8">
+                        {t("profile.address_prefix")}: {order.address}
+                      </p>
                     )}
                     {order.payment_method && (
                       <p className="text-xs text-ink/45">
-                        To'lov: {order.payment_method === "karta" ? "Karta orqali" : "Naqd pul"}
-                        {order.payment_method === "karta" && paymentStatusLabels[order.payment_status] && (
+                        {t("profile.payment_prefix")}:{" "}
+                        {order.payment_method === "karta" ? t("profile.payment_card") : t("profile.payment_cash")}
+                        {order.payment_method === "karta" && paymentStatusLabelKeys[order.payment_status] && (
                           <span className={`font-bold ${paymentStatusColors[order.payment_status] ?? ""}`}>
                             {" "}
-                            · {paymentStatusLabels[order.payment_status]}
+                            · {t(paymentStatusLabelKeys[order.payment_status])}
                           </span>
                         )}
                       </p>
@@ -639,11 +647,13 @@ export default function ProfileDrawer({
 
                     {order.status === "bekor_sorovi" && order.cancel_reason && (
                       <p className="text-xs text-amber font-medium bg-amber-light rounded-lg p-2.5">
-                        Bekor qilish so'rovingiz ko'rib chiqilmoqda. Sabab: "{order.cancel_reason}"
+                        {t("profile.cancel_pending_note")} "{order.cancel_reason}"
                       </p>
                     )}
                     {order.status === "bekor" && order.cancel_reason && (
-                      <p className="text-xs text-ink/40 font-medium">Bekor qilish sababi: {order.cancel_reason}</p>
+                      <p className="text-xs text-ink/40 font-medium">
+                        {t("profile.cancel_reason_note")} {order.cancel_reason}
+                      </p>
                     )}
 
                     {canEditOrder(order.status) && (
@@ -652,7 +662,7 @@ export default function ProfileDrawer({
                         className="w-full flex items-center justify-center gap-2 border-2 border-brand-500/25 text-brand-600 font-bold text-xs py-2.5 rounded-lg hover:bg-brand-50 transition-colors mt-1"
                       >
                         <Pencil className="w-3.5 h-3.5" />
-                        Buyurtmani tahrirlash
+                        {t("profile.edit_order")}
                       </button>
                     )}
                   </>
@@ -662,14 +672,12 @@ export default function ProfileDrawer({
                   <div className="pt-1">
                     {cancelReasonOrderId === order.id ? (
                       <div className="flex flex-col gap-2">
-                        <p className="text-xs text-ink/50 font-medium">
-                          Nega bekor qilmoqchisiz? Sababni yozing — buni administrator ko'rib chiqadi.
-                        </p>
+                        <p className="text-xs text-ink/50 font-medium">{t("profile.cancel_reason_prompt")}</p>
                         <textarea
                           value={cancelReasonText}
                           onChange={(e) => setCancelReasonText(e.target.value)}
                           rows={2}
-                          placeholder="Nega bekor qilmoqchisiz?"
+                          placeholder={t("profile.cancel_reason_placeholder")}
                           className="w-full border border-ink/15 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
                         />
                         {cancelError && <p className="text-xs text-danger font-semibold">{cancelError}</p>}
@@ -682,7 +690,7 @@ export default function ProfileDrawer({
                             }}
                             className="flex-1 border-2 border-ink/15 text-ink/60 font-bold text-xs py-2 rounded-lg hover:bg-ink/5 transition-colors"
                           >
-                            Yopish
+                            {t("common.close")}
                           </button>
                           <button
                             onClick={() => handleCancelWithReason(order)}
@@ -690,7 +698,7 @@ export default function ProfileDrawer({
                             className="flex-1 flex items-center justify-center gap-1.5 bg-danger text-white font-bold text-xs py-2 rounded-lg hover:bg-danger/90 transition-colors disabled:opacity-70"
                           >
                             {cancelSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                            So'rovni yuborish
+                            {t("profile.send_request")}
                           </button>
                         </div>
                       </div>
@@ -701,7 +709,7 @@ export default function ProfileDrawer({
                         className="w-full flex items-center justify-center gap-2 border-2 border-danger/25 text-danger font-bold text-xs py-2.5 rounded-lg hover:bg-danger/5 transition-colors disabled:opacity-70"
                       >
                         <XCircle className="w-3.5 h-3.5" />
-                        Bekor qilishni so'rash
+                        {t("profile.request_cancel")}
                       </button>
                     )}
                   </div>
@@ -712,7 +720,7 @@ export default function ProfileDrawer({
                     onClick={() => handleReorder(order)}
                     className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-brand-600 transition-colors mt-1"
                   >
-                    <RotateCcw className="w-4 h-4" /> Qayta buyurtma qilish
+                    <RotateCcw className="w-4 h-4" /> {t("profile.reorder")}
                   </button>
                 )}
               </div>
@@ -749,15 +757,15 @@ export default function ProfileDrawer({
                   <button
                     onClick={() => setScreen("settings")}
                     className="p-2 rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
-                    aria-label="Sozlamalar"
+                    aria-label={t("profile.settings")}
                   >
                     <Settings className="w-5 h-5 text-white" />
                   </button>
-                  <span className="font-display font-extrabold text-white text-lg">Profil</span>
+                  <span className="font-display font-extrabold text-white text-lg">{t("profile.title")}</span>
                   <button
                     onClick={handleClose}
                     className="p-2 rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
-                    aria-label="Yopish"
+                    aria-label={t("common.close")}
                   >
                     <X className="w-5 h-5 text-white" />
                   </button>
@@ -788,7 +796,7 @@ export default function ProfileDrawer({
                   </button>
                   <h3 className="font-display font-extrabold text-lg text-ink">{screenTitles[screen]}</h3>
                 </div>
-                <button onClick={handleClose} aria-label="Yopish" className="p-1.5 hover:bg-surface rounded-lg">
+                <button onClick={handleClose} aria-label={t("common.close")} className="p-1.5 hover:bg-surface rounded-lg">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -803,19 +811,19 @@ export default function ProfileDrawer({
                   >
                     <div>
                       {ordersLoading && orders === null ? (
-                        <p className="font-bold text-sm text-ink/40">Yuklanmoqda...</p>
+                        <p className="font-bold text-sm text-ink/40">{t("common.loading")}</p>
                       ) : activeOrders.length === 0 ? (
                         <>
-                          <p className="font-bold text-ink">Hali buyurtma yo'q</p>
-                          <p className="text-xs text-ink/45 font-medium mt-0.5">
-                            Birinchi buyurtmangizni bering!
-                          </p>
+                          <p className="font-bold text-ink">{t("profile.no_orders_yet")}</p>
+                          <p className="text-xs text-ink/45 font-medium mt-0.5">{t("profile.first_order_hint")}</p>
                         </>
                       ) : (
                         <>
-                          <p className="font-bold text-ink">{activeOrders.length} ta buyurtma berildi</p>
+                          <p className="font-bold text-ink">
+                            {t("profile.orders_count", { count: activeOrders.length })}
+                          </p>
                           <p className="text-xs text-ink/45 font-medium mt-0.5">
-                            Jami {totalSpent.toLocaleString("uz-UZ")} so'mlik xarid qilingan
+                            {t("profile.total_spent", { sum: totalSpent.toLocaleString("uz-UZ") })}
                           </p>
                         </>
                       )}
@@ -825,18 +833,22 @@ export default function ProfileDrawer({
 
                   <div className="flex flex-col gap-1">
                     {[
-                      { icon: ShoppingBag, label: "Buyurtmalarim", onClick: () => setScreen("orders") },
-                      { icon: XCircle, label: "Bekor qilingan buyurtmalar", onClick: () => setScreen("cancelled") },
+                      { icon: ShoppingBag, label: t("profile.menu_orders"), onClick: () => setScreen("orders") },
+                      {
+                        icon: XCircle,
+                        label: t("profile.menu_cancelled"),
+                        onClick: () => setScreen("cancelled")
+                      },
                       {
                         icon: Heart,
-                        label: "Yoqtirganlarim",
+                        label: t("profile.menu_favorites"),
                         onClick: () => {
                           handleClose();
                           onOpenFavorites();
                         }
                       },
-                      { icon: MessageCircle, label: "Sharhlarim", onClick: () => setScreen("reviews") },
-                      { icon: MapPin, label: "Filiallarim", onClick: () => setScreen("branches") }
+                      { icon: MessageCircle, label: t("profile.menu_reviews"), onClick: () => setScreen("reviews") },
+                      { icon: MapPin, label: t("profile.menu_branches"), onClick: () => setScreen("branches") }
                     ].map((item) => (
                       <button
                         key={item.label}
@@ -872,7 +884,7 @@ export default function ProfileDrawer({
                         onClick={() => avatarInputRef.current?.click()}
                         disabled={avatarUploading}
                         className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-brand-500 border-2 border-white flex items-center justify-center hover:bg-brand-600 transition-colors"
-                        aria-label="Rasmni o'zgartirish"
+                        aria-label={t("profile.change_avatar")}
                       >
                         {avatarUploading ? (
                           <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
@@ -893,7 +905,7 @@ export default function ProfileDrawer({
                         onClick={handleRemoveAvatar}
                         className="text-xs text-danger font-semibold hover:underline"
                       >
-                        Rasmni olib tashlash
+                        {t("profile.remove_avatar")}
                       </button>
                     )}
                     {avatarError && <p className="text-xs text-danger font-semibold text-center">{avatarError}</p>}
@@ -901,7 +913,9 @@ export default function ProfileDrawer({
 
                   <form onSubmit={handleSaveName} className="flex flex-col gap-3">
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Ism-familiya</label>
+                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                        {t("profile.full_name")}
+                      </label>
                       <input
                         required
                         value={name}
@@ -910,7 +924,9 @@ export default function ProfileDrawer({
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tashkilot nomi</label>
+                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                        {t("profile.company_name")}
+                      </label>
                       <div className="relative mt-1">
                         <input
                           value={companyName}
@@ -921,7 +937,9 @@ export default function ProfileDrawer({
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Telefon raqam</label>
+                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                        {t("profile.phone")}
+                      </label>
                       <input
                         disabled
                         value={auth.user?.phone ?? ""}
@@ -941,16 +959,22 @@ export default function ProfileDrawer({
                     >
                       {nameStatus === "saving" && <Loader2 className="w-4 h-4 animate-spin" />}
                       {nameStatus === "saved" && <CheckCircle2 className="w-4 h-4" />}
-                      {nameStatus === "saving" ? "Saqlanmoqda..." : nameStatus === "saved" ? "Saqlandi" : "Saqlash"}
+                      {nameStatus === "saving"
+                        ? t("profile.saving")
+                        : nameStatus === "saved"
+                        ? t("profile.saved")
+                        : t("profile.save")}
                     </button>
                   </form>
 
                   <div className="h-px bg-ink/8" />
 
                   <form onSubmit={handleSaveExtra} className="flex flex-col gap-3">
-                    <h4 className="font-bold text-sm text-ink">Qo'shimcha ma'lumot (ixtiyoriy)</h4>
+                    <h4 className="font-bold text-sm text-ink">{t("profile.extra_info_title")}</h4>
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tug'ilgan sana</label>
+                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                        {t("profile.birth_date")}
+                      </label>
                       <input
                         type="date"
                         value={birthDate}
@@ -959,15 +983,17 @@ export default function ProfileDrawer({
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Jins</label>
+                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                        {t("profile.gender")}
+                      </label>
                       <select
                         value={gender}
                         onChange={(e) => setGender(e.target.value as "" | "male" | "female")}
                         className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
                       >
-                        <option value="">Ko'rsatilmagan</option>
-                        <option value="male">Erkak</option>
-                        <option value="female">Ayol</option>
+                        <option value="">{t("profile.gender_unspecified")}</option>
+                        <option value="male">{t("profile.gender_male")}</option>
+                        <option value="female">{t("profile.gender_female")}</option>
                       </select>
                     </div>
                     <button
@@ -977,7 +1003,11 @@ export default function ProfileDrawer({
                     >
                       {extraStatus === "saving" && <Loader2 className="w-4 h-4 animate-spin" />}
                       {extraStatus === "saved" && <CheckCircle2 className="w-4 h-4" />}
-                      {extraStatus === "saving" ? "Saqlanmoqda..." : extraStatus === "saved" ? "Saqlandi" : "Saqlash"}
+                      {extraStatus === "saving"
+                        ? t("profile.saving")
+                        : extraStatus === "saved"
+                        ? t("profile.saved")
+                        : t("profile.save")}
                     </button>
                   </form>
 
@@ -985,7 +1015,7 @@ export default function ProfileDrawer({
 
                   <form onSubmit={handleChangePassword} className="flex flex-col gap-3">
                     <h4 className="font-bold text-sm text-ink flex items-center gap-1.5">
-                      <Lock className="w-4 h-4" /> Parolni almashtirish
+                      <Lock className="w-4 h-4" /> {t("profile.change_password_title")}
                     </h4>
                     <input
                       required
@@ -993,7 +1023,7 @@ export default function ProfileDrawer({
                       minLength={6}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Yangi parol (kamida 6 belgi)"
+                      placeholder={t("profile.new_password_placeholder")}
                       className="w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
                     />
                     {passError && (
@@ -1010,10 +1040,10 @@ export default function ProfileDrawer({
                       {passStatus === "saving" && <Loader2 className="w-4 h-4 animate-spin" />}
                       {passStatus === "saved" && <CheckCircle2 className="w-4 h-4" />}
                       {passStatus === "saving"
-                        ? "Saqlanmoqda..."
+                        ? t("profile.saving")
                         : passStatus === "saved"
-                        ? "Parol yangilandi"
-                        : "Parolni yangilash"}
+                        ? t("profile.password_updated")
+                        : t("profile.update_password")}
                     </button>
                   </form>
 
@@ -1023,7 +1053,7 @@ export default function ProfileDrawer({
                     onClick={handleLogout}
                     className="flex items-center justify-center gap-2 text-danger font-bold py-2.5 rounded-lg hover:bg-danger/10 transition-colors"
                   >
-                    <LogOut className="w-4 h-4" /> Hisobdan chiqish
+                    <LogOut className="w-4 h-4" /> {t("profile.logout")}
                   </button>
                 </div>
               )}
@@ -1060,7 +1090,7 @@ export default function ProfileDrawer({
                           <XCircle className="w-10 h-10 mb-3" />
                         )}
                         <p className="font-semibold">
-                          {screen === "orders" ? "Hali buyurtmalar yo'q" : "Bekor qilingan buyurtma yo'q"}
+                          {screen === "orders" ? t("profile.no_orders") : t("profile.no_cancelled_orders")}
                         </p>
                       </div>
                     )}
@@ -1080,8 +1110,8 @@ export default function ProfileDrawer({
                   {reviews !== null && reviews.length === 0 && !reviewsLoading && (
                     <div className="flex flex-col items-center justify-center text-center py-16 text-ink/40">
                       <Star className="w-10 h-10 mb-3" />
-                      <p className="font-semibold">Hali sharh yozmagansiz</p>
-                      <p className="text-sm mt-1">Mahsulot sahifasida fikringizni bildiring.</p>
+                      <p className="font-semibold">{t("profile.no_reviews_yet")}</p>
+                      <p className="text-sm mt-1">{t("profile.review_hint")}</p>
                     </div>
                   )}
 
@@ -1096,14 +1126,14 @@ export default function ProfileDrawer({
                           <button
                             onClick={() => handleDeleteReview(r.id)}
                             className="text-ink/25 hover:text-danger transition-colors shrink-0"
-                            aria-label="O'chirish"
+                            aria-label={t("profile.remove")}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                         <p className="text-sm text-ink/70 leading-relaxed mt-1">{r.body}</p>
                         <p className="text-[11px] text-ink/35 mt-1">
-                          {new Date(r.createdAt).toLocaleDateString("uz-UZ")}
+                          {new Date(r.createdAt).toLocaleDateString(dateLocale)}
                         </p>
                       </div>
                     </div>
@@ -1122,8 +1152,8 @@ export default function ProfileDrawer({
                   {!branchesLoading && branches && branches.length === 0 && !showAddBranch && (
                     <div className="flex flex-col items-center justify-center text-center py-12 text-ink/40">
                       <MapPin className="w-10 h-10 mb-3" />
-                      <p className="font-semibold">Hali filiallar qo'shilmagan</p>
-                      <p className="text-sm mt-1">Bir nechta shoxobchangiz bo'lsa, shu yerdan qo'shing.</p>
+                      <p className="font-semibold">{t("profile.no_branches_yet")}</p>
+                      <p className="text-sm mt-1">{t("profile.branches_hint")}</p>
                     </div>
                   )}
 
@@ -1143,7 +1173,7 @@ export default function ProfileDrawer({
                             <p className="text-xs text-ink/45 font-medium mt-0.5">{b.address}</p>
                             {b.latitude && b.longitude && (
                               <p className="text-[11px] text-brand-600 font-semibold mt-1 flex items-center gap-1">
-                                <Navigation className="w-3 h-3" /> Geolokatsiya ulangan
+                                <Navigation className="w-3 h-3" /> {t("profile.geo_connected")}
                               </p>
                             )}
                           </div>
@@ -1151,7 +1181,7 @@ export default function ProfileDrawer({
                         <button
                           onClick={() => handleDeleteBranch(b.id)}
                           className="text-ink/30 hover:text-danger transition-colors shrink-0"
-                          aria-label="O'chirish"
+                          aria-label={t("profile.remove")}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1163,26 +1193,26 @@ export default function ProfileDrawer({
                       onClick={() => setShowAddBranch(true)}
                       className="flex items-center justify-center gap-2 border-2 border-dashed border-ink/15 text-ink/50 hover:border-brand-300 hover:text-brand-600 font-bold text-sm py-3 rounded-lg transition-colors"
                     >
-                      <Plus className="w-4 h-4" /> Yangi filial qo'shish
+                      <Plus className="w-4 h-4" /> {t("profile.add_branch")}
                     </button>
                   ) : (
                     <form
                       onSubmit={handleAddBranch}
                       className="flex flex-col gap-3 border border-ink/8 rounded-xl p-4 bg-surface/60"
                     >
-                      <h4 className="font-bold text-sm text-ink">Yangi filial</h4>
+                      <h4 className="font-bold text-sm text-ink">{t("profile.new_branch_title")}</h4>
                       <input
                         required
                         value={newBranchName}
                         onChange={(e) => setNewBranchName(e.target.value)}
-                        placeholder="Filial nomi (masalan: Chilonzor filiali)"
+                        placeholder={t("profile.branch_name_placeholder")}
                         className="w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white text-sm focus:outline-none focus:border-brand-400"
                       />
                       <input
                         required
                         value={newBranchAddress}
                         onChange={(e) => setNewBranchAddress(e.target.value)}
-                        placeholder="Manzil"
+                        placeholder={t("profile.address_placeholder")}
                         className="w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white text-sm focus:outline-none focus:border-brand-400"
                       />
                       <button
@@ -1201,10 +1231,10 @@ export default function ProfileDrawer({
                           <Navigation className="w-4 h-4" />
                         )}
                         {newBranchGeoStatus === "loading"
-                          ? "Aniqlanmoqda..."
+                          ? t("profile.geo_detecting")
                           : newBranchGeoStatus === "granted"
-                          ? "Joylashuv ulandi"
-                          : "Joylashuvni ulash (ixtiyoriy)"}
+                          ? t("profile.geo_connected")
+                          : t("profile.geo_optional")}
                       </button>
                       {addBranchError && (
                         <div className="flex items-start gap-2 bg-danger/10 border border-danger/20 text-danger text-sm font-medium rounded-lg p-3">
@@ -1218,7 +1248,7 @@ export default function ProfileDrawer({
                           onClick={resetAddBranchForm}
                           className="flex-1 border-2 border-ink/15 text-ink/60 font-bold text-sm py-2.5 rounded-lg hover:bg-ink/5 transition-colors"
                         >
-                          Bekor qilish
+                          {t("common.cancel")}
                         </button>
                         <button
                           type="submit"
@@ -1226,7 +1256,7 @@ export default function ProfileDrawer({
                           className="flex-1 flex items-center justify-center gap-2 bg-brand-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70"
                         >
                           {addBranchStatus === "saving" && <Loader2 className="w-4 h-4 animate-spin" />}
-                          Saqlash
+                          {t("profile.save")}
                         </button>
                       </div>
                     </form>

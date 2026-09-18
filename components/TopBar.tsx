@@ -3,14 +3,20 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Clock, ChevronDown, Send, Instagram } from "lucide-react";
+import { useLanguage } from "./LanguageProvider";
 
 const cityPhones: Record<string, string> = {
   "Toshkent": "+998 95 872 83 83",
   "Qo'qon": "+998 91 382 83 83"
 };
+const cityLabelKeys: Record<string, string> = {
+  "Toshkent": "topbar.city_tashkent",
+  "Qo'qon": "topbar.city_qoqon"
+};
 const cities = Object.keys(cityPhones);
 
 export default function TopBar() {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [city, setCity] = useState("Toshkent");
   const phone = cityPhones[city];
@@ -24,7 +30,7 @@ export default function TopBar() {
               onClick={() => setOpen((v) => !v)}
               className="flex items-center gap-1 hover:text-white transition-colors"
             >
-              {city}
+              {t(cityLabelKeys[city])}
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
             </button>
             <AnimatePresence>
@@ -45,7 +51,7 @@ export default function TopBar() {
                       }}
                       className="w-full text-left px-3.5 py-2 text-sm font-medium hover:bg-brand-50 hover:text-brand-600"
                     >
-                      {c}
+                      {t(cityLabelKeys[c])}
                     </button>
                   ))}
                 </motion.div>
@@ -53,7 +59,7 @@ export default function TopBar() {
             </AnimatePresence>
           </div>
           <span className="flex items-center gap-1.5 text-white/60">
-            <Clock className="w-3.5 h-3.5" /> Har kuni 09:00–18:00
+            <Clock className="w-3.5 h-3.5" /> {t("topbar.hours")}
           </span>
         </div>
 

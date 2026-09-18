@@ -8,18 +8,20 @@ import ProductCard from "./ProductCard";
 import CategoryFilter from "./CategoryFilter";
 import ProductDetailModal from "./ProductDetailModal";
 import AuthModal from "./AuthModal";
+import { useLanguage } from "./LanguageProvider";
 
 type SortOption = "popular" | "price_asc" | "price_desc";
 
-const sortLabels: Record<SortOption, string> = {
-  popular: "Avval mashhurlari",
-  price_asc: "Narx: arzondan qimmatga",
-  price_desc: "Narx: qimmatdan arzonga"
+const sortLabelKeys: Record<SortOption, string> = {
+  popular: "grid.sort_popular",
+  price_asc: "grid.sort_price_asc",
+  price_desc: "grid.sort_price_desc"
 };
 
 const perPageOptions = [12, 24, 48];
 
 export default function ProductGrid({ products, categories }: { products: Product[]; categories: string[] }) {
+  const { t } = useLanguage();
   const [active, setActive] = useState<string>("Barchasi");
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [perPage, setPerPage] = useState<number>(24);
@@ -66,15 +68,13 @@ export default function ProductGrid({ products, categories }: { products: Produc
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
           <div>
             <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-brand-500">
-              To'liq katalog
+              {t("grid.tag")}
             </span>
             <h2 className="font-display font-extrabold text-2xl md:text-[32px] text-ink mt-1">
-              Barcha assortiment
+              {t("grid.title")}
             </h2>
           </div>
-          <p className="max-w-sm text-ink/50 text-sm font-medium">
-            Har bir mahsulot uchun material, o'lcham va qadoq hajmi bir qarashda ko'rsatilgan.
-          </p>
+          <p className="max-w-sm text-ink/50 text-sm font-medium">{t("grid.description")}</p>
         </div>
 
         <div className="mb-7 sticky top-[72px] z-20 py-3 bg-white/95 backdrop-blur border-b border-ink/8">
@@ -90,7 +90,7 @@ export default function ProductGrid({ products, categories }: { products: Produc
                   className="flex items-center gap-2 border border-ink/15 rounded-lg px-3 py-2 text-xs font-bold text-ink/70 hover:border-brand-300 transition-colors whitespace-nowrap"
                 >
                   <ArrowUpDown className="w-3.5 h-3.5" />
-                  {sortLabels[sortBy]}
+                  {t(sortLabelKeys[sortBy])}
                 </button>
                 <AnimatePresence>
                   {sortOpen && (
@@ -102,7 +102,7 @@ export default function ProductGrid({ products, categories }: { products: Produc
                         exit={{ opacity: 0, y: -6 }}
                         className="absolute right-0 top-11 w-56 bg-white rounded-lg shadow-card-hover border border-ink/8 overflow-hidden z-40"
                       >
-                        {(Object.keys(sortLabels) as SortOption[]).map((key) => (
+                        {(Object.keys(sortLabelKeys) as SortOption[]).map((key) => (
                           <button
                             key={key}
                             onClick={() => {
@@ -113,7 +113,7 @@ export default function ProductGrid({ products, categories }: { products: Produc
                               sortBy === key ? "bg-brand-50 text-brand-600" : "text-ink/70 hover:bg-surface"
                             }`}
                           >
-                            {sortLabels[key]}
+                            {t(sortLabelKeys[key])}
                           </button>
                         ))}
                       </motion.div>
@@ -155,7 +155,7 @@ export default function ProductGrid({ products, categories }: { products: Produc
         </motion.div>
 
         {sorted.length === 0 && (
-          <p className="text-center py-16 text-ink/40 font-semibold">Bu kategoriyada mahsulot topilmadi.</p>
+          <p className="text-center py-16 text-ink/40 font-semibold">{t("grid.not_found_category")}</p>
         )}
 
         {totalPages > 1 && (
@@ -164,7 +164,7 @@ export default function ProductGrid({ products, categories }: { products: Produc
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
               className="w-10 h-10 rounded-full border border-ink/15 flex items-center justify-center hover:bg-surface transition-colors disabled:opacity-30 disabled:pointer-events-none"
-              aria-label="Oldingi sahifa"
+              aria-label={t("grid.prev_page")}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -175,7 +175,7 @@ export default function ProductGrid({ products, categories }: { products: Produc
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
               className="w-10 h-10 rounded-full border border-ink/15 flex items-center justify-center hover:bg-surface transition-colors disabled:opacity-30 disabled:pointer-events-none"
-              aria-label="Keyingi sahifa"
+              aria-label={t("grid.next_page")}
             >
               <ChevronRight className="w-4 h-4" />
             </button>

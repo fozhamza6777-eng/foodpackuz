@@ -10,6 +10,7 @@ import { useAuth } from "./AuthProvider";
 import ProductImage from "./ProductImage";
 import ProductInfoBadge from "./ProductInfoBadge";
 import AuthModal from "./AuthModal";
+import { useLanguage } from "./LanguageProvider";
 import { fetchComments, addComment, deleteComment, type Comment } from "@/lib/supabase/comments";
 
 export default function ProductDetailModal({
@@ -22,6 +23,7 @@ export default function ProductDetailModal({
   const { addItem, items } = useCart();
   const { isLiked, toggleLike } = useLikes();
   const auth = useAuth();
+  const { t, locale } = useLanguage();
   const [packQty, setPackQty] = useState(1);
   const [unitMode, setUnitMode] = useState<"pack" | "carton">("pack");
   const [comments, setComments] = useState<Comment[] | null>(null);
@@ -46,7 +48,7 @@ export default function ProductDetailModal({
     : 0;
   const hasCarton = !!product.cartonSize;
   const unitSize = unitMode === "carton" && product.cartonSize ? product.cartonSize : product.packSize;
-  const unitLabel = unitMode === "carton" ? "karobka" : "pachka";
+  const unitLabel = t(unitMode === "carton" ? "product.carton" : "product.pack").toLowerCase();
   const unitPrice = product.price * unitSize;
   const oldUnitPrice = product.oldPrice ? product.oldPrice * unitSize : undefined;
   const liked = isLiked(product.id);
@@ -121,13 +123,13 @@ export default function ProductDetailModal({
                   <button
                     onClick={() => (auth.session ? toggleLike(product.id) : setAuthOpen(true))}
                     className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow-card flex items-center justify-center"
-                    aria-label="Yoqtirish"
+                    aria-label={t("product.like")}
                   >
                     <Heart className={`w-4 h-4 ${liked ? "fill-danger text-danger" : "text-ink/40"}`} />
                   </button>
                   {product.isNew && (
                     <span className="absolute top-3 left-3 text-[10px] font-extrabold uppercase bg-brand-500 text-white px-2 py-1 rounded-md">
-                      Yangi
+                      {t("product.new")}
                     </span>
                   )}
                 </div>
@@ -142,11 +144,11 @@ export default function ProductDetailModal({
 
                 <div className="grid grid-cols-2 gap-3 text-xs mb-4">
                   <div className="bg-surface rounded-lg p-3">
-                    <p className="text-ink/40 font-bold uppercase mb-1">Material</p>
+                    <p className="text-ink/40 font-bold uppercase mb-1">{t("product.material")}</p>
                     <p className="font-semibold text-ink">{product.material}</p>
                   </div>
                   <div className="bg-surface rounded-lg p-3">
-                    <p className="text-ink/40 font-bold uppercase mb-1">O'lcham</p>
+                    <p className="text-ink/40 font-bold uppercase mb-1">{t("product.size")}</p>
                     <p className="font-semibold text-ink">{product.sizes.join(", ")}</p>
                   </div>
                 </div>
@@ -164,7 +166,7 @@ export default function ProductDetailModal({
                           : "border-ink/15 text-ink/50 hover:border-ink/30"
                       }`}
                     >
-                      Pachka ({product.packSize} {product.unit})
+                      {t("product.pack")} ({product.packSize} {product.unit})
                     </button>
                     <button
                       onClick={() => {
@@ -177,7 +179,7 @@ export default function ProductDetailModal({
                           : "border-ink/15 text-ink/50 hover:border-ink/30"
                       }`}
                     >
-                      Karobka ({product.cartonSize} {product.unit})
+                      {t("product.carton")} ({product.cartonSize} {product.unit})
                     </button>
                   </div>
                 )}
@@ -188,7 +190,7 @@ export default function ProductDetailModal({
                       {unitPrice.toLocaleString("uz-UZ")}
                     </span>
                     <span className="text-xs font-semibold text-ink/40">
-                      so'm / {unitLabel} ({unitSize} {product.unit})
+                      {t("common.som")} / {unitLabel} ({unitSize} {product.unit})
                     </span>
                     {oldUnitPrice && (
                       <span className="text-xs font-semibold text-ink/35 line-through">
@@ -203,7 +205,7 @@ export default function ProductDetailModal({
                   </div>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-[11px] font-semibold text-ink/45">
-                      ({product.price.toLocaleString("uz-UZ")} so'm/{product.unit})
+                      ({product.price.toLocaleString("uz-UZ")} {t("common.som")}/{product.unit})
                     </span>
                   </div>
                 </div>
@@ -234,20 +236,21 @@ export default function ProductDetailModal({
                     }`}
                   >
                     <ShoppingBag className="w-4 h-4" />
-                    {cartDona > 0 ? "Qo'shildi!" : "Savatga"}
+                    {cartDona > 0 ? `${t("product.added")}!` : t("product.add_to_cart")}
                   </motion.button>
                 </div>
 
                 <div className="border-t border-ink/8 pt-4">
                   <h4 className="font-bold text-sm text-ink flex items-center gap-1.5 mb-3">
-                    <MessageCircle className="w-4 h-4" /> Sharhlar {comments ? `(${comments.length})` : ""}
+                    <MessageCircle className="w-4 h-4" /> {t("product.reviews")}{" "}
+                    {comments ? `(${comments.length})` : ""}
                   </h4>
 
                   <form onSubmit={handleSubmitComment} className="flex gap-2 mb-4">
                     <input
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      placeholder={auth.session ? "Fikringizni yozing..." : "Yozish uchun tizimga kiring"}
+                      placeholder={auth.session ? t("product.write_review") : t("product.login_to_write")}
                       className="flex-1 border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-400"
                     />
                     <button
@@ -266,9 +269,7 @@ export default function ProductDetailModal({
                   )}
 
                   {comments !== null && comments.length === 0 && (
-                    <p className="text-sm text-ink/40 text-center py-4">
-                      Hali sharh yo'q — birinchi bo'lib fikr bildiring!
-                    </p>
+                    <p className="text-sm text-ink/40 text-center py-4">{t("product.no_reviews")}</p>
                   )}
 
                   <div className="flex flex-col gap-3">
@@ -278,13 +279,13 @@ export default function ProductDetailModal({
                           <span className="font-bold text-xs text-ink">{c.authorName}</span>
                           <div className="flex items-center gap-2">
                             <span className="text-[11px] text-ink/35">
-                              {new Date(c.createdAt).toLocaleDateString("uz-UZ")}
+                              {new Date(c.createdAt).toLocaleDateString(locale === "ru" ? "ru-RU" : "uz-UZ")}
                             </span>
                             {auth.session?.user.id === c.userId && (
                               <button
                                 onClick={() => handleDeleteComment(c.id)}
                                 className="text-ink/25 hover:text-danger transition-colors"
-                                aria-label="O'chirish"
+                                aria-label={t("product.remove")}
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>

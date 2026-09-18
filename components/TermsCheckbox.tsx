@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "./LanguageProvider";
+
 export default function TermsCheckbox({
   checked,
   onChange
@@ -7,6 +9,8 @@ export default function TermsCheckbox({
   checked: boolean;
   onChange: (v: boolean) => void;
 }) {
+  const { t } = useLanguage();
+
   return (
     <label className="flex items-start gap-2.5 cursor-pointer select-none">
       <input
@@ -17,7 +21,7 @@ export default function TermsCheckbox({
         required
       />
       <span className="text-xs text-ink/60 font-medium leading-relaxed">
-        Men{" "}
+        {t("auth.accept_terms_prefix")}{" "}
         <a
           href="/oferta"
           target="_blank"
@@ -25,9 +29,9 @@ export default function TermsCheckbox({
           onClick={(e) => e.stopPropagation()}
           className="text-brand-600 font-bold hover:underline"
         >
-          Ommaviy oferta
+          {t("auth.accept_terms_link")}
         </a>{" "}
-        shartlari bilan tanishdim va roziman
+        {t("auth.accept_terms_suffix")}
       </span>
     </label>
   );

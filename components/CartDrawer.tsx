@@ -30,6 +30,7 @@ import { uploadPaymentReceipt } from "@/lib/supabase/storage";
 import CartItemCard from "./CartItemCard";
 import RegisterForm from "./RegisterForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
+import { useLanguage } from "./LanguageProvider";
 
 type Step = "cart" | "auth" | "checkout" | "success";
 type AuthMode = "register" | "login" | "forgot";
@@ -38,6 +39,7 @@ type GeoStatus = "idle" | "loading" | "granted" | "denied" | "error";
 export default function CartDrawer() {
   const { items, isOpen, closeCart, setQty, removeItem, totalSum, totalCount, clearCart } = useCart();
   const auth = useAuth();
+  const { t } = useLanguage();
   const [step, setStep] = useState<Step>("cart");
   const [authMode, setAuthMode] = useState<AuthMode>("register");
   const [authLoading, setAuthLoading] = useState(false);
@@ -175,16 +177,16 @@ export default function CartDrawer() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth.session) {
-      setOrderError("Sessiya tugagan. Iltimos, qaytadan kiring.");
+      setOrderError(t("checkout.session_expired"));
       setStep("auth");
       return;
     }
     if (items.length === 0) {
-      setOrderError("Savat bo'sh — buyurtma berish uchun kamida bitta mahsulot qoldiring.");
+      setOrderError(t("checkout.cart_empty_error"));
       return;
     }
     if (paymentMethod === "karta" && !receiptFile) {
-      setOrderError("Karta orqali to'laganingizni tasdiqlash uchun chek skrinshotini yuklang.");
+      setOrderError(t("checkout.receipt_required_error"));
       return;
     }
     setOrderError(null);
@@ -195,7 +197,7 @@ export default function CartDrawer() {
       const { path, error: uploadError } = await uploadPaymentReceipt(receiptFile, auth.session.user.id);
       if (uploadError || !path) {
         setSubmitting(false);
-        setOrderError(uploadError ?? "Chekni yuklashda xatolik yuz berdi.");
+        setOrderError(uploadError ?? t("checkout.receipt_upload_error"));
         return;
       }
       receiptPath = path;
@@ -218,7 +220,7 @@ export default function CartDrawer() {
           .from("branches")
           .insert({
             user_id: auth.session.user.id,
-            name: newBranchName || "Filial",
+            name: newBranchName || t("checkout.default_branch_name"),
             address: form.address,
             latitude: geo?.lat ?? null,
             longitude: geo?.lng ?? null
@@ -256,7 +258,7 @@ export default function CartDrawer() {
     setSubmitting(false);
 
     if (error) {
-      setOrderError("Buyurtmani saqlashda xatolik yuz berdi: " + error.message);
+      setOrderError(`${t("checkout.order_save_error")}: ${error.message}`);
       return;
     }
 
@@ -269,10 +271,11 @@ export default function CartDrawer() {
   };
 
   const titles: Record<Step, string> = {
-    cart: `Savat (${totalCount})`,
-    auth: authMode === "register" ? "Ro'yxatdan o'tish" : "Kirish",
-    checkout: "Buyurtma ma'lumotlari",
-    success: "Qabul qilindi"
+    cart: t("cart.title", { count: totalCount }),
+    auth:
+      authMode === "register" ? t("auth.register") : authMode === "login" ? t("auth.login") : t("auth.forgot_title"),
+    checkout: t("checkout.title"),
+    success: t("checkout.success_title")
   };
 
   return (
@@ -302,7 +305,7 @@ export default function CartDrawer() {
                 )}
                 <h3 className="font-display font-extrabold text-lg text-ink">{titles[step]}</h3>
               </div>
-              <button onClick={handleClose} aria-label="Yopish" className="p-1.5 hover:bg-surface rounded-lg">
+              <button onClick={handleClose} aria-label={t("common.close")} className="p-1.5 hover:bg-surface rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -313,24 +316,17 @@ export default function CartDrawer() {
                   {items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center text-center py-20 text-ink/40">
                       <ShoppingBag className="w-10 h-10 mb-3" />
-                      <p className="font-semibold">Savat hozircha bo'sh</p>
-                      <p className="text-sm mt-1">Katalogdan mahsulot qo'shing.</p>
+                      <p className="font-semibold">{t("cart.empty_title")}</p>
+                      <p className="text-sm mt-1">{t("cart.empty_text")}</p>
                     </div>
                   ) : (
                     <>
                       <div className="mb-5">
-                        <h4 className="font-display font-extrabold text-lg text-ink">
-                          Buyurtmangizni rasmiylashtiring
-                        </h4>
-                        <p className="text-sm text-ink/50 font-medium mt-1 leading-relaxed">
-                          Yetkazib berish manzilini va to'lov usulini tanlang. Buyurtmangizni tasdiqlaganimizdan
-                          keyin tayyorlashni boshlaymiz.
-                        </p>
+                        <h4 className="font-display font-extrabold text-lg text-ink">{t("cart.heading")}</h4>
+                        <p className="text-sm text-ink/50 font-medium mt-1 leading-relaxed">{t("cart.subheading")}</p>
                       </div>
 
-                      <p className="text-xs font-bold uppercase tracking-wide text-ink/40 mb-3">
-                        1. Savatni tekshiring
-                      </p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-ink/40 mb-3">{t("cart.step1")}</p>
 
                       <div className="flex flex-col gap-3">
                         <AnimatePresence initial={false}>
@@ -366,7 +362,7 @@ export default function CartDrawer() {
                       }}
                       className="flex items-center gap-1.5 text-sm font-bold text-ink/50 hover:text-ink mb-5"
                     >
-                      <ArrowLeft className="w-4 h-4" /> Kirishga qaytish
+                      <ArrowLeft className="w-4 h-4" /> {t("auth.back_to_login")}
                     </button>
                   ) : null}
 
@@ -380,10 +376,10 @@ export default function CartDrawer() {
                     )}
                     <p className="text-sm text-ink/70 font-medium leading-relaxed">
                       {authMode === "register"
-                        ? "Buyurtmani rasmiylashtirish uchun avval ro'yxatdan o'ting. Bu atigi 30 soniya vaqt oladi."
+                        ? t("auth.checkout_intro_register")
                         : authMode === "login"
-                        ? "Ro'yxatdan o'tgan bo'lsangiz, telefon raqam va parolingiz bilan kiring."
-                        : "Telefon raqamingizga tasdiqlash kodi yuboramiz, so'ng yangi parol o'rnatasiz."}
+                        ? t("auth.checkout_intro_login")
+                        : t("auth.forgot_intro")}
                     </p>
                   </div>
 
@@ -398,7 +394,7 @@ export default function CartDrawer() {
                           authMode === "register" ? "bg-white text-ink shadow-sm" : "text-ink/50"
                         }`}
                       >
-                        Ro'yxatdan o'tish
+                        {t("auth.register")}
                       </button>
                       <button
                         onClick={() => {
@@ -409,7 +405,7 @@ export default function CartDrawer() {
                           authMode === "login" ? "bg-white text-ink shadow-sm" : "text-ink/50"
                         }`}
                       >
-                        Kirish
+                        {t("auth.login")}
                       </button>
                     </div>
                   )}
@@ -435,7 +431,7 @@ export default function CartDrawer() {
                   ) : (
                     <form id="auth-form" onSubmit={handleLogin} className="flex flex-col gap-4">
                       <div>
-                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Telefon raqam</label>
+                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.phone")}</label>
                         <input
                           required
                           type="tel"
@@ -447,7 +443,7 @@ export default function CartDrawer() {
                       </div>
                       <div>
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
+                          <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.password")}</label>
                           <button
                             type="button"
                             onClick={() => {
@@ -456,7 +452,7 @@ export default function CartDrawer() {
                             }}
                             className="text-xs font-bold text-brand-600 hover:text-brand-700"
                           >
-                            Parolni unutdingizmi?
+                            {t("auth.forgot_password")}
                           </button>
                         </div>
                         <div className="relative mt-1">
@@ -466,7 +462,7 @@ export default function CartDrawer() {
                             value={regForm.password}
                             onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
                             className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                            placeholder="Parolingiz"
+                            placeholder={t("auth.login_password_placeholder")}
                           />
                           <Lock className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
                         </div>
@@ -493,7 +489,9 @@ export default function CartDrawer() {
                   </AnimatePresence>
 
                   <div className="bg-surface/60 rounded-xl p-3.5">
-                    <p className="text-xs font-bold uppercase tracking-wide text-ink/40 mb-2">Buyurtma tarkibi</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-ink/40 mb-2">
+                      {t("checkout.order_contents")}
+                    </p>
                     <div className="flex flex-col gap-3">
                       {items.map((item) => (
                         <CartItemCard
@@ -505,23 +503,25 @@ export default function CartDrawer() {
                       ))}
                     </div>
                     <div className="flex items-center justify-between text-sm font-bold text-ink pt-3 mt-1 border-t border-ink/8">
-                      <span>Jami</span>
-                      <span>{totalSum.toLocaleString("uz-UZ")} so'm</span>
+                      <span>{t("product.total")}</span>
+                      <span>
+                        {totalSum.toLocaleString("uz-UZ")} {t("common.som")}
+                      </span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Ism-familiya</label>
+                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.full_name")}</label>
                     <input
                       required
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                      placeholder="Ism Familiya"
+                      placeholder={t("auth.full_name_placeholder")}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Telefon raqam</label>
+                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.phone")}</label>
                     <input
                       required
                       type="tel"
@@ -534,7 +534,7 @@ export default function CartDrawer() {
                   {branches && branches.length > 0 && (
                     <div>
                       <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                        Qaysi filial uchun?
+                        {t("checkout.which_branch")}
                       </label>
                       <select
                         value={selectedBranch}
@@ -546,7 +546,7 @@ export default function CartDrawer() {
                             {b.name} — {b.address}
                           </option>
                         ))}
-                        <option value="new">+ Yangi manzil kiritish</option>
+                        <option value="new">{t("checkout.new_address_option")}</option>
                       </select>
                     </div>
                   )}
@@ -555,25 +555,25 @@ export default function CartDrawer() {
                     <>
                       <div>
                         <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                          Filial nomi (ixtiyoriy)
+                          {t("checkout.branch_name_optional")}
                         </label>
                         <input
                           value={newBranchName}
                           onChange={(e) => setNewBranchName(e.target.value)}
                           className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                          placeholder="Masalan: Chilonzor filiali"
+                          placeholder={t("checkout.branch_name_placeholder")}
                         />
                       </div>
                       <div>
                         <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                          Yetkazish manzili
+                          {t("checkout.delivery_address")}
                         </label>
                         <input
                           required
                           value={form.address}
                           onChange={(e) => setForm({ ...form, address: e.target.value })}
                           className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                          placeholder="Shahar, tuman, ko'cha"
+                          placeholder={t("checkout.address_placeholder")}
                         />
                       </div>
                       <label className="flex items-center gap-2 text-sm text-ink/60 font-medium">
@@ -583,7 +583,7 @@ export default function CartDrawer() {
                           onChange={(e) => setSaveBranch(e.target.checked)}
                           className="w-4 h-4 accent-brand-500"
                         />
-                        Bu manzilni keyingi safar uchun filial sifatida saqlash
+                        {t("checkout.save_branch")}
                       </label>
                     </>
                   )}
@@ -603,25 +603,23 @@ export default function CartDrawer() {
                       {geoStatus === "granted" && <Check className="w-4 h-4" />}
                       {geoStatus !== "loading" && geoStatus !== "granted" && <Navigation className="w-4 h-4" />}
                       {geoStatus === "loading"
-                        ? "Aniqlanmoqda..."
+                        ? t("checkout.geo_detecting")
                         : geoStatus === "granted"
-                        ? "Joylashuv ulandi"
-                        : "Joriy joylashuvni yuborish"}
+                        ? t("checkout.geo_connected")
+                        : t("checkout.geo_send")}
                     </button>
                     {geoStatus === "denied" && (
-                      <p className="text-xs text-danger mt-1.5">
-                        Joylashuvga ruxsat berilmadi. Brauzer sozlamalaridan ruxsat berishingiz mumkin.
-                      </p>
+                      <p className="text-xs text-danger mt-1.5">{t("checkout.geo_denied")}</p>
                     )}
                     {geoStatus === "error" && (
-                      <p className="text-xs text-danger mt-1.5">Bu qurilmada geolokatsiya qo'llab-quvvatlanmaydi.</p>
+                      <p className="text-xs text-danger mt-1.5">{t("checkout.geo_unsupported")}</p>
                     )}
-                    <p className="text-xs text-ink/40 mt-1.5">
-                      Kuryerga aniq manzilni topishga yordam beradi (ixtiyoriy).
-                    </p>
+                    <p className="text-xs text-ink/40 mt-1.5">{t("checkout.geo_hint")}</p>
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">To'lov usuli</label>
+                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                      {t("checkout.payment_method")}
+                    </label>
                     <div className="flex gap-2 mt-1">
                       <button
                         type="button"
@@ -632,7 +630,7 @@ export default function CartDrawer() {
                             : "border-ink/15 text-ink/60 hover:border-brand-400"
                         }`}
                       >
-                        <Wallet className="w-4 h-4" /> Naqd pul
+                        <Wallet className="w-4 h-4" /> {t("checkout.cash")}
                       </button>
                       <button
                         type="button"
@@ -643,23 +641,20 @@ export default function CartDrawer() {
                             : "border-ink/15 text-ink/60 hover:border-brand-400"
                         }`}
                       >
-                        <CreditCard className="w-4 h-4" /> Karta orqali
+                        <CreditCard className="w-4 h-4" /> {t("checkout.card")}
                       </button>
                     </div>
                     {paymentMethod === "naqd" ? (
-                      <p className="text-xs text-ink/40 mt-1.5">
-                        To'lov yetkazib berish payti kuryerga naqd pul bilan amalga oshiriladi.
-                      </p>
+                      <p className="text-xs text-ink/40 mt-1.5">{t("checkout.cash_hint")}</p>
                     ) : (
                       <div className="mt-3 flex flex-col gap-3">
                         {paymentCards === null ? (
                           <div className="flex items-center gap-2 text-sm text-ink/40 font-medium py-2">
-                            <Loader2 className="w-4 h-4 animate-spin" /> Kartalar yuklanmoqda...
+                            <Loader2 className="w-4 h-4 animate-spin" /> {t("checkout.cards_loading")}
                           </div>
                         ) : paymentCards.length === 0 ? (
                           <p className="text-xs text-danger font-medium bg-danger/10 rounded-lg p-3">
-                            Hozircha to'lov kartasi kiritilmagan. Iltimos, "Naqd pul" usulini tanlang yoki
-                            biz bilan bog'laning.
+                            {t("checkout.no_cards")}
                           </p>
                         ) : (
                           <div className="flex flex-col gap-2">
@@ -681,11 +676,11 @@ export default function CartDrawer() {
                                 >
                                   {copiedCardId === card.id ? (
                                     <>
-                                      <Check className="w-3.5 h-3.5" /> Nusxalandi
+                                      <Check className="w-3.5 h-3.5" /> {t("checkout.copied")}
                                     </>
                                   ) : (
                                     <>
-                                      <Copy className="w-3.5 h-3.5" /> Nusxalash
+                                      <Copy className="w-3.5 h-3.5" /> {t("checkout.copy")}
                                     </>
                                   )}
                                 </button>
@@ -696,12 +691,12 @@ export default function CartDrawer() {
 
                         <div>
                           <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                            To'lov chekining skrinshoti
+                            {t("checkout.receipt_label")}
                           </label>
                           <label className="mt-1 flex items-center gap-2 border-2 border-dashed border-ink/15 rounded-lg px-3.5 py-3 cursor-pointer hover:border-brand-400 transition-colors">
                             <Upload className="w-4 h-4 text-ink/40 shrink-0" />
                             <span className="text-sm text-ink/60 font-medium truncate">
-                              {receiptFile ? receiptFile.name : "Skrinshot tanlash..."}
+                              {receiptFile ? receiptFile.name : t("checkout.receipt_choose")}
                             </span>
                             <input type="file" accept="image/*" onChange={handleReceiptSelect} className="hidden" />
                           </label>
@@ -713,22 +708,21 @@ export default function CartDrawer() {
                               className="mt-2 max-h-40 rounded-lg border border-ink/10 object-contain"
                             />
                           )}
-                          <p className="text-xs text-ink/40 mt-1.5">
-                            Yuqoridagi kartaga o'tkazma qilib, chekning skrinshotini yuklang — admin tez
-                            orada tekshirib tasdiqlaydi.
-                          </p>
+                          <p className="text-xs text-ink/40 mt-1.5">{t("checkout.receipt_hint")}</p>
                         </div>
                       </div>
                     )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Izoh (ixtiyoriy)</label>
+                    <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                      {t("checkout.note_label")}
+                    </label>
                     <textarea
                       value={form.note}
                       onChange={(e) => setForm({ ...form, note: e.target.value })}
                       rows={3}
                       className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400 resize-none"
-                      placeholder="Yetkazish vaqti yoki qo'shimcha talablar"
+                      placeholder={t("checkout.note_placeholder")}
                     />
                   </div>
                 </form>
@@ -744,26 +738,22 @@ export default function CartDrawer() {
                     <CheckCircle2 className="w-16 h-16 text-success" />
                   </motion.div>
                   <h4 className="font-display font-extrabold text-xl text-ink mt-4">
-                    Rahmat, {form.name.split(" ")[0] || "mijoz"}!
+                    {t("checkout.thanks", { name: form.name.split(" ")[0] || t("checkout.customer_fallback") })}
                   </h4>
                   <p className="text-ink/50 text-sm mt-2 max-w-xs">
-                    Buyurtmangiz xavfsiz saqlandi. Menejerimiz 15 daqiqa ichida{" "}
-                    <span className="font-semibold text-ink">{form.phone}</span> raqamiga aloqaga chiqadi.
+                    {t("checkout.success_text_prefix")}{" "}
+                    <span className="font-semibold text-ink">{form.phone}</span> {t("checkout.success_text_suffix")}
                   </p>
                   {paymentMethod === "karta" ? (
-                    <p className="text-ink/40 text-xs mt-2 max-w-xs">
-                      To'lov chekingiz qabul qilindi — admin tez orada tekshirib tasdiqlaydi.
-                    </p>
+                    <p className="text-ink/40 text-xs mt-2 max-w-xs">{t("checkout.success_card_note")}</p>
                   ) : (
-                    <p className="text-ink/40 text-xs mt-2 max-w-xs">
-                      To'lov yetkazib berishda naqd pul bilan kuryerga amalga oshiriladi.
-                    </p>
+                    <p className="text-ink/40 text-xs mt-2 max-w-xs">{t("checkout.success_cash_note")}</p>
                   )}
                   <button
                     onClick={handleClose}
                     className="mt-6 bg-ink text-white font-bold px-6 py-3 rounded-lg hover:bg-brand-600 transition-colors"
                   >
-                    Yopish
+                    {t("common.close")}
                   </button>
                 </div>
               )}
@@ -772,16 +762,16 @@ export default function CartDrawer() {
             {step === "cart" && items.length > 0 && (
               <div className="border-t border-ink/8 p-5 bg-surface/60">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-bold text-ink/60 text-sm">Jami</span>
+                  <span className="font-bold text-ink/60 text-sm">{t("product.total")}</span>
                   <span className="font-display font-extrabold text-xl text-ink">
-                    {totalSum.toLocaleString("uz-UZ")} so'm
+                    {totalSum.toLocaleString("uz-UZ")} {t("common.som")}
                   </span>
                 </div>
                 <button
                   onClick={goToCheckout}
                   className="w-full bg-brand-500 text-white font-bold py-3.5 rounded-lg hover:bg-brand-600 transition-colors"
                 >
-                  Rasmiylashtirish
+                  {t("checkout.checkout_button")}
                 </button>
               </div>
             )}
@@ -795,7 +785,7 @@ export default function CartDrawer() {
                   className="w-full flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
-                  {authLoading ? "Yuborilmoqda..." : "Kirish va davom etish"}
+                  {authLoading ? t("common.sending") : t("auth.login_and_continue")}
                 </button>
               </div>
             )}
@@ -803,9 +793,9 @@ export default function CartDrawer() {
             {step === "checkout" && (
               <div className="border-t border-ink/8 p-5 bg-surface/60">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-bold text-ink/60 text-sm">Jami</span>
+                  <span className="font-bold text-ink/60 text-sm">{t("product.total")}</span>
                   <span className="font-display font-extrabold text-xl text-ink">
-                    {totalSum.toLocaleString("uz-UZ")} so'm
+                    {totalSum.toLocaleString("uz-UZ")} {t("common.som")}
                   </span>
                 </div>
                 <button
@@ -816,14 +806,14 @@ export default function CartDrawer() {
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Yuborilmoqda...
+                      <Loader2 className="w-4 h-4 animate-spin" /> {t("common.sending")}
                     </>
                   ) : items.length === 0 ? (
-                    "Savat bo'sh"
+                    t("checkout.cart_empty_button")
                   ) : paymentMethod === "karta" && !receiptFile ? (
-                    "Avval chek skrinshotini yuklang"
+                    t("checkout.upload_receipt_first")
                   ) : (
-                    "Buyurtmani tasdiqlash"
+                    t("checkout.confirm_order")
                   )}
                 </button>
               </div>

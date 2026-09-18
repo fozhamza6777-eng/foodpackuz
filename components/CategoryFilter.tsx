@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "./LanguageProvider";
 
 export default function CategoryFilter({
   active,
@@ -11,6 +12,7 @@ export default function CategoryFilter({
   onChange: (c: string) => void;
   categories: string[];
 }) {
+  const { t } = useLanguage();
   const allTabs = ["Barchasi", ...categories];
 
   return (
@@ -32,7 +34,7 @@ export default function CategoryFilter({
                 className="absolute inset-0 bg-brand-500 rounded-lg -z-10"
               />
             )}
-            {c}
+            {c === "Barchasi" ? t("grid.all_categories") : c}
           </button>
         );
       })}

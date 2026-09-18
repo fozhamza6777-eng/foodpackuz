@@ -7,11 +7,13 @@ import { X, UserPlus, LogIn, Lock, AlertCircle, Loader2, KeyRound, ArrowLeft } f
 import { useAuth } from "./AuthProvider";
 import RegisterForm from "./RegisterForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
+import { useLanguage } from "./LanguageProvider";
 
 type AuthMode = "register" | "login" | "forgot";
 
 export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const auth = useAuth();
+  const { t } = useLanguage();
   const [mode, setMode] = useState<AuthMode>("register");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +69,11 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
             >
               <div className="flex items-center justify-between px-6 py-4 border-b border-ink/8">
                 <h3 className="font-display font-extrabold text-lg text-ink">
-                  {mode === "register" ? "Ro'yxatdan o'tish" : mode === "login" ? "Hisobga kirish" : "Parolni tiklash"}
+                  {mode === "register"
+                    ? t("auth.register")
+                    : mode === "login"
+                    ? t("auth.login")
+                    : t("auth.forgot_title")}
                 </h3>
                 <button onClick={handleClose} className="p-1.5 hover:bg-surface rounded-lg">
                   <X className="w-5 h-5" />
@@ -83,7 +89,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                     }}
                     className="flex items-center gap-1.5 text-sm font-bold text-ink/50 hover:text-ink mb-5"
                   >
-                    <ArrowLeft className="w-4 h-4" /> Kirishga qaytish
+                    <ArrowLeft className="w-4 h-4" /> {t("auth.back_to_login")}
                   </button>
                 ) : null}
 
@@ -97,10 +103,10 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                   )}
                   <p className="text-sm text-ink/70 font-medium leading-relaxed">
                     {mode === "register"
-                      ? "Ro'yxatdan o'ting — bu atigi 30 soniya vaqt oladi va buyurtmalaringizni kuzatib borasiz."
+                      ? t("auth.modal_intro_register")
                       : mode === "login"
-                      ? "Ro'yxatdan o'tgan bo'lsangiz, telefon raqam va parolingiz bilan kiring."
-                      : "Telefon raqamingizga tasdiqlash kodi yuboramiz, so'ng yangi parol o'rnatasiz."}
+                      ? t("auth.checkout_intro_login")
+                      : t("auth.forgot_intro")}
                   </p>
                 </div>
 
@@ -115,7 +121,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                         mode === "register" ? "bg-white text-ink shadow-sm" : "text-ink/50"
                       }`}
                     >
-                      Ro'yxatdan o'tish
+                      {t("auth.register")}
                     </button>
                     <button
                       onClick={() => {
@@ -126,7 +132,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                         mode === "login" ? "bg-white text-ink shadow-sm" : "text-ink/50"
                       }`}
                     >
-                      Kirish
+                      {t("auth.login")}
                     </button>
                   </div>
                 )}
@@ -152,7 +158,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 ) : (
                   <form onSubmit={handleLogin} className="flex flex-col gap-4">
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Telefon raqam</label>
+                      <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.phone")}</label>
                       <input
                         required
                         type="tel"
@@ -164,7 +170,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                     </div>
                     <div>
                       <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Parol</label>
+                        <label className="text-xs font-bold uppercase tracking-wide text-ink/45">{t("auth.password")}</label>
                         <button
                           type="button"
                           onClick={() => {
@@ -173,7 +179,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                           }}
                           className="text-xs font-bold text-brand-600 hover:text-brand-700"
                         >
-                          Parolni unutdingizmi?
+                          {t("auth.forgot_password")}
                         </button>
                       </div>
                       <div className="relative mt-1">
@@ -183,7 +189,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                           value={regForm.password}
                           onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
                           className="w-full border border-ink/15 rounded-lg pl-9 pr-3.5 py-2.5 bg-white focus:outline-none focus:border-brand-400"
-                          placeholder="Parolingiz"
+                          placeholder={t("auth.login_password_placeholder")}
                         />
                         <Lock className="w-4 h-4 text-ink/30 absolute left-3 top-1/2 -translate-y-1/2" />
                       </div>
@@ -194,7 +200,7 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClos
                       className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70 mt-1"
                     >
                       {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {loading ? "Yuborilmoqda..." : "Kirish"}
+                      {loading ? t("common.sending") : t("auth.login")}
                     </button>
                   </form>
                 )}

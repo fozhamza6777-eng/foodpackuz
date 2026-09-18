@@ -9,10 +9,12 @@ import { useCart } from "./CartProvider";
 import { fetchActiveProducts } from "@/lib/supabase/products";
 import ProductImage from "./ProductImage";
 import type { Product } from "@/lib/types";
+import { useLanguage } from "./LanguageProvider";
 
 export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { likedIds, toggleLike } = useLikes();
   const { addItem } = useCart();
+  const { t } = useLanguage();
   const [allProducts, setAllProducts] = useState<Product[] | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -50,9 +52,9 @@ export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; 
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-ink/8">
               <h3 className="font-display font-extrabold text-lg text-ink flex items-center gap-2">
-                <Heart className="w-5 h-5 text-danger fill-danger" /> Sevimlilar
+                <Heart className="w-5 h-5 text-danger fill-danger" /> {t("favorites.title")}
               </h3>
-              <button onClick={onClose} aria-label="Yopish" className="p-1.5 hover:bg-surface rounded-lg">
+              <button onClick={onClose} aria-label={t("common.close")} className="p-1.5 hover:bg-surface rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -67,8 +69,8 @@ export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; 
               {allProducts !== null && liked.length === 0 && (
                 <div className="flex flex-col items-center justify-center text-center py-16 text-ink/40">
                   <Heart className="w-10 h-10 mb-3" />
-                  <p className="font-semibold">Hali sevimli mahsulot yo'q</p>
-                  <p className="text-sm mt-1">Mahsulot kartochkasidagi yurakcha belgisini bosing.</p>
+                  <p className="font-semibold">{t("favorites.empty_title")}</p>
+                  <p className="text-sm mt-1">{t("favorites.empty_hint")}</p>
                 </div>
               )}
 
@@ -88,9 +90,9 @@ export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; 
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-sm leading-tight truncate text-ink">{product.name}</p>
                       <p className="text-xs text-ink/45 font-medium mt-0.5">
-                        {(product.price * product.packSize).toLocaleString("uz-UZ")} so'm / pachka ·{" "}
+                        {(product.price * product.packSize).toLocaleString("uz-UZ")} {t("favorites.per_pack")} ·{" "}
                         <span className="text-ink/35">
-                          {product.price.toLocaleString("uz-UZ")} so'm/{product.unit}
+                          {product.price.toLocaleString("uz-UZ")} {t("common.som")}/{product.unit}
                         </span>
                       </p>
                       <div className="flex items-center gap-2 mt-2">
@@ -98,12 +100,12 @@ export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; 
                           onClick={() => addItem(product, product.packSize)}
                           className="flex-1 flex items-center justify-center gap-1.5 bg-brand-500 text-white font-bold text-xs px-2 py-2 rounded-lg hover:bg-brand-600 transition-colors"
                         >
-                          <ShoppingBag className="w-3.5 h-3.5" /> Savatga
+                          <ShoppingBag className="w-3.5 h-3.5" /> {t("product.add_to_cart")}
                         </button>
                         <button
                           onClick={() => toggleLike(product.id)}
                           className="p-2 rounded-lg text-danger hover:bg-danger/10 transition-colors"
-                          aria-label="Sevimlilardan olib tashlash"
+                          aria-label={t("favorites.remove")}
                         >
                           <Heart className="w-4 h-4 fill-danger" />
                         </button>

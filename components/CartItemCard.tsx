@@ -4,6 +4,7 @@ import { Plus, Minus, Trash2 } from "lucide-react";
 import type { CartItem } from "@/lib/types";
 import ProductImage from "./ProductImage";
 import ProductInfoBadge from "./ProductInfoBadge";
+import { useLanguage } from "./LanguageProvider";
 
 export default function CartItemCard({
   item,
@@ -14,8 +15,11 @@ export default function CartItemCard({
   onQtyChange: (qty: number) => void;
   onRemove: () => void;
 }) {
+  const { t } = useLanguage();
   const packSize = item.product.packSize || 1;
   const packs = Math.round(item.qty / packSize);
+  const packLabel = t("product.pack").toLowerCase();
+  const cartonLabel = t("product.carton").toLowerCase();
 
   return (
     <div className="flex gap-3 border border-ink/8 rounded-xl p-3">
@@ -43,15 +47,15 @@ export default function CartItemCard({
           </p>
         )}
         <p className="text-xs text-ink/45 font-medium mt-1">
-          qadoq {packSize} {item.product.unit}
-          {item.product.cartonSize ? ` · karobka ${item.product.cartonSize} ${item.product.unit}` : ""}
+          {t("product.package_size_label")} {packSize} {item.product.unit}
+          {item.product.cartonSize ? ` · ${cartonLabel} ${item.product.cartonSize} ${item.product.unit}` : ""}
         </p>
         <p className="text-[11px] text-ink/45 font-medium mt-0.5">
-          Tanlangan: {item.qty} {item.product.unit} ·{" "}
-          {item.product.price.toLocaleString("uz-UZ")} so'm/{item.product.unit}
+          {t("product.selected")}: {item.qty} {item.product.unit} ·{" "}
+          {item.product.price.toLocaleString("uz-UZ")} {t("common.som")}/{item.product.unit}
         </p>
         <p className="text-sm font-bold text-ink mt-1">
-          Jami: {(item.qty * item.product.price).toLocaleString("uz-UZ")} so'm
+          {t("product.total")}: {(item.qty * item.product.price).toLocaleString("uz-UZ")} {t("common.som")}
         </p>
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center border border-ink/15 rounded-lg">
@@ -59,16 +63,18 @@ export default function CartItemCard({
               type="button"
               onClick={() => onQtyChange(item.qty - packSize)}
               className="p-1.5 hover:bg-surface"
-              aria-label="Pachkani kamaytirish"
+              aria-label={t("cart.decrease_pack")}
             >
               <Minus className="w-3 h-3" />
             </button>
-            <span className="px-2 text-center font-mono text-xs font-bold whitespace-nowrap">{packs} pachka</span>
+            <span className="px-2 text-center font-mono text-xs font-bold whitespace-nowrap">
+              {packs} {packLabel}
+            </span>
             <button
               type="button"
               onClick={() => onQtyChange(item.qty + packSize)}
               className="p-1.5 hover:bg-surface"
-              aria-label="Pachkani ko'paytirish"
+              aria-label={t("cart.increase_pack")}
             >
               <Plus className="w-3 h-3" />
             </button>
@@ -77,7 +83,7 @@ export default function CartItemCard({
             type="button"
             onClick={onRemove}
             className="text-ink/30 hover:text-danger transition-colors"
-            aria-label="O'chirish"
+            aria-label={t("product.remove")}
           >
             <Trash2 className="w-4 h-4" />
           </button>

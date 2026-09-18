@@ -9,14 +9,16 @@ import { useAuth } from "./AuthProvider";
 import ProfileDrawer from "./ProfileDrawer";
 import AuthModal from "./AuthModal";
 import FavoritesDrawer from "./FavoritesDrawer";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { useLikes } from "./LikesProvider";
+import { useLanguage } from "./LanguageProvider";
 import type { Category } from "@/lib/supabase/categories";
 
 const navLinks = [
-  { href: "#yangiliklar", label: "Yangiliklar" },
-  { href: "#nega-biz", label: "Nega biz" },
-  { href: "#hamkorlik", label: "Hamkorlik" },
-  { href: "#aloqa", label: "Aloqa" }
+  { href: "#yangiliklar", key: "header.nav_news" },
+  { href: "#nega-biz", key: "header.nav_why_us" },
+  { href: "#hamkorlik", key: "header.nav_partnership" },
+  { href: "#aloqa", key: "header.nav_contact" }
 ];
 
 export default function Header({ categories }: { categories: Category[] }) {
@@ -29,6 +31,7 @@ export default function Header({ categories }: { categories: Category[] }) {
   const { likedIds } = useLikes();
   const { totalCount, totalSum, openCart, lastAdded } = useCart();
   const { user, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -58,7 +61,7 @@ export default function Header({ categories }: { categories: Category[] }) {
               catalogOpen ? "bg-brand-600 text-white" : "bg-brand-500 text-white hover:bg-brand-600"
             }`}
           >
-            <LayoutGrid className="w-4 h-4" /> Katalog
+            <LayoutGrid className="w-4 h-4" /> {t("header.catalog")}
           </button>
 
           <AnimatePresence>
@@ -101,7 +104,7 @@ export default function Header({ categories }: { categories: Category[] }) {
         <div className="hidden md:flex flex-1 max-w-xl relative">
           <input
             type="text"
-            placeholder="Mahsulot qidirish: stakan, quti, paket..."
+            placeholder={t("header.search_placeholder")}
             className="w-full h-11 rounded-lg border border-ink/10 bg-surface pl-11 pr-4 text-sm font-medium focus:outline-none focus:border-brand-400 focus:bg-white transition-colors"
           />
           <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-ink/40" />
@@ -110,26 +113,27 @@ export default function Header({ categories }: { categories: Category[] }) {
         <nav className="hidden xl:flex items-center gap-6 font-semibold text-sm ml-auto">
           {navLinks.map((l) => (
             <a key={l.href} href={l.href} className="text-ink/70 hover:text-brand-500 transition-colors whitespace-nowrap">
-              {l.label}
+              {t(l.key)}
             </a>
           ))}
         </nav>
 
         <div className="flex items-center gap-2 ml-auto lg:ml-0">
+          <LanguageSwitcher className="hidden md:block text-ink/70" />
           {isAuthenticated && user?.isAdmin && (
             <Link
               href="/admin"
               className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-ink/60 hover:text-brand-600 hover:bg-brand-50 transition-colors"
-              title="Admin panel"
+              title={t("header.admin_panel")}
             >
-              <ShieldCheck className="w-4 h-4" /> Admin
+              <ShieldCheck className="w-4 h-4" /> {t("header.admin")}
             </Link>
           )}
           {isAuthenticated && user && (
             <button
               onClick={() => setProfileOpen(true)}
               className="hidden md:flex items-center gap-1.5 pr-1 text-xs font-bold text-ink/60 hover:text-brand-600 transition-colors"
-              title="Mening profilim"
+              title={t("header.my_profile")}
             >
               <span className="w-7 h-7 rounded-full bg-brand-50 flex items-center justify-center">
                 <User className="w-3.5 h-3.5 text-brand-600" />
@@ -142,13 +146,13 @@ export default function Header({ categories }: { categories: Category[] }) {
               onClick={() => setAuthOpen(true)}
               className="hidden md:flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-sm font-bold border border-ink/15 text-ink/70 hover:border-brand-400 hover:text-brand-600 transition-colors"
             >
-              <LogIn className="w-4 h-4" /> Kirish
+              <LogIn className="w-4 h-4" /> {t("header.login")}
             </button>
           )}
           <button
             onClick={() => (isAuthenticated ? setFavoritesOpen(true) : setAuthOpen(true))}
             className="hidden sm:flex relative p-2.5 rounded-lg hover:bg-surface transition-colors"
-            aria-label="Sevimlilar"
+            aria-label={t("header.favorites")}
           >
             <Heart className="w-5 h-5 text-ink/60" />
             {likedIds.size > 0 && (
@@ -162,7 +166,7 @@ export default function Header({ categories }: { categories: Category[] }) {
             <button
               onClick={() => setAuthOpen(true)}
               className="flex md:hidden p-2.5 rounded-lg border border-ink/15 text-ink/70 hover:border-brand-400 hover:text-brand-600 transition-colors"
-              aria-label="Kirish yoki ro'yxatdan o'tish"
+              aria-label={t("header.login_or_register")}
             >
               <LogIn className="w-5 h-5" />
             </button>
@@ -174,11 +178,11 @@ export default function Header({ categories }: { categories: Category[] }) {
             animate={lastAdded ? { scale: [1, 1.12, 1] } : {}}
             transition={{ duration: 0.35 }}
             className="relative flex items-center gap-2 bg-ink text-white px-3.5 py-2.5 rounded-lg font-bold text-sm hover:bg-brand-600 transition-colors"
-            aria-label="Savatni ochish"
+            aria-label={t("header.cart_open")}
           >
             <ShoppingBag className="w-5 h-5" />
             <span className="hidden sm:inline">
-              {totalCount > 0 ? `${totalSum.toLocaleString("uz-UZ")} so'm` : "Savat"}
+              {totalCount > 0 ? `${totalSum.toLocaleString("uz-UZ")} ${t("common.som")}` : t("header.cart_default")}
             </span>
             <AnimatePresence>
               {totalCount > 0 && (
@@ -196,7 +200,7 @@ export default function Header({ categories }: { categories: Category[] }) {
           <button
             onClick={() => setMenuOpen((v) => !v)}
             className="lg:hidden p-2.5 rounded-lg border border-ink/10"
-            aria-label="Menyu"
+            aria-label={t("header.menu")}
           >
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -212,7 +216,10 @@ export default function Header({ categories }: { categories: Category[] }) {
             className="lg:hidden overflow-hidden bg-white border-t border-ink/5"
           >
             <div className="flex flex-col px-5 py-4 gap-1 font-semibold">
-              <p className="text-xs uppercase tracking-wide text-ink/40 mb-1 mt-1">Katalog</p>
+              <div className="flex justify-end pb-2">
+                <LanguageSwitcher className="text-ink/70" />
+              </div>
+              <p className="text-xs uppercase tracking-wide text-ink/40 mb-1 mt-1">{t("header.catalog")}</p>
               {categories.map((c) => (
                   <a key={c.id} href="#katalog" onClick={() => setMenuOpen(false)} className="py-2 text-ink/80">
                     {c.name}
@@ -221,7 +228,7 @@ export default function Header({ categories }: { categories: Category[] }) {
               <div className="h-px bg-ink/10 my-2" />
               {navLinks.map((l) => (
                 <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className="py-2 text-ink/80">
-                  {l.label}
+                  {t(l.key)}
                 </a>
               ))}
               {isAuthenticated && user && (
@@ -234,7 +241,7 @@ export default function Header({ categories }: { categories: Category[] }) {
                     }}
                     className="flex items-center gap-2 py-2 text-ink/80 text-left"
                   >
-                    <User className="w-4 h-4" /> Mening profilim
+                    <User className="w-4 h-4" /> {t("header.my_profile")}
                   </button>
                   {user.isAdmin && (
                     <Link
@@ -242,7 +249,7 @@ export default function Header({ categories }: { categories: Category[] }) {
                       onClick={() => setMenuOpen(false)}
                       className="flex items-center gap-2 py-2 text-ink/80"
                     >
-                      <ShieldCheck className="w-4 h-4" /> Admin panel
+                      <ShieldCheck className="w-4 h-4" /> {t("header.admin_panel")}
                     </Link>
                   )}
                 </>
@@ -257,7 +264,7 @@ export default function Header({ categories }: { categories: Category[] }) {
                     }}
                     className="flex items-center gap-2 py-2 text-brand-600 font-bold text-left"
                   >
-                    <LogIn className="w-4 h-4" /> Kirish / Ro'yxatdan o'tish
+                    <LogIn className="w-4 h-4" /> {t("header.login_or_register")}
                   </button>
                 </>
               )}
