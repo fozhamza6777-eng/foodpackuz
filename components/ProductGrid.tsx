@@ -68,12 +68,12 @@ export default function ProductGrid({ products, categories }: { products: Produc
   useEffect(() => {
     const sentinel = stickySentinelRef.current;
     if (!sentinel) return;
-    const observer = new IntersectionObserver(([entry]) => setIsCompact(!entry.isIntersecting), {
-      rootMargin: "-73px 0px 0px 0px",
-      threshold: 0
-    });
-    observer.observe(sentinel);
-    return () => observer.disconnect();
+    const handleScroll = () => {
+      setIsCompact(sentinel.getBoundingClientRect().top < 73);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const goToPage = (p: number) => {
