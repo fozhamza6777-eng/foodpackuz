@@ -11,6 +11,7 @@ export interface Comment {
 export interface MyComment extends Comment {
   productId: string;
   productName: string;
+  productNameRu?: string;
   productImage: string;
   productImageUrl?: string;
 }
@@ -35,7 +36,7 @@ export async function fetchComments(productId: string): Promise<Comment[]> {
 export async function fetchUserComments(userId: string): Promise<MyComment[]> {
   const { data } = await supabase
     .from("product_comments")
-    .select("*, product:products(id, name, image, image_url)")
+    .select("*, product:products(id, name, name_ru, image, image_url)")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -49,6 +50,7 @@ export async function fetchUserComments(userId: string): Promise<MyComment[]> {
       createdAt: r.created_at,
       productId: r.product.id,
       productName: r.product.name,
+      productNameRu: r.product.name_ru ?? undefined,
       productImage: r.product.image,
       productImageUrl: r.product.image_url ?? undefined
     }));

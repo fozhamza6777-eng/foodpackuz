@@ -5,6 +5,7 @@ import type { CartItem } from "@/lib/types";
 import ProductImage from "./ProductImage";
 import ProductInfoBadge from "./ProductInfoBadge";
 import { useLanguage } from "./LanguageProvider";
+import { useCategoryLabels } from "./CategoryLabelsProvider";
 
 export default function CartItemCard({
   item,
@@ -15,7 +16,8 @@ export default function CartItemCard({
   onQtyChange: (qty: number) => void;
   onRemove: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t, tr } = useLanguage();
+  const categoryLabels = useCategoryLabels();
   const packSize = item.product.packSize || 1;
   const packs = Math.round(item.qty / packSize);
   const packLabel = t("product.pack").toLowerCase();
@@ -28,7 +30,7 @@ export default function CartItemCard({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className="font-bold text-sm leading-tight text-ink">{item.product.name}</p>
+          <p className="font-bold text-sm leading-tight text-ink">{tr(item.product.name, item.product.nameRu)}</p>
           {item.product.infoBadgeType && (
             <ProductInfoBadge
               type={item.product.infoBadgeType}
@@ -38,7 +40,9 @@ export default function CartItemCard({
           )}
         </div>
         {item.product.categories.length > 0 && (
-          <p className="text-[11px] text-brand-600 font-bold mt-0.5">{item.product.categories.join(" · ")}</p>
+          <p className="text-[11px] text-brand-600 font-bold mt-0.5">
+            {item.product.categories.map((c) => categoryLabels[c] ?? c).join(" · ")}
+          </p>
         )}
         {(item.product.material || item.product.sizes.length > 0) && (
           <p className="text-[11px] text-ink/40 font-medium mt-0.5">

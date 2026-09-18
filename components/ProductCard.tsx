@@ -25,7 +25,7 @@ export default function ProductCard({
   const { addItem, items } = useCart();
   const { isLiked, toggleLike } = useLikes();
   const auth = useAuth();
-  const { t } = useLanguage();
+  const { t, tr } = useLanguage();
   const [packQty, setPackQty] = useState(1);
   const [unitMode, setUnitMode] = useState<"pack" | "carton">("pack");
   const [cartUnitMode, setCartUnitMode] = useState<"pack" | "carton">("pack");
@@ -128,7 +128,7 @@ export default function ProductCard({
             onOpenDetail ? "cursor-pointer hover:text-brand-600" : ""
           }`}
         >
-          {product.name}
+          {tr(product.name, product.nameRu)}
         </h3>
         <p className="text-xs text-ink/45 font-medium mb-3">
           {product.sizes[0]}

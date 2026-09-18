@@ -10,6 +10,7 @@ import { useAuth } from "./AuthProvider";
 interface ToastInfo {
   id: number;
   productName: string;
+  productNameRu?: string;
   qty: number;
   unit: string;
 }
@@ -147,7 +148,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
       setCartStartedAt((prev) => prev ?? new Date());
       setLastAdded(product.id);
-      setToast({ id: Date.now(), productName: product.name, qty, unit: product.unit });
+      setToast({ id: Date.now(), productName: product.name, productNameRu: product.nameRu, qty, unit: product.unit });
       window.clearTimeout((window as any).__fp_last_added_timer);
       (window as any).__fp_last_added_timer = window.setTimeout(() => setLastAdded(null), 900);
       window.clearTimeout((window as any).__fp_toast_timer);

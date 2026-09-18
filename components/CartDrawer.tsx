@@ -39,7 +39,7 @@ type GeoStatus = "idle" | "loading" | "granted" | "denied" | "error";
 export default function CartDrawer() {
   const { items, isOpen, closeCart, setQty, removeItem, totalSum, totalCount, clearCart } = useCart();
   const auth = useAuth();
-  const { t } = useLanguage();
+  const { t, tr } = useLanguage();
   const [step, setStep] = useState<Step>("cart");
   const [authMode, setAuthMode] = useState<AuthMode>("register");
   const [authLoading, setAuthLoading] = useState(false);
@@ -238,7 +238,7 @@ export default function CartDrawer() {
       user_id: auth.session.user.id,
       items: items.map((i) => ({
         id: i.product.id,
-        name: i.product.name,
+        name: tr(i.product.name, i.product.nameRu),
         price: i.product.price,
         qty: i.qty,
         unit: i.product.unit

@@ -14,7 +14,7 @@ import { useLanguage } from "./LanguageProvider";
 export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { likedIds, toggleLike } = useLikes();
   const { addItem } = useCart();
-  const { t } = useLanguage();
+  const { t, tr } = useLanguage();
   const [allProducts, setAllProducts] = useState<Product[] | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -88,7 +88,9 @@ export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; 
                       <ProductImage imageUrl={product.imageUrl} art={product.image} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm leading-tight truncate text-ink">{product.name}</p>
+                      <p className="font-bold text-sm leading-tight truncate text-ink">
+                        {tr(product.name, product.nameRu)}
+                      </p>
                       <p className="text-xs text-ink/45 font-medium mt-0.5">
                         {(product.price * product.packSize).toLocaleString("uz-UZ")} {t("favorites.per_pack")} ·{" "}
                         <span className="text-ink/35">

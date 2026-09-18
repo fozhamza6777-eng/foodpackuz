@@ -3,9 +3,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, ShoppingBag } from "lucide-react";
 import { useCart } from "./CartProvider";
+import { useLanguage } from "./LanguageProvider";
 
 export default function CartToast() {
   const { toast, openCart, dismissToast } = useCart();
+  const { t, tr } = useLanguage();
 
   return (
     <div className="fixed bottom-5 right-5 z-[60] pointer-events-none">
@@ -23,9 +25,11 @@ export default function CartToast() {
               <CheckCircle2 className="w-5 h-5 text-success" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold leading-tight truncate">{toast.productName}</p>
+              <p className="text-sm font-bold leading-tight truncate">
+                {tr(toast.productName, toast.productNameRu)}
+              </p>
               <p className="text-xs text-white/60 font-medium">
-                {toast.qty} {toast.unit} savatga qo'shildi
+                {toast.qty} {toast.unit} {t("cart.toast_added")}
               </p>
             </div>
             <button
@@ -35,7 +39,7 @@ export default function CartToast() {
               }}
               className="shrink-0 flex items-center gap-1 bg-white/10 hover:bg-white/20 text-xs font-bold px-2.5 py-1.5 rounded-lg transition-colors"
             >
-              <ShoppingBag className="w-3.5 h-3.5" /> Savat
+              <ShoppingBag className="w-3.5 h-3.5" /> {t("cart.toast_open")}
             </button>
           </motion.div>
         )}

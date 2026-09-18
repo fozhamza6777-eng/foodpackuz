@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useLanguage } from "./LanguageProvider";
+import type { Category } from "@/lib/supabase/categories";
 
 export default function CategoryFilter({
   active,
@@ -10,19 +11,22 @@ export default function CategoryFilter({
 }: {
   active: string;
   onChange: (c: string) => void;
-  categories: string[];
+  categories: Category[];
 }) {
-  const { t } = useLanguage();
-  const allTabs = ["Barchasi", ...categories];
+  const { t, tr } = useLanguage();
+  const allTabs: { key: string; label: string }[] = [
+    { key: "Barchasi", label: t("grid.all_categories") },
+    ...categories.map((c) => ({ key: c.name, label: tr(c.name, c.nameRu) }))
+  ];
 
   return (
     <div className="flex flex-wrap gap-2 no-scrollbar">
-      {allTabs.map((c) => {
-        const isActive = c === active;
+      {allTabs.map((tab) => {
+        const isActive = tab.key === active;
         return (
           <button
-            key={c}
-            onClick={() => onChange(c)}
+            key={tab.key}
+            onClick={() => onChange(tab.key)}
             className={`relative px-4 py-2 rounded-lg text-sm font-bold border transition-colors whitespace-nowrap ${
               isActive ? "text-white border-brand-500" : "text-ink/60 border-ink/10 hover:border-brand-300 hover:text-brand-500"
             }`}
@@ -34,7 +38,7 @@ export default function CategoryFilter({
                 className="absolute inset-0 bg-brand-500 rounded-lg -z-10"
               />
             )}
-            {c === "Barchasi" ? t("grid.all_categories") : c}
+            {tab.label}
           </button>
         );
       })}

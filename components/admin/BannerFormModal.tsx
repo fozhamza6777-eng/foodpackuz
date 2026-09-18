@@ -19,9 +19,13 @@ const gradientOptions = [
 
 interface FormState {
   tag: string;
+  tagRu: string;
   title: string;
+  titleRu: string;
   description: string;
+  descriptionRu: string;
   ctaLabel: string;
+  ctaLabelRu: string;
   ctaHref: string;
   imageUrl: string;
   gradientFrom: string;
@@ -35,9 +39,13 @@ function rowToForm(row: BannerRow | null): FormState {
   if (!row) {
     return {
       tag: "",
+      tagRu: "",
       title: "",
+      titleRu: "",
       description: "",
+      descriptionRu: "",
       ctaLabel: "Katalogni ko'rish",
+      ctaLabelRu: "",
       ctaHref: "#katalog",
       imageUrl: "",
       gradientFrom: "from-brand-500",
@@ -49,9 +57,13 @@ function rowToForm(row: BannerRow | null): FormState {
   }
   return {
     tag: row.tag,
+    tagRu: row.tag_ru ?? "",
     title: row.title,
+    titleRu: row.title_ru ?? "",
     description: row.description,
+    descriptionRu: row.description_ru ?? "",
     ctaLabel: row.cta_label,
+    ctaLabelRu: row.cta_label_ru ?? "",
     ctaHref: row.cta_href,
     imageUrl: row.image_url ?? "",
     gradientFrom: row.gradient_from,
@@ -108,9 +120,13 @@ export default function BannerFormModal({
 
     const payload = {
       tag: form.tag.trim(),
+      tag_ru: form.tagRu.trim() || null,
       title: form.title.trim(),
+      title_ru: form.titleRu.trim() || null,
       description: form.description.trim(),
+      description_ru: form.descriptionRu.trim() || null,
       cta_label: form.ctaLabel.trim() || "Katalogni ko'rish",
+      cta_label_ru: form.ctaLabelRu.trim() || null,
       cta_href: form.ctaHref.trim() || "#katalog",
       image_url: form.imageUrl || null,
       gradient_from: form.gradientFrom,
@@ -234,41 +250,84 @@ export default function BannerFormModal({
               </p>
             </div>
 
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                Kichik yorliq (tag)
-              </label>
-              <input
-                value={form.tag}
-                onChange={(e) => set("tag", e.target.value)}
-                placeholder="Masalan: Yangi kolleksiya"
-                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Sarlavha</label>
-              <input
-                required
-                value={form.title}
-                onChange={(e) => set("title", e.target.value)}
-                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tavsif</label>
-              <textarea
-                rows={2}
-                value={form.description}
-                onChange={(e) => set("description", e.target.value)}
-                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Kichik yorliq (o'zbekcha)
+                </label>
+                <input
+                  value={form.tag}
+                  onChange={(e) => set("tag", e.target.value)}
+                  placeholder="Masalan: Yangi kolleksiya"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Kichik yorliq (ruscha, ixtiyoriy)
+                </label>
+                <input
+                  value={form.tagRu}
+                  onChange={(e) => set("tagRu", e.target.value)}
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                />
+              </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tugma matni</label>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Sarlavha (o'zbekcha)
+                </label>
+                <input
+                  required
+                  value={form.title}
+                  onChange={(e) => set("title", e.target.value)}
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Sarlavha (ruscha, ixtiyoriy)
+                </label>
+                <input
+                  value={form.titleRu}
+                  onChange={(e) => set("titleRu", e.target.value)}
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Tavsif (o'zbekcha)
+                </label>
+                <textarea
+                  rows={2}
+                  value={form.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Tavsif (ruscha, ixtiyoriy)
+                </label>
+                <textarea
+                  rows={2}
+                  value={form.descriptionRu}
+                  onChange={(e) => set("descriptionRu", e.target.value)}
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Tugma matni (o'zbekcha)
+                </label>
                 <input
                   value={form.ctaLabel}
                   onChange={(e) => set("ctaLabel", e.target.value)}
@@ -277,15 +336,24 @@ export default function BannerFormModal({
               </div>
               <div>
                 <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                  Tugma havolasi
+                  Tugma matni (ruscha, ixtiyoriy)
                 </label>
                 <input
-                  value={form.ctaHref}
-                  onChange={(e) => set("ctaHref", e.target.value)}
-                  placeholder="#katalog"
+                  value={form.ctaLabelRu}
+                  onChange={(e) => set("ctaLabelRu", e.target.value)}
                   className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tugma havolasi</label>
+              <input
+                value={form.ctaHref}
+                onChange={(e) => set("ctaHref", e.target.value)}
+                placeholder="#katalog"
+                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+              />
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">

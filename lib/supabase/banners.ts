@@ -4,9 +4,13 @@ import type { BannerRow } from "./types";
 export interface Banner {
   id: string;
   tag: string;
+  tagRu?: string;
   title: string;
+  titleRu?: string;
   description: string;
+  descriptionRu?: string;
   ctaLabel: string;
+  ctaLabelRu?: string;
   ctaHref: string;
   imageUrl?: string;
   gradientFrom: string;
@@ -18,9 +22,13 @@ export function mapRowToBanner(row: BannerRow): Banner {
   return {
     id: row.id,
     tag: row.tag,
+    tagRu: row.tag_ru ?? undefined,
     title: row.title,
+    titleRu: row.title_ru ?? undefined,
     description: row.description,
+    descriptionRu: row.description_ru ?? undefined,
     ctaLabel: row.cta_label,
+    ctaLabelRu: row.cta_label_ru ?? undefined,
     ctaHref: row.cta_href,
     imageUrl: row.image_url ?? undefined,
     gradientFrom: row.gradient_from,

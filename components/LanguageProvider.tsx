@@ -7,6 +7,10 @@ interface LanguageContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string, vars?: Record<string, string | number>) => string;
+  /** Bazadagi ikki tilli kontentni (mahsulot nomi, tavsifi, kategoriya nomi,
+   *  banner matni) joriy tilga qarab tanlaydi. Rus tili matni bo'sh bo'lsa,
+   *  o'zbekcha (asosiy) matnga qaytadi. */
+  tr: (uz: string, ru?: string | null) => string;
 }
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
@@ -47,7 +51,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [locale]
   );
 
-  return <LanguageContext.Provider value={{ locale, setLocale, t }}>{children}</LanguageContext.Provider>;
+  const tr = useCallback(
+    (uz: string, ru?: string | null) => (locale === "ru" && ru ? ru : uz),
+    [locale]
+  );
+
+  return <LanguageContext.Provider value={{ locale, setLocale, t, tr }}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {

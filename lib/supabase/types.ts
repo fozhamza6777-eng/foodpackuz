@@ -14,6 +14,7 @@ export interface ProfileRow {
 export interface CategoryRow {
   id: string;
   name: string;
+  name_ru: string | null;
   sort_order: number;
   is_active: boolean;
   image_url: string | null;
@@ -23,6 +24,7 @@ export interface CategoryRow {
 export interface ProductRow {
   id: string;
   name: string;
+  name_ru: string | null;
   category: string;
   categories: string[];
   price: number;
@@ -37,6 +39,7 @@ export interface ProductRow {
   material: string;
   sizes: string[];
   description: string;
+  description_ru: string | null;
   code: string;
   is_active: boolean;
   sort_order: number;
@@ -49,9 +52,13 @@ export interface ProductRow {
 export interface BannerRow {
   id: string;
   tag: string;
+  tag_ru: string | null;
   title: string;
+  title_ru: string | null;
   description: string;
+  description_ru: string | null;
   cta_label: string;
+  cta_label_ru: string | null;
   cta_href: string;
   image_url: string | null;
   gradient_from: string;

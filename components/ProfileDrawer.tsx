@@ -102,7 +102,7 @@ export default function ProfileDrawer({
 }) {
   const auth = useAuth();
   const cart = useCart();
-  const { t, locale } = useLanguage();
+  const { t, tr, locale } = useLanguage();
   const dateLocale = locale === "ru" ? "ru-RU" : "uz-UZ";
   const [screen, setScreen] = useState<Screen>("home");
   const [mounted, setMounted] = useState(false);
@@ -1122,7 +1122,7 @@ export default function ProfileDrawer({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="font-bold text-xs text-ink truncate">{r.productName}</p>
+                          <p className="font-bold text-xs text-ink truncate">{tr(r.productName, r.productNameRu)}</p>
                           <button
                             onClick={() => handleDeleteReview(r.id)}
                             className="text-ink/25 hover:text-danger transition-colors shrink-0"

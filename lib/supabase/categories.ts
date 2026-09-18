@@ -4,11 +4,12 @@ import type { CategoryRow } from "./types";
 export interface Category {
   id: string;
   name: string;
+  nameRu?: string;
   imageUrl?: string;
 }
 
 function mapRowToCategory(row: CategoryRow): Category {
-  return { id: row.id, name: row.name, imageUrl: row.image_url ?? undefined };
+  return { id: row.id, name: row.name, nameRu: row.name_ru ?? undefined, imageUrl: row.image_url ?? undefined };
 }
 
 /** Faqat faol kategoriyalar nomlarini oladi — sayt tashrif buyuruvchilari uchun. */
@@ -44,19 +45,21 @@ export async function fetchAllCategoriesAdmin(): Promise<CategoryRow[]> {
   return data as CategoryRow[];
 }
 
-export async function createCategory(input: { name: string; sortOrder: number }) {
+export async function createCategory(input: { name: string; nameRu?: string; sortOrder: number }) {
   return supabase.from("categories").insert({
     name: input.name,
+    name_ru: input.nameRu?.trim() || null,
     sort_order: input.sortOrder
   });
 }
 
 export async function updateCategory(
   id: string,
-  input: { name?: string; sortOrder?: number; isActive?: boolean; imageUrl?: string | null }
+  input: { name?: string; nameRu?: string | null; sortOrder?: number; isActive?: boolean; imageUrl?: string | null }
 ) {
   const payload: Record<string, unknown> = {};
   if (input.name !== undefined) payload.name = input.name;
+  if (input.nameRu !== undefined) payload.name_ru = input.nameRu?.trim() || null;
   if (input.sortOrder !== undefined) payload.sort_order = input.sortOrder;
   if (input.isActive !== undefined) payload.is_active = input.isActive;
   if (input.imageUrl !== undefined) payload.image_url = input.imageUrl;

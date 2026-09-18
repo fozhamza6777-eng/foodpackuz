@@ -23,7 +23,7 @@ export default function ProductDetailModal({
   const { addItem, items } = useCart();
   const { isLiked, toggleLike } = useLikes();
   const auth = useAuth();
-  const { t, locale } = useLanguage();
+  const { t, tr, locale } = useLanguage();
   const [packQty, setPackQty] = useState(1);
   const [unitMode, setUnitMode] = useState<"pack" | "carton">("pack");
   const [comments, setComments] = useState<Comment[] | null>(null);
@@ -102,7 +102,9 @@ export default function ProductDetailModal({
             className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[92vh] shadow-2xl overflow-hidden flex flex-col"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-ink/8 shrink-0">
-              <h3 className="font-display font-extrabold text-lg text-ink truncate pr-4">{product.name}</h3>
+              <h3 className="font-display font-extrabold text-lg text-ink truncate pr-4">
+                {tr(product.name, product.nameRu)}
+              </h3>
               <button onClick={onClose} className="p-1.5 hover:bg-surface rounded-lg shrink-0">
                 <X className="w-5 h-5" />
               </button>
@@ -140,7 +142,9 @@ export default function ProductDetailModal({
                   </div>
                 )}
 
-                <p className="text-sm text-ink/60 leading-relaxed mb-4">{product.description}</p>
+                <p className="text-sm text-ink/60 leading-relaxed mb-4">
+                  {tr(product.description, product.descriptionRu)}
+                </p>
 
                 <div className="grid grid-cols-2 gap-3 text-xs mb-4">
                   <div className="bg-surface rounded-lg p-3">

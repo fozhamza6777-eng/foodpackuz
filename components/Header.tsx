@@ -31,7 +31,7 @@ export default function Header({ categories }: { categories: Category[] }) {
   const { likedIds } = useLikes();
   const { totalCount, totalSum, openCart, lastAdded } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const { t } = useLanguage();
+  const { t, tr } = useLanguage();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -92,7 +92,7 @@ export default function Header({ categories }: { categories: Category[] }) {
                           <Package className="w-4 h-4 text-ink/30" />
                         )}
                       </span>
-                      {c.name}
+                      {tr(c.name, c.nameRu)}
                     </motion.a>
                   ))}
               </motion.div>
@@ -222,7 +222,7 @@ export default function Header({ categories }: { categories: Category[] }) {
               <p className="text-xs uppercase tracking-wide text-ink/40 mb-1 mt-1">{t("header.catalog")}</p>
               {categories.map((c) => (
                   <a key={c.id} href="#katalog" onClick={() => setMenuOpen(false)} className="py-2 text-ink/80">
-                    {c.name}
+                    {tr(c.name, c.nameRu)}
                   </a>
                 ))}
               <div className="h-px bg-ink/10 my-2" />

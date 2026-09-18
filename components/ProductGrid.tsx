@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { Product } from "@/lib/types";
+import type { Category } from "@/lib/supabase/categories";
 import ProductCard from "./ProductCard";
 import CategoryFilter from "./CategoryFilter";
 import ProductDetailModal from "./ProductDetailModal";
@@ -20,7 +21,7 @@ const sortLabelKeys: Record<SortOption, string> = {
 
 const perPageOptions = [12, 24, 48];
 
-export default function ProductGrid({ products, categories }: { products: Product[]; categories: string[] }) {
+export default function ProductGrid({ products, categories }: { products: Product[]; categories: Category[] }) {
   const { t } = useLanguage();
   const [active, setActive] = useState<string>("Barchasi");
   const [sortBy, setSortBy] = useState<SortOption>("popular");

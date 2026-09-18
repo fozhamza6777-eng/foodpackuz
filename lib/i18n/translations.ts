@@ -18,6 +18,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.sending": "Yuborilmoqda...",
     "common.error": "Xatolik yuz berdi",
     "common.som": "so'm",
+    "common.hour_short": "soat",
 
     // --- TopBar ---
     "topbar.hours": "Har kuni 09:00–18:00",
@@ -44,6 +45,15 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // --- Hero ---
     "hero.quick_categories_view_all": "Barchasini ko'rish",
+    "hero.prev": "Oldingi",
+    "hero.next": "Keyingi",
+    "hero.pagination": "{{n}}-banner",
+    "hero.stat_customers": "Mijoz biznes",
+    "hero.stat_delivery": "Yetkazib berish",
+    "hero.stat_product_types": "Mahsulot turi",
+    "hero.fallback_title": "Fast-food biznesingiz uchun to'liq qadoqlash yechimi",
+    "hero.fallback_description": "Klamshell qutilardan termo-konteynerlargacha — bitta manzilda, ulgurji narxda.",
+    "hero.fallback_cta": "Katalogni ko'rish",
 
     // --- TrustBadges ---
     "trust.free_delivery_title": "Bepul yetkazib berish",
@@ -54,6 +64,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     "trust.vat_text": "To'liq hisobot hujjatlari paketini taqdim etamiz",
     "trust.payment_title": "Qabul qilishda to'lov",
     "trust.payment_text": "Kuryerga naqd yoki karta orqali to'lash imkoniyati",
+
+    // --- PromoRow ---
+    "promo.new_subtitle": "Yangiliklar",
+    "promo.new_title": "Yangi mahsulotlar",
+    "promo.prev": "Chapga",
+    "promo.next": "O'ngga",
+    "promo.view_all": "Barchasini ko'rish",
 
     // --- ProductGrid ---
     "grid.sort_popular": "Avval mashhurlari",
@@ -129,6 +146,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.reset_phone_hint": "Ro'yxatdan o'tgan telefon raqamingizga tasdiqlash kodi yuboriladi.",
 
     // --- Cart / Checkout (CartDrawer) ---
+    "cart.toast_added": "savatga qo'shildi",
+    "cart.toast_open": "Savat",
     "cart.title": "Savat ({{count}})",
     "cart.empty_title": "Savat hozircha bo'sh",
     "cart.empty_text": "Katalogdan mahsulot qo'shing.",
@@ -374,6 +393,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.sending": "Отправка...",
     "common.error": "Произошла ошибка",
     "common.som": "сум",
+    "common.hour_short": "ч",
 
     // --- TopBar ---
     "topbar.hours": "Ежедневно 09:00–18:00",
@@ -400,6 +420,15 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // --- Hero ---
     "hero.quick_categories_view_all": "Смотреть все",
+    "hero.prev": "Предыдущий",
+    "hero.next": "Следующий",
+    "hero.pagination": "Баннер {{n}}",
+    "hero.stat_customers": "Клиентов-бизнесов",
+    "hero.stat_delivery": "Доставка",
+    "hero.stat_product_types": "Видов товаров",
+    "hero.fallback_title": "Комплексное решение для упаковки вашего фастфуд-бизнеса",
+    "hero.fallback_description": "От клэмшелл-коробок до термоконтейнеров — в одном месте, по оптовым ценам.",
+    "hero.fallback_cta": "Смотреть каталог",
 
     // --- TrustBadges ---
     "trust.free_delivery_title": "Бесплатная доставка",
@@ -410,6 +439,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     "trust.vat_text": "Предоставляем полный пакет отчётных документов",
     "trust.payment_title": "Оплата при получении",
     "trust.payment_text": "Наличными или картой курьеру",
+
+    // --- PromoRow ---
+    "promo.new_subtitle": "Новинки",
+    "promo.new_title": "Новые товары",
+    "promo.prev": "Влево",
+    "promo.next": "Вправо",
+    "promo.view_all": "Смотреть все",
 
     // --- ProductGrid ---
     "grid.sort_popular": "Сначала популярные",
@@ -485,6 +521,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "auth.reset_phone_hint": "На ваш зарегистрированный номер телефона будет отправлен код подтверждения.",
 
     // --- Cart / Checkout (CartDrawer) ---
+    "cart.toast_added": "добавлено в корзину",
+    "cart.toast_open": "Корзина",
     "cart.title": "Корзина ({{count}})",
     "cart.empty_title": "Корзина пока пуста",
     "cart.empty_text": "Добавьте товары из каталога.",

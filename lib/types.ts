@@ -1,6 +1,7 @@
 export interface Product {
   id: string;
   name: string;
+  nameRu?: string;
   categories: string[];
   price: number;
   oldPrice?: number;
@@ -14,6 +15,7 @@ export interface Product {
   material: string;
   sizes: string[];
   description: string;
+  descriptionRu?: string;
   code: string;
   infoBadgeType?: "low_stock" | "ships_in" | "imported" | "manufacturing";
   infoBadgeText?: string;

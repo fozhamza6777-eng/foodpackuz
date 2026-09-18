@@ -6,6 +6,7 @@ export function mapRowToProduct(row: ProductRow): Product {
   return {
     id: row.id,
     name: row.name,
+    nameRu: row.name_ru ?? undefined,
     categories: row.categories && row.categories.length > 0 ? row.categories : [row.category],
     price: row.price,
     oldPrice: row.old_price ?? undefined,
@@ -19,6 +20,7 @@ export function mapRowToProduct(row: ProductRow): Product {
     material: row.material,
     sizes: row.sizes ?? [],
     description: row.description,
+    descriptionRu: row.description_ru ?? undefined,
     code: row.code,
     infoBadgeType: (row.info_badge_type as Product["infoBadgeType"]) ?? undefined,
     infoBadgeText: row.info_badge_text ?? undefined

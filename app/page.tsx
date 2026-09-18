@@ -27,7 +27,6 @@ export default async function Home() {
     fetchActiveBanners(),
     fetchActiveCategories()
   ]);
-  const categoryNames = categories.map((c) => c.name);
   const newProducts = products.filter((p) => p.isNew);
 
   return (
@@ -36,16 +35,10 @@ export default async function Home() {
       <Header categories={categories} />
       <main>
         <Hero banners={banners} categories={categories} />
-        <PromoRow
-          id="yangiliklar"
-          title="Yangi mahsulotlar"
-          subtitle="Yangiliklar"
-          accent="brand"
-          products={newProducts}
-        />
+        <PromoRow id="yangiliklar" accent="brand" products={newProducts} />
         <TrustBadges />
         <PartnersMarquee />
-        <ProductGrid products={products} categories={categoryNames} />
+        <ProductGrid products={products} categories={categories} />
         <Testimonials />
         <FAQAccordion />
         <Branches />

@@ -14,6 +14,7 @@ const artOptions = ["clamshell", "cup", "pizza", "deli", "bag", "cutlery", "sauc
 interface FormState {
   id: string;
   name: string;
+  nameRu: string;
   categories: string[];
   price: string;
   oldPrice: string;
@@ -27,6 +28,7 @@ interface FormState {
   material: string;
   sizes: string;
   description: string;
+  descriptionRu: string;
   code: string;
   isActive: boolean;
   infoBadgeType: string;
@@ -38,6 +40,7 @@ function rowToForm(row: ProductRow | null): FormState {
     return {
       id: "",
       name: "",
+      nameRu: "",
       categories: [],
       price: "",
       oldPrice: "",
@@ -51,6 +54,7 @@ function rowToForm(row: ProductRow | null): FormState {
       material: "",
       sizes: "",
       description: "",
+      descriptionRu: "",
       code: "",
       isActive: true,
       infoBadgeType: "",
@@ -60,6 +64,7 @@ function rowToForm(row: ProductRow | null): FormState {
   return {
     id: row.id,
     name: row.name,
+    nameRu: row.name_ru ?? "",
     categories: row.categories && row.categories.length > 0 ? row.categories : row.category ? [row.category] : [],
     price: String(row.price),
     oldPrice: row.old_price ? String(row.old_price) : "",
@@ -73,6 +78,7 @@ function rowToForm(row: ProductRow | null): FormState {
     material: row.material,
     sizes: (row.sizes ?? []).join(", "),
     description: row.description,
+    descriptionRu: row.description_ru ?? "",
     code: row.code,
     isActive: row.is_active,
     infoBadgeType: row.info_badge_type ?? "",
@@ -154,6 +160,7 @@ export default function ProductFormModal({
     const payload = {
       id: form.id.trim(),
       name: form.name.trim(),
+      name_ru: form.nameRu.trim() || null,
       category: form.categories[0],
       categories: form.categories,
       price,
@@ -174,6 +181,7 @@ export default function ProductFormModal({
         .map((s) => s.trim())
         .filter(Boolean),
       description: form.description.trim(),
+      description_ru: form.descriptionRu.trim() || null,
       code: form.code.trim(),
       is_active: form.isActive,
       info_badge_type: form.infoBadgeType || null,
@@ -266,14 +274,29 @@ export default function ProductFormModal({
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Mahsulot nomi</label>
-              <input
-                required
-                value={form.name}
-                onChange={(e) => set("name", e.target.value)}
-                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Mahsulot nomi (o'zbekcha)
+                </label>
+                <input
+                  required
+                  value={form.name}
+                  onChange={(e) => set("name", e.target.value)}
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Mahsulot nomi (ruscha, ixtiyoriy)
+                </label>
+                <input
+                  value={form.nameRu}
+                  onChange={(e) => set("nameRu", e.target.value)}
+                  placeholder="Kiritilmasa, o'zbekcha nom ko'rsatiladi"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                />
+              </div>
             </div>
 
             <div>
@@ -491,14 +514,30 @@ export default function ProductFormModal({
               />
             </div>
 
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-ink/45">Tavsif</label>
-              <textarea
-                rows={3}
-                value={form.description}
-                onChange={(e) => set("description", e.target.value)}
-                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Tavsif (o'zbekcha)
+                </label>
+                <textarea
+                  rows={3}
+                  value={form.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                  Tavsif (ruscha, ixtiyoriy)
+                </label>
+                <textarea
+                  rows={3}
+                  value={form.descriptionRu}
+                  onChange={(e) => set("descriptionRu", e.target.value)}
+                  placeholder="Kiritilmasa, o'zbekcha tavsif ko'rsatiladi"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
+                />
+              </div>
             </div>
 
             <div className="bg-surface rounded-xl p-4">

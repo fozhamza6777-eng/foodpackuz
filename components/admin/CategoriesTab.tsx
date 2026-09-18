@@ -17,10 +17,12 @@ export default function CategoriesTab() {
   const [categories, setCategories] = useState<CategoryRow[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
+  const [newNameRu, setNewNameRu] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [editingNameRu, setEditingNameRu] = useState("");
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -42,7 +44,7 @@ export default function CategoriesTab() {
     setAdding(true);
     setError(null);
     const nextOrder = ((categories?.at(-1)?.sort_order ?? 0) as number) + 10;
-    const { error: dbError } = await createCategory({ name, sortOrder: nextOrder });
+    const { error: dbError } = await createCategory({ name, nameRu: newNameRu.trim(), sortOrder: nextOrder });
     setAdding(false);
     if (dbError) {
       setError(
@@ -51,6 +53,7 @@ export default function CategoriesTab() {
       return;
     }
     setNewName("");
+    setNewNameRu("");
     load();
   };
 
@@ -85,26 +88,37 @@ export default function CategoriesTab() {
   const startEdit = (cat: CategoryRow) => {
     setEditingId(cat.id);
     setEditingName(cat.name);
+    setEditingNameRu(cat.name_ru ?? "");
   };
 
   const saveEdit = async (cat: CategoryRow) => {
     const name = editingName.trim();
-    if (!name || name === cat.name) {
+    const nameRu = editingNameRu.trim();
+    if (!name) {
       setEditingId(null);
       return;
     }
-    const { error: dbError } = await updateCategory(cat.id, { name });
+    if (name === cat.name && nameRu === (cat.name_ru ?? "")) {
+      setEditingId(null);
+      return;
+    }
+    const { error: dbError } = await updateCategory(cat.id, { name, nameRu });
     if (dbError) {
       setError(dbError.message.includes("duplicate") ? "Bu nomdagi bo'lim allaqachon mavjud." : dbError.message);
       return;
     }
     // Bu bo'limga tegishli barcha mahsulotlarda ham eski nom yangisiga almashtiriladi,
     // aks holda ular "yetim" (hech qanday bo'limga bog'lanmagan) bo'lib qolardi.
-    const { data: affected } = await supabase.from("products").select("id, categories").contains("categories", [cat.name]);
-    if (affected && affected.length > 0) {
-      for (const row of affected as { id: string; categories: string[] }[]) {
-        const updated = row.categories.map((c) => (c === cat.name ? name : c));
-        await supabase.from("products").update({ categories: updated }).eq("id", row.id);
+    if (name !== cat.name) {
+      const { data: affected } = await supabase
+        .from("products")
+        .select("id, categories")
+        .contains("categories", [cat.name]);
+      if (affected && affected.length > 0) {
+        for (const row of affected as { id: string; categories: string[] }[]) {
+          const updated = row.categories.map((c) => (c === cat.name ? name : c));
+          await supabase.from("products").update({ categories: updated }).eq("id", row.id);
+        }
       }
     }
     setEditingId(null);
@@ -143,6 +157,12 @@ export default function CategoriesTab() {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="Yangi bo'lim nomi, masalan: Gofro qutilar"
+          className="flex-1 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-brand-400"
+        />
+        <input
+          value={newNameRu}
+          onChange={(e) => setNewNameRu(e.target.value)}
+          placeholder="Ruscha nomi (ixtiyoriy)"
           className="flex-1 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-brand-400"
         />
         <button
@@ -217,15 +237,28 @@ export default function CategoriesTab() {
               )}
 
               {editingId === cat.id ? (
-                <input
-                  autoFocus
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && saveEdit(cat)}
-                  className="flex-1 border border-brand-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
-                />
+                <div className="flex-1 flex gap-2">
+                  <input
+                    autoFocus
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && saveEdit(cat)}
+                    placeholder="O'zbekcha"
+                    className="flex-1 border border-brand-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
+                  />
+                  <input
+                    value={editingNameRu}
+                    onChange={(e) => setEditingNameRu(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && saveEdit(cat)}
+                    placeholder="Ruscha (ixtiyoriy)"
+                    className="flex-1 border border-brand-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
+                  />
+                </div>
               ) : (
-                <span className="flex-1 text-sm font-bold text-ink">{cat.name}</span>
+                <span className="flex-1 text-sm font-bold text-ink">
+                  {cat.name}
+                  {cat.name_ru && <span className="text-ink/35 font-medium"> · {cat.name_ru}</span>}
+                </span>
               )}
 
               {editingId === cat.id ? (

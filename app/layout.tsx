@@ -5,6 +5,7 @@ import { CartProvider } from "@/components/CartProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { LikesProvider } from "@/components/LikesProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import { CategoryLabelsProvider } from "@/components/CategoryLabelsProvider";
 
 const display = Sora({
   subsets: ["latin"],
@@ -43,11 +44,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${display.variable} ${body.variable} ${mono.variable} font-body bg-surface text-ink antialiased`}
       >
         <LanguageProvider>
-          <AuthProvider>
-            <LikesProvider>
-              <CartProvider>{children}</CartProvider>
-            </LikesProvider>
-          </AuthProvider>
+          <CategoryLabelsProvider>
+            <AuthProvider>
+              <LikesProvider>
+                <CartProvider>{children}</CartProvider>
+              </LikesProvider>
+            </AuthProvider>
+          </CategoryLabelsProvider>
         </LanguageProvider>
       </body>
     </html>

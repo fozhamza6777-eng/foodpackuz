@@ -7,20 +7,21 @@ import ProductArt from "./ProductArt";
 import Counter from "./Counter";
 import type { Banner } from "@/lib/supabase/banners";
 import type { Category } from "@/lib/supabase/categories";
-
-const fallbackBanner: Banner = {
-  id: "fallback",
-  tag: "FOOD BOX",
-  title: "Fast-food biznesingiz uchun to'liq qadoqlash yechimi",
-  description: "Klamshell qutilardan termo-konteynerlargacha — bitta manzilda, ulgurji narxda.",
-  ctaLabel: "Katalogni ko'rish",
-  ctaHref: "#katalog",
-  gradientFrom: "from-brand-500",
-  gradientTo: "to-brand-300",
-  art: "clamshell"
-};
+import { useLanguage } from "./LanguageProvider";
 
 export default function Hero({ banners, categories }: { banners: Banner[]; categories: Category[] }) {
+  const { t, tr } = useLanguage();
+  const fallbackBanner: Banner = {
+    id: "fallback",
+    tag: "FOOD BOX",
+    title: t("hero.fallback_title"),
+    description: t("hero.fallback_description"),
+    ctaLabel: t("hero.fallback_cta"),
+    ctaHref: "#katalog",
+    gradientFrom: "from-brand-500",
+    gradientTo: "to-brand-300",
+    art: "clamshell"
+  };
   const slides = banners.length > 0 ? banners : [fallbackBanner];
   const [index, setIndex] = useState(0);
 
@@ -74,20 +75,20 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
               >
                 {slide.tag && (
                   <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide mb-5">
-                    {slide.tag}
+                    {tr(slide.tag, slide.tagRu)}
                   </span>
                 )}
                 <h1 className="font-display font-extrabold text-3xl sm:text-4xl md:text-[40px] leading-tight max-w-lg">
-                  {slide.title}
+                  {tr(slide.title, slide.titleRu)}
                 </h1>
                 {slide.description && (
-                  <p className="mt-4 max-w-md text-white/85 font-medium">{slide.description}</p>
+                  <p className="mt-4 max-w-md text-white/85 font-medium">{tr(slide.description, slide.descriptionRu)}</p>
                 )}
                 <a
                   href={slide.ctaHref}
                   className="group inline-flex items-center gap-2 mt-7 bg-white text-ink font-bold px-6 py-3.5 rounded-lg hover:-translate-y-0.5 hover:shadow-lg transition-all"
                 >
-                  {slide.ctaLabel}
+                  {tr(slide.ctaLabel, slide.ctaLabelRu)}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </a>
               </motion.div>
@@ -117,14 +118,14 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
               <button
                 onClick={() => go(-1)}
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 hover:bg-white/35 backdrop-blur flex items-center justify-center text-white transition-colors"
-                aria-label="Oldingi"
+                aria-label={t("hero.prev")}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={() => go(1)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 hover:bg-white/35 backdrop-blur flex items-center justify-center text-white transition-colors"
-                aria-label="Keyingi"
+                aria-label={t("hero.next")}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -137,7 +138,7 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
                     className={`h-1.5 rounded-full transition-all ${
                       i === index ? "w-7 bg-white" : "w-1.5 bg-white/40"
                     }`}
-                    aria-label={`${i + 1}-banner`}
+                    aria-label={t("hero.pagination", { n: i + 1 })}
                   />
                 ))}
               </div>
@@ -148,9 +149,9 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
         {/* statistikalar */}
         <div className="grid grid-cols-3 gap-3 md:gap-6 mt-5">
           {[
-            { to: 1200, suffix: "+", label: "Mijoz biznes" },
-            { to: 24, suffix: " soat", label: "Yetkazib berish" },
-            { to: 35, suffix: "+", label: "Mahsulot turi" }
+            { to: 1200, suffix: "+", label: t("hero.stat_customers") },
+            { to: 24, suffix: ` ${t("common.hour_short")}`, label: t("hero.stat_delivery") },
+            { to: 35, suffix: "+", label: t("hero.stat_product_types") }
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-xl shadow-card px-4 py-4 md:py-5 text-center">
               <div className="font-display font-extrabold text-xl md:text-3xl text-brand-500">
@@ -188,7 +189,7 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
                   )}
                 </div>
                 <span className="text-[11px] md:text-xs font-bold text-ink/70 text-center leading-tight px-2 py-2.5">
-                  {c.name}
+                  {tr(c.name, c.nameRu)}
                 </span>
               </motion.a>
             ))}
