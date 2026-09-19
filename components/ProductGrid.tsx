@@ -32,7 +32,9 @@ export default function ProductGrid({ products, categories }: { products: Produc
   const [selected, setSelected] = useState<Product | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
+  const [hideBar, setHideBar] = useState(false);
   const stickySentinelRef = useRef<HTMLDivElement>(null);
+  const lastScrollYRef = useRef(0);
 
   const filtered = useMemo(
     () =>
@@ -63,13 +65,26 @@ export default function ProductGrid({ products, categories }: { products: Produc
   }, [activeCategory, sortBy, perPage]);
 
   // Kategoriya panelini "yopishtirilgan" (sticky) holatga o'tganida ixcham
-  // ko'rinishga almashtiradi — foydalanuvchi katalogni ko'rishni boshlashi
-  // bilanoq (sarlavha matnidan o'tgach) panel darhol ixchamlashadi.
+  // ko'rinishga almashtiradi va mahsulot kartochkalarini ko'rishni
+  // boshlagach tepaga yashirinadi (ko'proq joy bo'shatish uchun) — pastga
+  // scroll qilinganda yashiriladi, tepaga (orqaga) scroll qilinganda esa
+  // yana ko'rinadi.
   useEffect(() => {
     const sentinel = stickySentinelRef.current;
     if (!sentinel) return;
+    lastScrollYRef.current = window.scrollY;
     const handleScroll = () => {
-      setIsCompact(sentinel.getBoundingClientRect().top < 73);
+      const currentY = window.scrollY;
+      const pastThreshold = sentinel.getBoundingClientRect().top < 73;
+      const delta = currentY - lastScrollYRef.current;
+      if (pastThreshold) {
+        if (delta > 4) setHideBar(true);
+        else if (delta < -4) setHideBar(false);
+      } else {
+        setHideBar(false);
+      }
+      setIsCompact(pastThreshold);
+      lastScrollYRef.current = currentY;
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -102,9 +117,9 @@ export default function ProductGrid({ products, categories }: { products: Produc
 
         <div ref={stickySentinelRef} />
         <div
-          className={`mb-7 sticky top-[72px] z-20 bg-white/95 backdrop-blur border-b transition-[padding,box-shadow] duration-200 ${
-            isCompact ? "py-1.5 border-ink/10 shadow-card" : "py-3 border-ink/8"
-          }`}
+          className={`mb-7 sticky top-[72px] z-20 bg-white/95 backdrop-blur border-b transition-[transform,padding,box-shadow] duration-300 ${
+            isCompact && hideBar ? "-translate-y-[150%]" : "translate-y-0"
+          } ${isCompact ? "py-1.5 border-ink/10 shadow-card" : "py-3 border-ink/8"}`}
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex-1 min-w-0">
