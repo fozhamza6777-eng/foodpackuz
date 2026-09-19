@@ -234,7 +234,11 @@ export default function Header({ categories }: { categories: Category[] }) {
                     onClick={(e) => {
                       e.preventDefault();
                       setMenuOpen(false);
-                      goToCategory(c.name);
+                      // Mobil menyu yopilish animatsiyasi sahifa balandligini
+                      // o'zgartiradi, shuning uchun scrollIntoView'ni menyu
+                      // to'liq yopilgunicha kutib turamiz — aks holda scroll
+                      // yopilish animatsiyasi bilan to'qnashib, ishlamay qoladi.
+                      window.setTimeout(() => goToCategory(c.name), 300);
                     }}
                     className="py-2 text-ink/80"
                   >
