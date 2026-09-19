@@ -17,7 +17,15 @@ export function CatalogFilterProvider({ children }: { children: ReactNode }) {
 
   const goToCategory = useCallback((name: string) => {
     setActiveCategory(name);
-    document.getElementById("katalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = document.getElementById("katalog");
+    if (!el) return;
+    // `scrollIntoView`/`behavior: "smooth"` o'rniga aniq koordinataga darhol
+    // scroll qilamiz — ba'zi qurilma/brauzer sozlamalarida (masalan,
+    // "harakatni kamaytirish" yoqilgan bo'lsa) silliq scroll butunlay
+    // ishlamay qolishi mumkin. CSS'dagi `scroll-behavior: smooth` (global)
+    // baribir silliqlikni ta'minlaydi, u yerda qo'llab-quvvatlansa.
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top, behavior: "instant" });
   }, []);
 
   return (

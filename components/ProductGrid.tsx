@@ -78,7 +78,11 @@ export default function ProductGrid({ products, categories }: { products: Produc
 
   const goToPage = (p: number) => {
     setPage(p);
-    document.getElementById("katalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = document.getElementById("katalog");
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: "instant" });
+    }
   };
 
   return (
