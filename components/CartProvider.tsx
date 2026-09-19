@@ -123,13 +123,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   const syncToServer = useCallback(
-    (productId: string, qty: number) => {
+    async (productId: string, qty: number) => {
       const userId = auth.session?.user?.id;
       if (!userId || !isSupabaseConfigured) return;
       if (qty <= 0) {
-        supabase.from("cart_items").delete().eq("user_id", userId).eq("product_id", productId);
+        const { error } = await supabase.from("cart_items").delete().eq("user_id", userId).eq("product_id", productId);
+        if (error) console.error("[Cart] savatdan o'chirishda xatolik:", error.message);
       } else {
-        supabase.from("cart_items").upsert({ user_id: userId, product_id: productId, qty });
+        const { error } = await supabase.from("cart_items").upsert({ user_id: userId, product_id: productId, qty });
+        if (error) console.error("[Cart] savatga saqlashda xatolik:", error.message);
       }
     },
     [auth.session?.user?.id]
