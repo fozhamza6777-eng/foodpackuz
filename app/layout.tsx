@@ -8,6 +8,7 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 import { CategoryLabelsProvider } from "@/components/CategoryLabelsProvider";
 import { CatalogFilterProvider } from "@/components/CatalogFilterProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import SupportChatWidget from "@/components/SupportChatWidget";
 
 const display = Sora({
   subsets: ["latin"],
@@ -69,7 +70,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <CatalogFilterProvider>
               <AuthProvider>
                 <LikesProvider>
-                  <CartProvider>{children}</CartProvider>
+                  <CartProvider>
+                    {children}
+                    <SupportChatWidget />
+                  </CartProvider>
                 </LikesProvider>
               </AuthProvider>
             </CatalogFilterProvider>

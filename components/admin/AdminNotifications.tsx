@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, ShoppingBag, AlertTriangle, X } from "lucide-react";
+import { Bell, ShoppingBag, AlertTriangle, MessageCircle, X } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { formatNumber } from "@/lib/formatNumber";
 
 interface NotificationItem {
   id: string;
-  type: "new_order" | "cancel_request";
+  type: "new_order" | "cancel_request" | "new_chat_message";
   text: string;
 }
 
@@ -44,7 +44,18 @@ function playCancelAlertChime() {
   playTone(440, 220, 440);
 }
 
-export default function AdminNotifications({ onGoToOrders }: { onGoToOrders: () => void }) {
+function playChatChime() {
+  playTone(660, 130, 0);
+  playTone(880, 160, 130);
+}
+
+export default function AdminNotifications({
+  onGoToOrders,
+  onGoToChat
+}: {
+  onGoToOrders: () => void;
+  onGoToChat: () => void;
+}) {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [toast, setToast] = useState<NotificationItem | null>(null);
   const [open, setOpen] = useState(false);
@@ -82,6 +93,20 @@ export default function AdminNotifications({ onGoToOrders }: { onGoToOrders: () 
           setToast(item);
           window.setTimeout(() => setToast((t) => (t?.id === item.id ? null : t)), 6000);
         }
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_messages" }, (payload) => {
+        if (!initialized.current) return;
+        const message = payload.new as any;
+        if (message.sender_role !== "customer") return;
+        playChatChime();
+        const item: NotificationItem = {
+          id: `chat-${message.id}-${Date.now()}`,
+          type: "new_chat_message",
+          text: message.body.length > 80 ? `${message.body.slice(0, 80)}…` : message.body
+        };
+        setItems((prev) => [item, ...prev].slice(0, 20));
+        setToast(item);
+        window.setTimeout(() => setToast((t) => (t?.id === item.id ? null : t)), 6000);
       })
       .subscribe();
 
@@ -144,20 +169,23 @@ export default function AdminNotifications({ onGoToOrders }: { onGoToOrders: () 
                       key={n.id}
                       onClick={() => {
                         setOpen(false);
-                        onGoToOrders();
+                        if (n.type === "new_chat_message") onGoToChat();
+                        else onGoToOrders();
                       }}
                       className="w-full flex items-start gap-2.5 px-4 py-3 text-left hover:bg-surface transition-colors border-b border-ink/5 last:border-0"
                     >
                       <span
                         className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                          n.type === "new_order" ? "bg-brand-50 text-brand-600" : "bg-amber-light text-amber"
+                          n.type === "new_order"
+                            ? "bg-brand-50 text-brand-600"
+                            : n.type === "new_chat_message"
+                            ? "bg-success/10 text-success"
+                            : "bg-amber-light text-amber"
                         }`}
                       >
-                        {n.type === "new_order" ? (
-                          <ShoppingBag className="w-3.5 h-3.5" />
-                        ) : (
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                        )}
+                        {n.type === "new_order" && <ShoppingBag className="w-3.5 h-3.5" />}
+                        {n.type === "cancel_request" && <AlertTriangle className="w-3.5 h-3.5" />}
+                        {n.type === "new_chat_message" && <MessageCircle className="w-3.5 h-3.5" />}
                       </span>
                       <span className="text-xs font-medium text-ink/70 leading-snug">{n.text}</span>
                     </button>
@@ -180,25 +208,40 @@ export default function AdminNotifications({ onGoToOrders }: { onGoToOrders: () 
           >
             <div
               className={`bg-white rounded-xl shadow-2xl border p-4 flex items-start gap-3 ${
-                toast.type === "cancel_request" ? "border-amber/30" : "border-brand-100"
+                toast.type === "cancel_request"
+                  ? "border-amber/30"
+                  : toast.type === "new_chat_message"
+                  ? "border-success/30"
+                  : "border-brand-100"
               }`}
             >
               <span
                 className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-                  toast.type === "new_order" ? "bg-brand-50 text-brand-600" : "bg-amber-light text-amber"
+                  toast.type === "new_order"
+                    ? "bg-brand-50 text-brand-600"
+                    : toast.type === "new_chat_message"
+                    ? "bg-success/10 text-success"
+                    : "bg-amber-light text-amber"
                 }`}
               >
-                {toast.type === "new_order" ? <ShoppingBag className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+                {toast.type === "new_order" && <ShoppingBag className="w-4 h-4" />}
+                {toast.type === "cancel_request" && <AlertTriangle className="w-4 h-4" />}
+                {toast.type === "new_chat_message" && <MessageCircle className="w-4 h-4" />}
               </span>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-ink">
-                  {toast.type === "new_order" ? "🆕 Yangi buyurtma!" : "⚠️ Bekor qilish so'ralmoqda"}
+                  {toast.type === "new_order"
+                    ? "🆕 Yangi buyurtma!"
+                    : toast.type === "new_chat_message"
+                    ? "💬 Yangi xabar!"
+                    : "⚠️ Bekor qilish so'ralmoqda"}
                 </p>
                 <p className="text-xs text-ink/60 mt-0.5">{toast.text}</p>
                 <button
                   onClick={() => {
                     setToast(null);
-                    onGoToOrders();
+                    if (toast.type === "new_chat_message") onGoToChat();
+                    else onGoToOrders();
                   }}
                   className="mt-2 text-xs font-bold text-brand-600 hover:underline"
                 >

@@ -367,6 +367,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "badge.imported": "Chet eldan olib kelinadi",
     "badge.manufacturing": "Ishlab chiqarilmoqda",
 
+    // --- SupportChatWidget ---
+    "chat.button_label": "Yordam kerakmi?",
+    "chat.title": "Qo'llab-quvvatlash",
+    "chat.subtitle": "Savolingiz bo'lsa, shu yerga yozing — administrator tez orada javob beradi.",
+    "chat.empty": "Hozircha xabar yo'q. Birinchi xabarni yozing!",
+    "chat.placeholder": "Xabaringizni yozing...",
+    "chat.send": "Yuborish",
+    "chat.admin_label": "Administrator",
+    "chat.you_label": "Siz",
+
     // --- Footer ---
     "footer.app_title": "FOOD BOX ilovasi doim yoningizda",
     "footer.app_text": "Buyurtmalarni telefoningizdan kuzating va tezroq qayta buyurtma bering.",
@@ -741,6 +751,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "badge.ships_in": "Доставка через несколько дней",
     "badge.imported": "Привозится из-за рубежа",
     "badge.manufacturing": "В процессе производства",
+
+    // --- SupportChatWidget ---
+    "chat.button_label": "Нужна помощь?",
+    "chat.title": "Поддержка",
+    "chat.subtitle": "Если у вас есть вопрос, напишите сюда — администратор скоро ответит.",
+    "chat.empty": "Пока нет сообщений. Напишите первое сообщение!",
+    "chat.placeholder": "Напишите сообщение...",
+    "chat.send": "Отправить",
+    "chat.admin_label": "Администратор",
+    "chat.you_label": "Вы",
 
     // --- Footer ---
     "footer.app_title": "Приложение FOOD BOX всегда с вами",

@@ -13,7 +13,8 @@ import {
   Image as ImageIcon,
   Layers,
   CreditCard,
-  Handshake
+  Handshake,
+  MessageCircle
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import OrdersTab from "./OrdersTab";
@@ -22,9 +23,10 @@ import BannersTab from "./BannersTab";
 import CategoriesTab from "./CategoriesTab";
 import PaymentCardsTab from "./PaymentCardsTab";
 import BulkRequestsTab from "./BulkRequestsTab";
+import SupportChatTab from "./SupportChatTab";
 import AdminNotifications from "./AdminNotifications";
 
-type Tab = "orders" | "products" | "categories" | "banners" | "payment-cards" | "bulk-requests";
+type Tab = "orders" | "products" | "categories" | "banners" | "payment-cards" | "bulk-requests" | "chat";
 
 export default function AdminPanel() {
   const auth = useAuth();
@@ -82,7 +84,7 @@ export default function AdminPanel() {
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <AdminNotifications onGoToOrders={() => setTab("orders")} />
+            <AdminNotifications onGoToOrders={() => setTab("orders")} onGoToChat={() => setTab("chat")} />
             <button
               onClick={() => auth.logout()}
               className="flex items-center gap-1.5 text-sm font-bold text-ink/60 hover:text-danger transition-colors px-2"
@@ -183,6 +185,21 @@ export default function AdminPanel() {
             )}
             <Handshake className="w-4 h-4" /> Hamkorlik so'rovlari
           </button>
+          <button
+            onClick={() => setTab("chat")}
+            className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+              tab === "chat" ? "text-white" : "text-ink/50 hover:text-ink"
+            }`}
+          >
+            {tab === "chat" && (
+              <motion.span
+                layoutId="admin-tab-pill"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                className="absolute inset-0 bg-brand-500 rounded-lg -z-10"
+              />
+            )}
+            <MessageCircle className="w-4 h-4" /> Mijozlar chati
+          </button>
         </div>
       </header>
 
@@ -193,6 +210,7 @@ export default function AdminPanel() {
         {tab === "banners" && <BannersTab />}
         {tab === "payment-cards" && <PaymentCardsTab />}
         {tab === "bulk-requests" && <BulkRequestsTab />}
+        {tab === "chat" && <SupportChatTab />}
       </main>
     </div>
   );

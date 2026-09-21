@@ -124,3 +124,12 @@ export interface PaymentCardRow {
   sort_order: number;
   created_at: string;
 }
+
+export interface SupportMessageRow {
+  id: string;
+  user_id: string;
+  sender_role: "customer" | "admin";
+  body: string;
+  is_read_by_admin: boolean;
+  created_at: string;
+}
