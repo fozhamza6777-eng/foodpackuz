@@ -381,9 +381,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "chat.admin_label": "Administrator",
     "chat.you_label": "Siz",
 
+    // --- Ilova banneri ---
+    "app_promo.title": "FOOD BOX ilovasi doim yoningizda",
+    "app_promo.text": "Buyurtmalarni telefoningizdan kuzating va tezroq qayta buyurtma bering.",
+    "app_promo.install_button": "Ilovani o'rnatish",
+    "app_promo.ios_title": "iPhone'da qanday qo'shiladi?",
+    "app_promo.ios_steps": "Pastdagi Safari menyusidan Ulashish tugmasini bosing, so'ng \"Bosh ekranga qo'shish\"ni tanlang.",
+
     // --- Footer ---
-    "footer.app_title": "FOOD BOX ilovasi doim yoningizda",
-    "footer.app_text": "Buyurtmalarni telefoningizdan kuzating va tezroq qayta buyurtma bering.",
     "footer.about": "Restoran, kafe va dostavka biznesi uchun bir martalik qadoqlash yechimlari. 2019 yildan beri O'zbekiston bozorida.",
     "footer.catalog": "Katalog",
     "footer.cat_clamshell": "Klamshell qutilar",
@@ -770,9 +775,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "chat.admin_label": "Администратор",
     "chat.you_label": "Вы",
 
+    // --- Ilova banneri ---
+    "app_promo.title": "Приложение FOOD BOX всегда с вами",
+    "app_promo.text": "Отслеживайте заказы с телефона и оформляйте повторный заказ быстрее.",
+    "app_promo.install_button": "Установить приложение",
+    "app_promo.ios_title": "Как добавить на iPhone?",
+    "app_promo.ios_steps": "Нажмите кнопку \"Поделиться\" в Safari внизу экрана, затем выберите \"На экран «Домой»\".",
+
     // --- Footer ---
-    "footer.app_title": "Приложение FOOD BOX всегда с вами",
-    "footer.app_text": "Отслеживайте заказы с телефона и оформляйте повторный заказ быстрее.",
     "footer.about": "Одноразовая упаковка для ресторанов, кафе и доставки. На рынке Узбекистана с 2019 года.",
     "footer.catalog": "Каталог",
     "footer.cat_clamshell": "Клэмшелл коробки",

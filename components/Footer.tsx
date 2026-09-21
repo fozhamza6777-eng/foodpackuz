@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Mail, MapPin, Instagram, Send, Smartphone } from "lucide-react";
+import { Phone, Mail, MapPin, Instagram, Send } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 
 export default function Footer() {
@@ -8,30 +8,7 @@ export default function Footer() {
 
   return (
     <footer id="aloqa" className="bg-white border-t border-ink/8">
-      {/* ilova banneri */}
-      <div className="mx-auto max-w-7xl px-5 lg:px-8 py-10">
-        <div className="bg-ink rounded-2xl px-6 md:px-10 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4 text-white">
-            <span className="w-12 h-12 rounded-xl bg-brand-gradient flex items-center justify-center shrink-0">
-              <Smartphone className="w-6 h-6" />
-            </span>
-            <div>
-              <h3 className="font-display font-extrabold text-lg">{t("footer.app_title")}</h3>
-              <p className="text-white/60 text-sm font-medium mt-0.5">{t("footer.app_text")}</p>
-            </div>
-          </div>
-          <div className="flex gap-3 shrink-0">
-            <a href="#" className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors">
-              App Store
-            </a>
-            <a href="#" className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors">
-              Google Play
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-7xl px-5 lg:px-8 pb-14">
+      <div className="mx-auto max-w-7xl px-5 lg:px-8 py-14">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           <div>
             <div className="mb-4">

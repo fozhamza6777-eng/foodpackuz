@@ -8,6 +8,7 @@ import { fetchActiveCategories, type Category } from "@/lib/supabase/categories"
 import type { Product } from "@/lib/types";
 import TopBar from "@/components/TopBar";
 import Header from "@/components/Header";
+import AppInstallBanner from "@/components/AppInstallBanner";
 import Hero from "@/components/Hero";
 import PromoRow from "@/components/PromoRow";
 import TrustBadges from "@/components/TrustBadges";
@@ -66,6 +67,7 @@ export default function HomeContent({
       <TopBar />
       <Header categories={categories} />
       <main>
+        <AppInstallBanner />
         <Hero banners={banners} categories={categories} />
         <PromoRow id="yangiliklar" accent="brand" products={newProducts} />
         <TrustBadges />
