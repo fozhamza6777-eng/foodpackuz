@@ -94,7 +94,7 @@ export default function PaymentCardsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
@@ -111,24 +111,24 @@ export default function PaymentCardsTab() {
           value={form.bankName}
           onChange={(e) => setForm({ ...form, bankName: e.target.value })}
           placeholder="Bank (masalan: Humo)"
-          className="sm:w-40 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-brand-400"
+          className="sm:w-40 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-violet-400"
         />
         <input
           value={form.cardHolder}
           onChange={(e) => setForm({ ...form, cardHolder: e.target.value })}
           placeholder="Karta egasi (ixtiyoriy)"
-          className="sm:w-44 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-brand-400"
+          className="sm:w-44 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-violet-400"
         />
         <input
           value={form.cardNumber}
           onChange={(e) => setForm({ ...form, cardNumber: e.target.value })}
           placeholder="8600 1234 5678 9012"
-          className="flex-1 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium font-mono focus:outline-none focus:border-brand-400"
+          className="flex-1 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium font-mono focus:outline-none focus:border-violet-400"
         />
         <button
           type="submit"
           disabled={adding || !form.cardNumber.trim()}
-          className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold text-sm px-4 py-2.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 shrink-0"
+          className="flex items-center justify-center gap-2 bg-violet-600 text-white font-bold text-sm px-4 py-2.5 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 shrink-0"
         >
           {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           Qo'shish
@@ -164,20 +164,20 @@ export default function PaymentCardsTab() {
                     value={editForm.bankName}
                     onChange={(e) => setEditForm({ ...editForm, bankName: e.target.value })}
                     placeholder="Bank"
-                    className="sm:w-32 border border-brand-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
+                    className="sm:w-32 border border-violet-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
                   />
                   <input
                     value={editForm.cardHolder}
                     onChange={(e) => setEditForm({ ...editForm, cardHolder: e.target.value })}
                     placeholder="Karta egasi"
-                    className="sm:w-36 border border-brand-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
+                    className="sm:w-36 border border-violet-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
                   />
                   <input
                     value={editForm.cardNumber}
                     onChange={(e) => setEditForm({ ...editForm, cardNumber: e.target.value })}
                     onKeyDown={(e) => e.key === "Enter" && saveEdit(card)}
                     placeholder="Karta raqami"
-                    className="flex-1 border border-brand-300 rounded-lg px-3 py-1.5 text-sm font-semibold font-mono focus:outline-none"
+                    className="flex-1 border border-violet-300 rounded-lg px-3 py-1.5 text-sm font-semibold font-mono focus:outline-none"
                   />
                 </div>
               ) : (

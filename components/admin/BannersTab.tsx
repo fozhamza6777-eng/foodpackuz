@@ -52,7 +52,7 @@ export default function BannersTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
@@ -65,7 +65,7 @@ export default function BannersTab() {
         </p>
         <button
           onClick={() => setModal("create")}
-          className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-brand-600 transition-colors whitespace-nowrap"
+          className="flex items-center justify-center gap-2 bg-violet-600 text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-violet-700 transition-colors whitespace-nowrap"
         >
           <Plus className="w-4 h-4" /> Yangi banner
         </button>
@@ -114,7 +114,7 @@ export default function BannersTab() {
               </button>
               <button
                 onClick={() => setModal(b)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold text-brand-600 hover:bg-brand-50 transition-colors border-r border-ink/8"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold text-violet-700 hover:bg-violet-50 transition-colors border-r border-ink/8"
               >
                 <Pencil className="w-3.5 h-3.5" /> Tahrirlash
               </button>

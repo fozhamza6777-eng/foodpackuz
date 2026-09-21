@@ -66,7 +66,7 @@ export default function ProductsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
@@ -79,13 +79,13 @@ export default function ProductsTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Mahsulot nomi, kod yoki kategoriya bo'yicha qidirish..."
-            className="w-full h-11 rounded-lg border border-ink/10 bg-white pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-brand-400"
+            className="w-full h-11 rounded-lg border border-ink/10 bg-white pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-violet-400"
           />
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/35" />
         </div>
         <button
           onClick={() => setModal("create")}
-          className="flex items-center justify-center gap-2 bg-brand-500 text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-brand-600 transition-colors whitespace-nowrap"
+          className="flex items-center justify-center gap-2 bg-violet-600 text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-violet-700 transition-colors whitespace-nowrap"
         >
           <Plus className="w-4 h-4" /> Yangi mahsulot
         </button>
@@ -107,7 +107,7 @@ export default function ProductsTab() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <p className="font-bold text-sm text-ink truncate">{p.name}</p>
-                  {p.is_new && <Sparkles className="w-3.5 h-3.5 text-brand-500 shrink-0" />}
+                  {p.is_new && <Sparkles className="w-3.5 h-3.5 text-violet-600 shrink-0" />}
                 </div>
                 <p className="text-xs text-ink/45 font-medium mt-0.5">
                   {(p.categories && p.categories.length > 0 ? p.categories : [p.category]).join(" · ")}
@@ -136,7 +136,7 @@ export default function ProductsTab() {
               </button>
               <button
                 onClick={() => setModal(p)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold text-brand-600 hover:bg-brand-50 transition-colors border-r border-ink/8"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold text-violet-700 hover:bg-violet-50 transition-colors border-r border-ink/8"
               >
                 <Pencil className="w-3.5 h-3.5" /> Tahrirlash
               </button>

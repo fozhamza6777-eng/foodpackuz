@@ -177,7 +177,7 @@ export default function AdminNotifications({
                       <span
                         className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                           n.type === "new_order"
-                            ? "bg-brand-50 text-brand-600"
+                            ? "bg-violet-50 text-violet-700"
                             : n.type === "new_chat_message"
                             ? "bg-success/10 text-success"
                             : "bg-amber-light text-amber"
@@ -212,13 +212,13 @@ export default function AdminNotifications({
                   ? "border-amber/30"
                   : toast.type === "new_chat_message"
                   ? "border-success/30"
-                  : "border-brand-100"
+                  : "border-violet-100"
               }`}
             >
               <span
                 className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                   toast.type === "new_order"
-                    ? "bg-brand-50 text-brand-600"
+                    ? "bg-violet-50 text-violet-700"
                     : toast.type === "new_chat_message"
                     ? "bg-success/10 text-success"
                     : "bg-amber-light text-amber"
@@ -243,7 +243,7 @@ export default function AdminNotifications({
                     if (toast.type === "new_chat_message") onGoToChat();
                     else onGoToOrders();
                   }}
-                  className="mt-2 text-xs font-bold text-brand-600 hover:underline"
+                  className="mt-2 text-xs font-bold text-violet-700 hover:underline"
                 >
                   Ko'rish →
                 </button>

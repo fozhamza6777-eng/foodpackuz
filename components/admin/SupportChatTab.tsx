@@ -84,7 +84,7 @@ export default function SupportChatTab() {
   if (!conversations) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
@@ -107,10 +107,10 @@ export default function SupportChatTab() {
               key={c.userId}
               onClick={() => setSelectedUserId(c.userId)}
               className={`w-full flex items-start gap-2.5 px-4 py-3 text-left border-b border-ink/5 hover:bg-surface transition-colors ${
-                selectedUserId === c.userId ? "bg-brand-50" : ""
+                selectedUserId === c.userId ? "bg-violet-50" : ""
               }`}
             >
-              <span className="w-9 h-9 rounded-full bg-brand-50 flex items-center justify-center shrink-0 font-bold text-brand-600 text-sm">
+              <span className="w-9 h-9 rounded-full bg-violet-50 flex items-center justify-center shrink-0 font-bold text-violet-700 text-sm">
                 {c.customerName.charAt(0).toUpperCase()}
               </span>
               <div className="flex-1 min-w-0">
@@ -145,7 +145,7 @@ export default function SupportChatTab() {
               <button onClick={() => setSelectedUserId(null)} className="p-1 -ml-1 md:hidden">
                 <ArrowLeft className="w-4 h-4" />
               </button>
-              <span className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center font-bold text-brand-600 text-xs">
+              <span className="w-8 h-8 rounded-full bg-violet-50 flex items-center justify-center font-bold text-violet-700 text-xs">
                 {selectedConversation.customerName.charAt(0).toUpperCase()}
               </span>
               <div>
@@ -167,7 +167,7 @@ export default function SupportChatTab() {
                   <div
                     className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm font-medium leading-relaxed ${
                       m.senderRole === "admin"
-                        ? "bg-brand-500 text-white rounded-br-sm"
+                        ? "bg-violet-600 text-white rounded-br-sm"
                         : "bg-surface text-ink rounded-bl-sm"
                     }`}
                   >
@@ -190,12 +190,12 @@ export default function SupportChatTab() {
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Javob yozing..."
-                className="flex-1 border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                className="flex-1 border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
               />
               <button
                 type="submit"
                 disabled={!body.trim() || sending}
-                className="bg-brand-500 text-white p-2.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 shrink-0"
+                className="bg-violet-600 text-white p-2.5 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 shrink-0"
                 aria-label="Yuborish"
               >
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

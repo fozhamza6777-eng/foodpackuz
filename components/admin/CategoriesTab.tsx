@@ -145,7 +145,7 @@ export default function CategoriesTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
@@ -157,18 +157,18 @@ export default function CategoriesTab() {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="Yangi bo'lim nomi, masalan: Gofro qutilar"
-          className="flex-1 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-brand-400"
+          className="flex-1 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-violet-400"
         />
         <input
           value={newNameRu}
           onChange={(e) => setNewNameRu(e.target.value)}
           placeholder="Ruscha nomi (ixtiyoriy)"
-          className="flex-1 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-brand-400"
+          className="flex-1 h-11 rounded-lg border border-ink/10 bg-white px-4 text-sm font-medium focus:outline-none focus:border-violet-400"
         />
         <button
           type="submit"
           disabled={adding || !newName.trim()}
-          className="flex items-center gap-2 bg-brand-500 text-white font-bold text-sm px-4 py-2.5 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 bg-violet-600 text-white font-bold text-sm px-4 py-2.5 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50"
         >
           {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           Qo'shish
@@ -199,7 +199,7 @@ export default function CategoriesTab() {
 
               <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-surface border border-ink/10 flex items-center justify-center p-1.5">
                 {uploadingId === cat.id ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-brand-500" />
+                  <Loader2 className="w-4 h-4 animate-spin text-violet-600" />
                 ) : cat.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={cat.image_url} alt="" className="w-full h-full object-contain" />
@@ -221,7 +221,7 @@ export default function CategoriesTab() {
                 onClick={() => fileInputRefs.current[cat.id]?.click()}
                 disabled={uploadingId === cat.id}
                 title={cat.image_url ? "Rasmni almashtirish" : "Rasm yuklash"}
-                className="p-2 rounded-lg text-ink/40 hover:bg-surface hover:text-brand-600 transition-colors shrink-0"
+                className="p-2 rounded-lg text-ink/40 hover:bg-surface hover:text-violet-700 transition-colors shrink-0"
               >
                 <Upload className="w-4 h-4" />
               </button>
@@ -244,14 +244,14 @@ export default function CategoriesTab() {
                     onChange={(e) => setEditingName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && saveEdit(cat)}
                     placeholder="O'zbekcha"
-                    className="flex-1 border border-brand-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
+                    className="flex-1 border border-violet-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
                   />
                   <input
                     value={editingNameRu}
                     onChange={(e) => setEditingNameRu(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && saveEdit(cat)}
                     placeholder="Ruscha (ixtiyoriy)"
-                    className="flex-1 border border-brand-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
+                    className="flex-1 border border-violet-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none"
                   />
                 </div>
               ) : (

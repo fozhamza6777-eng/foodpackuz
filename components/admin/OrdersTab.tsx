@@ -32,7 +32,7 @@ const paymentStatusMeta: Record<string, { label: string; color: string }> = {
 };
 
 const statusOptions = [
-  { value: "yangi", label: "Yangi", color: "bg-brand-50 text-brand-600" },
+  { value: "yangi", label: "Yangi", color: "bg-violet-50 text-violet-700" },
   { value: "jarayonda", label: "Jarayonda", color: "bg-amber-light text-amber" },
   { value: "yetkazildi", label: "Yetkazildi", color: "bg-success/10 text-success" },
   { value: "bekor_sorovi", label: "Bekor so'ralgan", color: "bg-amber-light text-amber" },
@@ -145,7 +145,7 @@ export default function OrdersTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
@@ -158,7 +158,7 @@ export default function OrdersTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Ism, telefon, tashkilot yoki manzil bo'yicha qidirish..."
-            className="w-full h-11 rounded-lg border border-ink/10 bg-white pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-brand-400"
+            className="w-full h-11 rounded-lg border border-ink/10 bg-white pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-violet-400"
           />
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/35" />
         </div>
@@ -219,7 +219,7 @@ export default function OrdersTab() {
                       </span>
                     )}
                     {hasGeo && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-[11px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">
                         <MapPin className="w-3 h-3" /> GPS
                       </span>
                     )}
@@ -250,7 +250,7 @@ export default function OrdersTab() {
                   <select
                     value={order.status}
                     onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-full border-0 focus:outline-none focus:ring-2 focus:ring-brand-300 ${meta.color}`}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-full border-0 focus:outline-none focus:ring-2 focus:ring-violet-300 ${meta.color}`}
                   >
                     {statusOptions.map((s) => (
                       <option key={s.value} value={s.value}>
@@ -371,7 +371,7 @@ export default function OrdersTab() {
                       <div className="border-t border-ink/8 pt-4 flex flex-wrap gap-2">
                         <button
                           onClick={() => copyToClipboard(buildCourierText(order, profile), order.id)}
-                          className="flex items-center gap-2 bg-brand-500 text-white font-bold text-sm px-4 py-2.5 rounded-lg hover:bg-brand-600 transition-colors"
+                          className="flex items-center gap-2 bg-violet-600 text-white font-bold text-sm px-4 py-2.5 rounded-lg hover:bg-violet-700 transition-colors"
                         >
                           {copiedId === order.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                           {copiedId === order.id ? "Nusxalandi!" : "Kuryer uchun nusxalash"}

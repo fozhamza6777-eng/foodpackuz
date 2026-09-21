@@ -34,7 +34,7 @@ export default function BulkRequestsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
@@ -46,7 +46,7 @@ export default function BulkRequestsTab() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Tashkilot yoki telefon bo'yicha qidirish..."
-          className="w-full h-11 rounded-lg border border-ink/10 bg-white pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-brand-400"
+          className="w-full h-11 rounded-lg border border-ink/10 bg-white pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-violet-400"
         />
         <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/35" />
       </div>
@@ -70,12 +70,12 @@ export default function BulkRequestsTab() {
               className="bg-white border border-ink/8 rounded-xl p-4"
             >
               <div className="flex items-center gap-2 mb-2">
-                <Building2 className="w-4 h-4 text-brand-500 shrink-0" />
+                <Building2 className="w-4 h-4 text-violet-600 shrink-0" />
                 <p className="font-bold text-sm text-ink truncate">{r.company}</p>
               </div>
               <a
                 href={`tel:${r.phone.replace(/\s+/g, "")}`}
-                className="flex items-center gap-2 text-sm text-ink/70 font-medium hover:text-brand-600 transition-colors mb-1.5"
+                className="flex items-center gap-2 text-sm text-ink/70 font-medium hover:text-violet-700 transition-colors mb-1.5"
               >
                 <Phone className="w-3.5 h-3.5 text-ink/40 shrink-0" /> {r.phone}
               </a>

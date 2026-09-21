@@ -260,7 +260,7 @@ export default function ProductFormModal({
                   value={form.id}
                   onChange={(e) => set("id", e.target.value.trim())}
                   placeholder="masalan: cl-03"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white disabled:bg-surface disabled:text-ink/40 focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white disabled:bg-surface disabled:text-ink/40 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -269,7 +269,7 @@ export default function ProductFormModal({
                   value={form.code}
                   onChange={(e) => set("code", e.target.value)}
                   placeholder="FP-CL-103"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
@@ -283,7 +283,7 @@ export default function ProductFormModal({
                   required
                   value={form.name}
                   onChange={(e) => set("name", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -294,7 +294,7 @@ export default function ProductFormModal({
                   value={form.nameRu}
                   onChange={(e) => set("nameRu", e.target.value)}
                   placeholder="Kiritilmasa, o'zbekcha nom ko'rsatiladi"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
@@ -327,7 +327,7 @@ export default function ProductFormModal({
                     className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-lg py-2.5 text-sm font-bold cursor-pointer transition-colors ${
                       uploading
                         ? "border-ink/10 text-ink/30"
-                        : "border-ink/15 text-ink/60 hover:border-brand-400 hover:text-brand-600"
+                        : "border-ink/15 text-ink/60 hover:border-violet-400 hover:text-violet-700"
                     }`}
                   >
                     {uploading ? (
@@ -373,8 +373,8 @@ export default function ProductFormModal({
                         key={cat.id}
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer border transition-colors ${
                           checked
-                            ? "bg-brand-500 text-white border-brand-500"
-                            : "bg-white text-ink/60 border-ink/15 hover:border-brand-300"
+                            ? "bg-violet-600 text-white border-violet-600"
+                            : "bg-white text-ink/60 border-ink/15 hover:border-violet-300"
                         }`}
                       >
                         <input
@@ -404,7 +404,7 @@ export default function ProductFormModal({
                   <select
                     value={form.image}
                     onChange={(e) => set("image", e.target.value)}
-                    className="flex-1 border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                    className="flex-1 border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                   >
                     {artOptions.map((a) => (
                       <option key={a} value={a}>
@@ -428,7 +428,7 @@ export default function ProductFormModal({
                   min={0}
                   value={form.price}
                   onChange={(e) => set("price", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -441,7 +441,7 @@ export default function ProductFormModal({
                   value={form.oldPrice}
                   onChange={(e) => set("oldPrice", e.target.value)}
                   placeholder="Chegirma uchun"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -450,7 +450,7 @@ export default function ProductFormModal({
                   value={form.unit}
                   onChange={(e) => set("unit", e.target.value)}
                   placeholder="dona"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
@@ -463,7 +463,7 @@ export default function ProductFormModal({
                   min={1}
                   value={form.packSize}
                   onChange={(e) => set("packSize", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -476,7 +476,7 @@ export default function ProductFormModal({
                   value={form.cartonSize}
                   onChange={(e) => set("cartonSize", e.target.value)}
                   placeholder="Masalan: 1000"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -485,7 +485,7 @@ export default function ProductFormModal({
                   value={form.material}
                   onChange={(e) => set("material", e.target.value)}
                   placeholder="Kraft karton, 350 gsm"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
@@ -498,7 +498,7 @@ export default function ProductFormModal({
                 value={form.sizes}
                 onChange={(e) => set("sizes", e.target.value)}
                 placeholder="S — 12×12 sm, M — 15×15 sm, L — 18×18 sm"
-                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
               />
             </div>
 
@@ -510,7 +510,7 @@ export default function ProductFormModal({
                 value={form.badges}
                 onChange={(e) => set("badges", e.target.value)}
                 placeholder="Biologik chiriydigan, Yog'ga chidamli"
-                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
               />
             </div>
 
@@ -523,7 +523,7 @@ export default function ProductFormModal({
                   rows={3}
                   value={form.description}
                   onChange={(e) => set("description", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400 resize-none"
                 />
               </div>
               <div>
@@ -535,7 +535,7 @@ export default function ProductFormModal({
                   value={form.descriptionRu}
                   onChange={(e) => set("descriptionRu", e.target.value)}
                   placeholder="Kiritilmasa, o'zbekcha tavsif ko'rsatiladi"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400 resize-none"
                 />
               </div>
             </div>
@@ -550,7 +550,7 @@ export default function ProductFormModal({
               <select
                 value={form.infoBadgeType}
                 onChange={(e) => set("infoBadgeType", e.target.value)}
-                className="w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                className="w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
               >
                 <option value="">Belgi yo'q</option>
                 <option value="low_stock">⚠️ Tugab qolyapti</option>
@@ -563,7 +563,7 @@ export default function ProductFormModal({
                   value={form.infoBadgeText}
                   onChange={(e) => set("infoBadgeText", e.target.value)}
                   placeholder="Matnni o'zingiz yozing (bo'sh qoldirsangiz standart matn ishlatiladi)"
-                  className="mt-2 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-2 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               )}
             </div>
@@ -574,7 +574,7 @@ export default function ProductFormModal({
                   type="checkbox"
                   checked={form.isNew}
                   onChange={(e) => set("isNew", e.target.checked)}
-                  className="w-4 h-4 accent-brand-500"
+                  className="w-4 h-4 accent-violet-600"
                 />
                 "Yangi" belgisi
               </label>
@@ -583,7 +583,7 @@ export default function ProductFormModal({
                   type="checkbox"
                   checked={form.isActive}
                   onChange={(e) => set("isActive", e.target.checked)}
-                  className="w-4 h-4 accent-brand-500"
+                  className="w-4 h-4 accent-violet-600"
                 />
                 Saytda ko'rinsin (faol)
               </label>
@@ -600,7 +600,7 @@ export default function ProductFormModal({
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70"
+                className="flex-1 flex items-center justify-center gap-2 bg-violet-600 text-white font-bold py-3 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-70"
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isEdit ? "O'zgarishlarni saqlash" : "Mahsulotni qo'shish"}

@@ -221,7 +221,7 @@ export default function BannerFormModal({
                     className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-lg py-2.5 text-sm font-bold cursor-pointer transition-colors ${
                       uploading
                         ? "border-ink/10 text-ink/30"
-                        : "border-ink/15 text-ink/60 hover:border-brand-400 hover:text-brand-600"
+                        : "border-ink/15 text-ink/60 hover:border-violet-400 hover:text-violet-700"
                     }`}
                   >
                     {uploading ? (
@@ -259,7 +259,7 @@ export default function BannerFormModal({
                   value={form.tag}
                   onChange={(e) => set("tag", e.target.value)}
                   placeholder="Masalan: Yangi kolleksiya"
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -269,7 +269,7 @@ export default function BannerFormModal({
                 <input
                   value={form.tagRu}
                   onChange={(e) => set("tagRu", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
@@ -283,7 +283,7 @@ export default function BannerFormModal({
                   required
                   value={form.title}
                   onChange={(e) => set("title", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -293,7 +293,7 @@ export default function BannerFormModal({
                 <input
                   value={form.titleRu}
                   onChange={(e) => set("titleRu", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
@@ -307,7 +307,7 @@ export default function BannerFormModal({
                   rows={2}
                   value={form.description}
                   onChange={(e) => set("description", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400 resize-none"
                 />
               </div>
               <div>
@@ -318,7 +318,7 @@ export default function BannerFormModal({
                   rows={2}
                   value={form.descriptionRu}
                   onChange={(e) => set("descriptionRu", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400 resize-none"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400 resize-none"
                 />
               </div>
             </div>
@@ -331,7 +331,7 @@ export default function BannerFormModal({
                 <input
                   value={form.ctaLabel}
                   onChange={(e) => set("ctaLabel", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -341,7 +341,7 @@ export default function BannerFormModal({
                 <input
                   value={form.ctaLabelRu}
                   onChange={(e) => set("ctaLabelRu", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
@@ -352,7 +352,7 @@ export default function BannerFormModal({
                 value={form.ctaHref}
                 onChange={(e) => set("ctaHref", e.target.value)}
                 placeholder="#katalog"
-                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
               />
             </div>
 
@@ -368,7 +368,7 @@ export default function BannerFormModal({
                     set("gradientFrom", from);
                     set("gradientTo", to);
                   }}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 >
                   {gradientOptions.map((g) => (
                     <option key={g.label} value={`${g.from}|${g.to}`}>
@@ -385,7 +385,7 @@ export default function BannerFormModal({
                   <select
                     value={form.art}
                     onChange={(e) => set("art", e.target.value)}
-                    className="flex-1 border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                    className="flex-1 border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                   >
                     {artOptions.map((a) => (
                       <option key={a} value={a}>
@@ -409,7 +409,7 @@ export default function BannerFormModal({
                   type="number"
                   value={form.sortOrder}
                   onChange={(e) => set("sortOrder", e.target.value)}
-                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-400"
+                  className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm font-semibold text-ink/70 pb-2.5">
@@ -417,7 +417,7 @@ export default function BannerFormModal({
                   type="checkbox"
                   checked={form.isActive}
                   onChange={(e) => set("isActive", e.target.checked)}
-                  className="w-4 h-4 accent-brand-500"
+                  className="w-4 h-4 accent-violet-600"
                 />
                 Saytda ko'rinsin (faol)
               </label>
@@ -434,7 +434,7 @@ export default function BannerFormModal({
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-brand-500 text-white font-bold py-3 rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-70"
+                className="flex-1 flex items-center justify-center gap-2 bg-violet-600 text-white font-bold py-3 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-70"
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isEdit ? "O'zgarishlarni saqlash" : "Bannerni qo'shish"}
