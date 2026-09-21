@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Smartphone, Share2, X } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 
-const DISMISS_KEY = "foodbox_app_banner_dismissed";
+const INSTALLED_KEY = "foodbox_app_installed";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -18,55 +18,66 @@ interface BeforeInstallPromptEvent extends Event {
 // iOS Safari esa buni dasturiy tarzda ochishga ruxsat bermaydi — shuning
 // uchun bitta umumiy tugma orqasida ikkala holat ham boshqariladi: Androidda
 // darhol o'rnatish oynasi, iOS'da esa qisqa qo'lda qo'shish ko'rsatmasi.
+//
+// MUHIM: "X" tugmasi banner faqat shu safar (joriy sahifa ko'rinishi) uchun
+// yopadi va localStorage'ga yozilmaydi — mijoz ilovani haqiqatan o'rnatmas
+// ekan, banner har safar saytga kirganda yana chiqishi kerak.
 export default function AppInstallBanner() {
   const { t } = useLanguage();
   const [mounted, setMounted] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [closed, setClosed] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showHint, setShowHint] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+
+    const markInstalled = () => {
+      setInstalled(true);
+      try {
+        window.localStorage.setItem(INSTALLED_KEY, "1");
+      } catch {
+        // jim o'tkazamiz
+      }
+    };
+
     try {
-      if (window.localStorage.getItem(DISMISS_KEY)) setDismissed(true);
+      if (window.localStorage.getItem(INSTALLED_KEY)) setInstalled(true);
     } catch {
       // localStorage mavjud bo'lmasa — jim o'tkazamiz
     }
 
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
-    setInstalled(standalone);
+    if (standalone) markInstalled();
 
     const handlePrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
-    const handleInstalled = () => setInstalled(true);
 
     window.addEventListener("beforeinstallprompt", handlePrompt);
-    window.addEventListener("appinstalled", handleInstalled);
+    window.addEventListener("appinstalled", markInstalled);
     return () => {
       window.removeEventListener("beforeinstallprompt", handlePrompt);
-      window.removeEventListener("appinstalled", handleInstalled);
+      window.removeEventListener("appinstalled", markInstalled);
     };
   }, []);
-
-  const handleDismiss = () => {
-    setDismissed(true);
-    try {
-      window.localStorage.setItem(DISMISS_KEY, "1");
-    } catch {
-      // jim o'tkazamiz
-    }
-  };
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       await deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       setDeferredPrompt(null);
-      if (choice.outcome === "accepted") handleDismiss();
+      if (choice.outcome === "accepted") {
+        setInstalled(true);
+        try {
+          window.localStorage.setItem(INSTALLED_KEY, "1");
+        } catch {
+          // jim o'tkazamiz
+        }
+      }
       return;
     }
     // Dasturiy o'rnatish imkoni bo'lmasa (iOS Safari yoki boshqa brauzer) —
@@ -74,7 +85,7 @@ export default function AppInstallBanner() {
     setShowHint((v) => !v);
   };
 
-  if (!mounted || dismissed || installed) return null;
+  if (!mounted || closed || installed) return null;
 
   return (
     <div className="mx-auto max-w-7xl px-5 lg:px-8 pt-4">
@@ -119,7 +130,7 @@ export default function AppInstallBanner() {
         </div>
 
         <button
-          onClick={handleDismiss}
+          onClick={() => setClosed(true)}
           className="absolute -top-2 -right-2 md:top-3 md:right-3 bg-white text-ink/50 hover:text-ink rounded-full p-1 shadow-card"
           aria-label={t("common.close")}
         >
