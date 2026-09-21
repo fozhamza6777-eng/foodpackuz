@@ -90,7 +90,7 @@ export default function Footer() {
                 <Send className="w-4 h-4" />
               </a>
               <a
-                href="https://bit.ly/foodbox_uz"
+                href="https://www.instagram.com/foodbox_uz?stkn=bGFoMnBnZW92MHY2"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
