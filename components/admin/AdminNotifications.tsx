@@ -49,6 +49,24 @@ function playChatChime() {
   playTone(880, 160, 130);
 }
 
+// Admin chat oynasiga qaramay o'tirgan bo'lishi mumkin, shuning uchun
+// oddiy ohangdan tashqari ovozli xabar bilan ham diqqatini tortamiz.
+function speakNewChatMessage() {
+  window.setTimeout(() => {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance("Diqqat, mijozdan yangi xabar keldi");
+      utterance.lang = "uz-UZ";
+      utterance.rate = 0.95;
+      utterance.volume = 1;
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      // Ovoz sintezi qo'llab-quvvatlanmasa yoki xatolik bo'lsa, jim o'tkazamiz.
+    }
+  }, 350);
+}
+
 export default function AdminNotifications({
   onGoToOrders,
   onGoToChat
@@ -99,6 +117,7 @@ export default function AdminNotifications({
         const message = payload.new as any;
         if (message.sender_role !== "customer") return;
         playChatChime();
+        speakNewChatMessage();
         const item: NotificationItem = {
           id: `chat-${message.id}-${Date.now()}`,
           type: "new_chat_message",
