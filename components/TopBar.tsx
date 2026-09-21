@@ -4,21 +4,23 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Clock, ChevronDown, Send, Instagram } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
+import { useBranch, type BranchCity } from "./BranchProvider";
 
-const cityPhones: Record<string, string> = {
+const cityPhones: Record<BranchCity, string> = {
   "Toshkent": "+998 95 872 83 83",
   "Qo'qon": "+998 91 382 83 83"
 };
-const cityLabelKeys: Record<string, string> = {
+const cityLabelKeys: Record<BranchCity, string> = {
   "Toshkent": "topbar.city_tashkent",
   "Qo'qon": "topbar.city_qoqon"
 };
-const cities = Object.keys(cityPhones);
+const cities = Object.keys(cityPhones) as BranchCity[];
 
 export default function TopBar() {
   const { t } = useLanguage();
+  const { city: selectedCity, setCity } = useBranch();
   const [open, setOpen] = useState(false);
-  const [city, setCity] = useState("Toshkent");
+  const city = selectedCity ?? "Toshkent";
   const phone = cityPhones[city];
 
   return (

@@ -25,6 +25,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "topbar.city_tashkent": "Toshkent",
     "topbar.city_qoqon": "Qo'qon",
 
+    // --- Filial tanlash oynasi ---
+    "branch_modal.question": "Sizga qaysi filialimiz yaqinroq?",
+    "branch_modal.subtitle": "Hudud bo'yicha aloqa va yetkazib berish ma'lumotlarini to'g'ri ko'rsatishimiz uchun tanlang.",
+
     // --- Header ---
     "header.catalog": "Katalog",
     "header.search_placeholder": "Mahsulot qidirish: stakan, quti, paket...",
@@ -409,6 +413,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "topbar.hours": "Ежедневно 09:00–18:00",
     "topbar.city_tashkent": "Ташкент",
     "topbar.city_qoqon": "Коканд",
+
+    // --- Окно выбора филиала ---
+    "branch_modal.question": "Какой из наших филиалов вам ближе?",
+    "branch_modal.subtitle": "Выберите, чтобы мы верно показывали контакты и условия доставки по вашему региону.",
 
     // --- Header ---
     "header.catalog": "Каталог",

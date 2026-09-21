@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Phone, Clock } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
+import { useBranch, type BranchCity } from "./BranchProvider";
 
-const branches = [
+const branches: { city: BranchCity; address: string; phone: string }[] = [
   {
     city: "Toshkent",
     address: "Uchtepa tumani, O'rikzor mahallasi, Bositxon ko'chasi 85-uy",
@@ -14,14 +14,18 @@ const branches = [
   { city: "Qo'qon", address: "Rais mahallasi, 2-uy", phone: "+998 91 382 83 83" }
 ];
 
-const cityLabelKeys: Record<string, string> = {
+const cityLabelKeys: Record<BranchCity, string> = {
   "Toshkent": "topbar.city_tashkent",
   "Qo'qon": "topbar.city_qoqon"
 };
 
 export default function Branches() {
   const { t } = useLanguage();
-  const [active, setActive] = useState(0);
+  const { city, setCity } = useBranch();
+  const active = Math.max(
+    branches.findIndex((b) => b.city === city),
+    0
+  );
 
   return (
     <section id="aloqa-filial" className="py-14 md:py-20">
@@ -39,7 +43,7 @@ export default function Branches() {
           {branches.map((b, i) => (
             <button
               key={b.city}
-              onClick={() => setActive(i)}
+              onClick={() => setCity(b.city)}
               className={`relative px-5 py-2.5 rounded-lg text-sm font-bold transition-colors ${
                 active === i ? "text-white" : "text-ink/60 hover:text-brand-500"
               }`}
