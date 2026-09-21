@@ -1,24 +1,11 @@
-import TopBar from "@/components/TopBar";
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import PromoRow from "@/components/PromoRow";
-import TrustBadges from "@/components/TrustBadges";
-import PartnersMarquee from "@/components/PartnersMarquee";
-import ProductGrid from "@/components/ProductGrid";
-import Testimonials from "@/components/Testimonials";
-import FAQAccordion from "@/components/FAQAccordion";
-import Branches from "@/components/Branches";
-import BulkCTA from "@/components/BulkCTA";
-import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
-import CartToast from "@/components/CartToast";
-import CartReminderBanner from "@/components/CartReminderBanner";
+import HomeContent from "@/components/HomeContent";
 import { fetchActiveProducts } from "@/lib/supabase/products";
 import { fetchActiveBanners } from "@/lib/supabase/banners";
 import { fetchActiveCategories } from "@/lib/supabase/categories";
 
-// Mahsulotlar admin panelda o'zgartirilganda sayt darhol yangilanishi uchun
-// bu sahifa har bir so'rovda qaytadan (statik keshlanmasdan) render qilinadi.
+// Boshlang'ich yuklashda eng so'nggi ma'lumot bilan render qilinishi uchun
+// bu sahifa statik keshlanmaydi; keyingi o'zgarishlar esa HomeContent
+// ichidagi real vaqtli (Supabase Realtime) obuna orqali yetkaziladi.
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -27,27 +14,6 @@ export default async function Home() {
     fetchActiveBanners(),
     fetchActiveCategories()
   ]);
-  const newProducts = products.filter((p) => p.isNew);
 
-  return (
-    <>
-      <TopBar />
-      <Header categories={categories} />
-      <main>
-        <Hero banners={banners} categories={categories} />
-        <PromoRow id="yangiliklar" accent="brand" products={newProducts} />
-        <TrustBadges />
-        <PartnersMarquee />
-        <ProductGrid products={products} categories={categories} />
-        <Testimonials />
-        <FAQAccordion />
-        <Branches />
-        <BulkCTA />
-      </main>
-      <Footer />
-      <CartDrawer />
-      <CartToast />
-      <CartReminderBanner />
-    </>
-  );
+  return <HomeContent initialProducts={products} initialBanners={banners} initialCategories={categories} />;
 }
