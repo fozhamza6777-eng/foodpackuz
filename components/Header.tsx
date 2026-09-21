@@ -23,6 +23,14 @@ const navLinks = [
   { href: "#aloqa", key: "header.nav_contact" }
 ];
 
+// html { scroll-behavior: smooth } global qoidasi mobil qatlamlarda
+// (masalan menyu yopilish animatsiyasi bilan bir vaqtda) uzilib, sahifa
+// umuman scroll bo'lmay qolishiga olib kelishi mumkin — shuning uchun
+// bo'limga o'tishni qo'lda va "instant" tarzda bajaramiz.
+function scrollToSection(href: string) {
+  document.querySelector(href)?.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
+}
+
 export default function Header({ categories }: { categories: Category[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -119,7 +127,15 @@ export default function Header({ categories }: { categories: Category[] }) {
 
         <nav className="hidden xl:flex items-center gap-6 font-semibold text-sm ml-auto">
           {navLinks.map((l) => (
-            <a key={l.href} href={l.href} className="text-ink/70 hover:text-brand-500 transition-colors whitespace-nowrap">
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection(l.href);
+              }}
+              className="text-ink/70 hover:text-brand-500 transition-colors whitespace-nowrap"
+            >
               {t(l.key)}
             </a>
           ))}
@@ -247,7 +263,16 @@ export default function Header({ categories }: { categories: Category[] }) {
                 ))}
               <div className="h-px bg-ink/10 my-2" />
               {navLinks.map((l) => (
-                <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className="py-2 text-ink/80">
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMenuOpen(false);
+                    window.setTimeout(() => scrollToSection(l.href), 300);
+                  }}
+                  className="py-2 text-ink/80"
+                >
                   {t(l.key)}
                 </a>
               ))}
