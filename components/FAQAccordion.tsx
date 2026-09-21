@@ -15,7 +15,7 @@ const faqKeys = [
 
 export default function FAQAccordion() {
   const { t } = useLanguage();
-  const [open, setOpen] = useState<number | null>(0);
+  const [open, setOpen] = useState<number | null>(null);
 
   return (
     <section className="py-14 md:py-20 bg-white">
