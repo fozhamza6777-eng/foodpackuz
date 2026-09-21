@@ -24,6 +24,13 @@ interface AuthContextValue {
   session: Session | null;
   isAuthenticated: boolean;
   hydrated: boolean;
+  /** Foydalanuvchi shu sessiyada AYNAN HOZIR (ro'yxatdan o'tish/kirish orqali)
+   *  tizimga kirdimi — sahifa avvaldan saqlangan sessiya bilan ochilganda
+   *  (masalan sayt qayta yuklanganda) false bo'ladi. Mehmon savatini
+   *  serverdagi hisobga faqat shu holatda (haqiqiy kirish paytida) qo'shish
+   *  kerak, aks holda foydalanuvchi savatdan o'chirgan mahsulot sahifa
+   *  qayta ochilganda noto'g'ri tarzda qayta tiklanib qolardi. */
+  justSignedIn: boolean;
   login: (input: { phone: string; password: string }) => Promise<AuthResult>;
   logout: () => Promise<void>;
   updateName: (name: string) => Promise<AuthResult>;
@@ -61,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [justSignedIn, setJustSignedIn] = useState(false);
 
   const loadProfile = useCallback(async (userId: string) => {
     const { data, error } = await supabase
@@ -95,8 +103,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setHydrated(true);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
+      // "SIGNED_IN" faqat foydalanuvchi AYNAN HOZIR kirish/ro'yxatdan o'tish
+      // amalini bajarganda keladi — sahifa saqlangan sessiya bilan ochilganda
+      // ("INITIAL_SESSION") kelmaydi.
+      if (event === "SIGNED_IN") setJustSignedIn(true);
       if (newSession?.user) {
         loadProfile(newSession.user.id);
       } else {
@@ -186,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         isAuthenticated: !!session,
         hydrated,
+        justSignedIn,
         login,
         logout,
         updateName,

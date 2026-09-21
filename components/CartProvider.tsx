@@ -83,8 +83,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         .eq("user_id", userId);
 
       if (!data || data.length === 0) {
-        // Mehmon sifatida (brauzerda) qo'shilgan narsalar bo'lsa, ularni serverga yozamiz
-        if (stored.length > 0) {
+        // Mehmon sifatida (brauzerda) qo'shilgan narsalar bo'lsa, ularni serverga
+        // yozamiz — LEKIN faqat foydalanuvchi AYNAN HOZIR kirgan/ro'yxatdan
+        // o'tgan bo'lsa. Aks holda: agar bu shunchaki saqlangan sessiya bilan
+        // sahifani qayta ochish bo'lsa, serverdagi bo'sh savat foydalanuvchi
+        // ONGLI RAVISHDA savatni bo'shatgani bo'lishi mumkin — bunday holda
+        // brauzerdagi eski ma'lumotni qayta yuklash noto'g'ri (o'chirilgan
+        // mahsulot qayta "tirilib" qolardi).
+        if (auth.justSignedIn && stored.length > 0) {
           for (const it of stored) {
             await supabase.from("cart_items").upsert({
               user_id: userId,
