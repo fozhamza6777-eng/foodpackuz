@@ -11,6 +11,7 @@ import { BranchProvider } from "@/components/BranchProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import BranchSelectModal from "@/components/BranchSelectModal";
+import ErrorLogger from "@/components/ErrorLogger";
 
 const display = Sora({
   subsets: ["latin"],
@@ -67,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${display.variable} ${body.variable} ${mono.variable} font-body bg-surface text-ink antialiased`}
       >
         <ServiceWorkerRegister />
+        <ErrorLogger />
         <LanguageProvider>
           <CategoryLabelsProvider>
             <CatalogFilterProvider>

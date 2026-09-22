@@ -16,6 +16,7 @@ import {
   CreditCard,
   Handshake,
   MessageCircle,
+  Bug,
   Menu,
   X,
   type LucideIcon
@@ -28,9 +29,18 @@ import CategoriesTab from "./CategoriesTab";
 import PaymentCardsTab from "./PaymentCardsTab";
 import BulkRequestsTab from "./BulkRequestsTab";
 import SupportChatTab from "./SupportChatTab";
+import ErrorLogsTab from "./ErrorLogsTab";
 import AdminNotifications from "./AdminNotifications";
 
-type Tab = "orders" | "products" | "categories" | "banners" | "payment-cards" | "bulk-requests" | "chat";
+type Tab =
+  | "orders"
+  | "products"
+  | "categories"
+  | "banners"
+  | "payment-cards"
+  | "bulk-requests"
+  | "chat"
+  | "errors";
 
 const navItems: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "orders", label: "Buyurtmalar", icon: ShoppingBag },
@@ -39,7 +49,8 @@ const navItems: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "banners", label: "Bannerlar", icon: ImageIcon },
   { id: "payment-cards", label: "To'lov kartalari", icon: CreditCard },
   { id: "bulk-requests", label: "Hamkorlik so'rovlari", icon: Handshake },
-  { id: "chat", label: "Mijozlar chati", icon: MessageCircle }
+  { id: "chat", label: "Mijozlar chati", icon: MessageCircle },
+  { id: "errors", label: "Xatoliklar", icon: Bug }
 ];
 
 export default function AdminPanel() {
@@ -213,7 +224,11 @@ export default function AdminPanel() {
             </button>
             <h1 className="font-display font-extrabold text-lg text-ink truncate">{activeLabel}</h1>
             <div className="ml-auto flex items-center gap-1">
-              <AdminNotifications onGoToOrders={() => setTab("orders")} onGoToChat={() => setTab("chat")} />
+              <AdminNotifications
+                onGoToOrders={() => setTab("orders")}
+                onGoToChat={() => setTab("chat")}
+                onGoToErrors={() => setTab("errors")}
+              />
             </div>
           </div>
         </header>
@@ -226,6 +241,7 @@ export default function AdminPanel() {
           {tab === "payment-cards" && <PaymentCardsTab />}
           {tab === "bulk-requests" && <BulkRequestsTab />}
           {tab === "chat" && <SupportChatTab />}
+          {tab === "errors" && <ErrorLogsTab />}
         </main>
       </div>
     </div>

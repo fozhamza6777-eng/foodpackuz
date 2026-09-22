@@ -133,3 +133,15 @@ export interface SupportMessageRow {
   is_read_by_admin: boolean;
   created_at: string;
 }
+
+export interface ErrorLogRow {
+  id: string;
+  source: "client" | "server";
+  message: string;
+  stack: string | null;
+  url: string | null;
+  user_agent: string | null;
+  extra: Record<string, unknown> | null;
+  resolved: boolean;
+  created_at: string;
+}

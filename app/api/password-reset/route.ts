@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { logServerError } from "@/lib/logError";
 
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (updateError) {
+    await logServerError("Parolni yangilashda xatolik", { route: "password-reset", error: updateError.message });
     return NextResponse.json({ ok: false, error: updateError.message }, { status: 400 });
   }
 

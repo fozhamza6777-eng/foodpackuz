@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import { sendSms } from "@/lib/eskiz";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { logServerError } from "@/lib/logError";
 
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
     expires_at: expiresAt
   });
   if (dbError) {
+    await logServerError("OTP kodini saqlashda xatolik", { route: "otp/send", dbError: dbError.message });
     return NextResponse.json({ ok: false, error: "Kodni saqlashda xatolik." }, { status: 500 });
   }
 
@@ -69,6 +71,7 @@ export async function POST(req: NextRequest) {
     `foodbox.uz sayti FOOD BOXga ro'yxatdan o'tishda telefon raqamni tasdiqlash uchun FOOD BOX: tasdiqlash kodingiz - ${code}.`
   );
   if (!ok) {
+    await logServerError("SMS yuborishda xatolik (Eskiz)", { route: "otp/send", eskizError: error });
     return NextResponse.json({ ok: false, error: error ?? "SMS yuborishda xatolik." }, { status: 502 });
   }
 

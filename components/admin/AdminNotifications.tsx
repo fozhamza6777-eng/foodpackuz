@@ -2,15 +2,44 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, ShoppingBag, AlertTriangle, MessageCircle, X } from "lucide-react";
+import { Bell, ShoppingBag, AlertTriangle, MessageCircle, Bug, X, type LucideIcon } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { formatNumber } from "@/lib/formatNumber";
 
+type NotificationType = "new_order" | "cancel_request" | "new_chat_message" | "new_error";
+
 interface NotificationItem {
   id: string;
-  type: "new_order" | "cancel_request" | "new_chat_message";
+  type: NotificationType;
   text: string;
 }
+
+const typeMeta: Record<NotificationType, { icon: LucideIcon; bg: string; border: string; title: string }> = {
+  new_order: {
+    icon: ShoppingBag,
+    bg: "bg-violet-50 text-violet-700",
+    border: "border-violet-100",
+    title: "🆕 Yangi buyurtma!"
+  },
+  cancel_request: {
+    icon: AlertTriangle,
+    bg: "bg-amber-light text-amber",
+    border: "border-amber/30",
+    title: "⚠️ Bekor qilish so'ralmoqda"
+  },
+  new_chat_message: {
+    icon: MessageCircle,
+    bg: "bg-success/10 text-success",
+    border: "border-success/30",
+    title: "💬 Yangi xabar!"
+  },
+  new_error: {
+    icon: Bug,
+    bg: "bg-danger/10 text-danger",
+    border: "border-danger/30",
+    title: "🐞 Yangi xatolik!"
+  }
+};
 
 function playTone(frequency: number, duration: number, delay = 0) {
   window.setTimeout(() => {
@@ -49,6 +78,11 @@ function playChatChime() {
   playTone(880, 160, 130);
 }
 
+function playErrorChime() {
+  playTone(220, 180, 0);
+  playTone(196, 220, 180);
+}
+
 // Admin chat oynasiga qaramay o'tirgan bo'lishi mumkin, shuning uchun
 // oddiy ohangdan tashqari ovozli xabar bilan ham diqqatini tortamiz.
 function speakNewChatMessage() {
@@ -69,15 +103,23 @@ function speakNewChatMessage() {
 
 export default function AdminNotifications({
   onGoToOrders,
-  onGoToChat
+  onGoToChat,
+  onGoToErrors
 }: {
   onGoToOrders: () => void;
   onGoToChat: () => void;
+  onGoToErrors: () => void;
 }) {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [toast, setToast] = useState<NotificationItem | null>(null);
   const [open, setOpen] = useState(false);
   const initialized = useRef(false);
+
+  const goTo = (type: NotificationType) => {
+    if (type === "new_chat_message") onGoToChat();
+    else if (type === "new_error") onGoToErrors();
+    else onGoToOrders();
+  };
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -122,6 +164,19 @@ export default function AdminNotifications({
           id: `chat-${message.id}-${Date.now()}`,
           type: "new_chat_message",
           text: message.body.length > 80 ? `${message.body.slice(0, 80)}…` : message.body
+        };
+        setItems((prev) => [item, ...prev].slice(0, 20));
+        setToast(item);
+        window.setTimeout(() => setToast((t) => (t?.id === item.id ? null : t)), 6000);
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "error_logs" }, (payload) => {
+        if (!initialized.current) return;
+        const log = payload.new as any;
+        playErrorChime();
+        const item: NotificationItem = {
+          id: `error-${log.id}-${Date.now()}`,
+          type: "new_error",
+          text: log.message.length > 80 ? `${log.message.slice(0, 80)}…` : log.message
         };
         setItems((prev) => [item, ...prev].slice(0, 20));
         setToast(item);
@@ -183,32 +238,25 @@ export default function AdminNotifications({
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {items.length === 0 && <p className="text-sm text-ink/40 text-center py-8">Hozircha yangilik yo'q</p>}
-                  {items.map((n) => (
-                    <button
-                      key={n.id}
-                      onClick={() => {
-                        setOpen(false);
-                        if (n.type === "new_chat_message") onGoToChat();
-                        else onGoToOrders();
-                      }}
-                      className="w-full flex items-start gap-2.5 px-4 py-3 text-left hover:bg-surface transition-colors border-b border-ink/5 last:border-0"
-                    >
-                      <span
-                        className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                          n.type === "new_order"
-                            ? "bg-violet-50 text-violet-700"
-                            : n.type === "new_chat_message"
-                            ? "bg-success/10 text-success"
-                            : "bg-amber-light text-amber"
-                        }`}
+                  {items.map((n) => {
+                    const meta = typeMeta[n.type];
+                    const Icon = meta.icon;
+                    return (
+                      <button
+                        key={n.id}
+                        onClick={() => {
+                          setOpen(false);
+                          goTo(n.type);
+                        }}
+                        className="w-full flex items-start gap-2.5 px-4 py-3 text-left hover:bg-surface transition-colors border-b border-ink/5 last:border-0"
                       >
-                        {n.type === "new_order" && <ShoppingBag className="w-3.5 h-3.5" />}
-                        {n.type === "cancel_request" && <AlertTriangle className="w-3.5 h-3.5" />}
-                        {n.type === "new_chat_message" && <MessageCircle className="w-3.5 h-3.5" />}
-                      </span>
-                      <span className="text-xs font-medium text-ink/70 leading-snug">{n.text}</span>
-                    </button>
-                  ))}
+                        <span className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${meta.bg}`}>
+                          <Icon className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-xs font-medium text-ink/70 leading-snug">{n.text}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             </>
@@ -217,62 +265,42 @@ export default function AdminNotifications({
       </div>
 
       <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, x: 40, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 40, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 300, damping: 26 }}
-            className="fixed bottom-6 right-6 z-[80] w-[calc(100%-3rem)] max-w-sm"
-          >
-            <div
-              className={`bg-white rounded-xl shadow-2xl border p-4 flex items-start gap-3 ${
-                toast.type === "cancel_request"
-                  ? "border-amber/30"
-                  : toast.type === "new_chat_message"
-                  ? "border-success/30"
-                  : "border-violet-100"
-              }`}
-            >
-              <span
-                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-                  toast.type === "new_order"
-                    ? "bg-violet-50 text-violet-700"
-                    : toast.type === "new_chat_message"
-                    ? "bg-success/10 text-success"
-                    : "bg-amber-light text-amber"
-                }`}
+        {toast &&
+          (() => {
+            const meta = typeMeta[toast.type];
+            const Icon = meta.icon;
+            return (
+              <motion.div
+                initial={{ opacity: 0, x: 40, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 40, scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 300, damping: 26 }}
+                className="fixed bottom-6 right-6 z-[80] w-[calc(100%-3rem)] max-w-sm"
               >
-                {toast.type === "new_order" && <ShoppingBag className="w-4 h-4" />}
-                {toast.type === "cancel_request" && <AlertTriangle className="w-4 h-4" />}
-                {toast.type === "new_chat_message" && <MessageCircle className="w-4 h-4" />}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-ink">
-                  {toast.type === "new_order"
-                    ? "🆕 Yangi buyurtma!"
-                    : toast.type === "new_chat_message"
-                    ? "💬 Yangi xabar!"
-                    : "⚠️ Bekor qilish so'ralmoqda"}
-                </p>
-                <p className="text-xs text-ink/60 mt-0.5">{toast.text}</p>
-                <button
-                  onClick={() => {
-                    setToast(null);
-                    if (toast.type === "new_chat_message") onGoToChat();
-                    else onGoToOrders();
-                  }}
-                  className="mt-2 text-xs font-bold text-violet-700 hover:underline"
-                >
-                  Ko'rish →
-                </button>
-              </div>
-              <button onClick={() => setToast(null)} className="p-1 text-ink/30 hover:text-ink/60 shrink-0">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </motion.div>
-        )}
+                <div className={`bg-white rounded-xl shadow-2xl border p-4 flex items-start gap-3 ${meta.border}`}>
+                  <span className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${meta.bg}`}>
+                    <Icon className="w-4 h-4" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-ink">{meta.title}</p>
+                    <p className="text-xs text-ink/60 mt-0.5">{toast.text}</p>
+                    <button
+                      onClick={() => {
+                        setToast(null);
+                        goTo(toast.type);
+                      }}
+                      className="mt-2 text-xs font-bold text-violet-700 hover:underline"
+                    >
+                      Ko'rish →
+                    </button>
+                  </div>
+                  <button onClick={() => setToast(null)} className="p-1 text-ink/30 hover:text-ink/60 shrink-0">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })()}
       </AnimatePresence>
     </>
   );

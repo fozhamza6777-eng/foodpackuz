@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { logServerError } from "@/lib/logError";
 
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -79,7 +80,11 @@ export async function POST(req: NextRequest) {
   });
 
   if (createError) {
-    const message = /already.*registered|already exists/i.test(createError.message)
+    const alreadyExists = /already.*registered|already exists/i.test(createError.message);
+    if (!alreadyExists) {
+      await logServerError("Foydalanuvchi yaratishda xatolik", { route: "register", error: createError.message });
+    }
+    const message = alreadyExists
       ? "Bu telefon raqam bilan allaqachon ro'yxatdan o'tilgan. Iltimos, \"Kirish\" bo'limidan foydalaning."
       : createError.message;
     return NextResponse.json({ ok: false, error: message }, { status: 400 });
