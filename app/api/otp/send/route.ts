@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import { sendSms } from "@/lib/eskiz";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -19,6 +20,18 @@ export async function POST(req: NextRequest) {
   const normalized = normalizePhone(phone);
   if (normalized.length !== 12) {
     return NextResponse.json({ ok: false, error: "Telefon raqam formati noto'g'ri." }, { status: 400 });
+  }
+
+  // Botlar turli telefon raqamlarga ommaviy SMS yubortirib, xarajat
+  // qildirishining oldini olish uchun bitta IP-manzildan soatiga cheklangan
+  // miqdorda SMS so'ralishi mumkin.
+  const ip = getClientIp(req);
+  const { allowed } = await checkRateLimit("otp_send", ip, 5, 60 * 60 * 1000);
+  if (!allowed) {
+    return NextResponse.json(
+      { ok: false, error: "Juda ko'p urinish qilindi. Iltimos, keyinroq qaytadan urinib ko'ring." },
+      { status: 429 }
+    );
   }
 
   const { data: recent } = await supabaseAdmin

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -18,6 +19,16 @@ export async function POST(req: NextRequest) {
   if (!phone || newPassword.length < 6) {
     return NextResponse.json({ ok: false, error: "Ma'lumotlar to'liq emas." }, { status: 400 });
   }
+
+  const ip = getClientIp(req);
+  const { allowed } = await checkRateLimit("password_reset", ip, 10, 60 * 60 * 1000);
+  if (!allowed) {
+    return NextResponse.json(
+      { ok: false, error: "Juda ko'p urinish qilindi. Iltimos, keyinroq qaytadan urinib ko'ring." },
+      { status: 429 }
+    );
+  }
+
   const normalized = normalizePhone(phone);
 
   const { data: otpRow } = await supabaseAdmin
