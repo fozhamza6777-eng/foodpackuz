@@ -17,11 +17,13 @@ import {
   Handshake,
   MessageCircle,
   Bug,
+  BarChart3,
   Menu,
   X,
   type LucideIcon
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
+import StatsTab from "./StatsTab";
 import OrdersTab from "./OrdersTab";
 import ProductsTab from "./ProductsTab";
 import BannersTab from "./BannersTab";
@@ -33,6 +35,7 @@ import ErrorLogsTab from "./ErrorLogsTab";
 import AdminNotifications from "./AdminNotifications";
 
 type Tab =
+  | "stats"
   | "orders"
   | "products"
   | "categories"
@@ -43,6 +46,7 @@ type Tab =
   | "errors";
 
 const navItems: { id: Tab; label: string; icon: LucideIcon }[] = [
+  { id: "stats", label: "Statistika", icon: BarChart3 },
   { id: "orders", label: "Buyurtmalar", icon: ShoppingBag },
   { id: "products", label: "Mahsulotlar", icon: Package },
   { id: "categories", label: "Bo'limlar", icon: Layers },
@@ -234,6 +238,7 @@ export default function AdminPanel() {
         </header>
 
         <main className="px-5 lg:px-8 py-6 max-w-7xl">
+          {tab === "stats" && <StatsTab />}
           {tab === "orders" && <OrdersTab />}
           {tab === "products" && <ProductsTab />}
           {tab === "categories" && <CategoriesTab />}

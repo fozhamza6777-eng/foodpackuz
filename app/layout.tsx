@@ -12,6 +12,7 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import BranchSelectModal from "@/components/BranchSelectModal";
 import ErrorLogger from "@/components/ErrorLogger";
+import VisitTracker from "@/components/VisitTracker";
 
 const display = Sora({
   subsets: ["latin"],
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <ServiceWorkerRegister />
         <ErrorLogger />
+        <VisitTracker />
         <LanguageProvider>
           <CategoryLabelsProvider>
             <CatalogFilterProvider>
