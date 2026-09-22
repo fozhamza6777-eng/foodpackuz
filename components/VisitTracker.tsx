@@ -38,7 +38,12 @@ export default function VisitTracker() {
     }
 
     const visitorId = getOrCreateVisitorId();
-    supabase.from("site_visits").insert({ visitor_id: visitorId, path: pathname ?? "/" });
+    // MUHIM: supabase-js so'rov quruvchilari "lazy thenable" — .then()
+    // yoki await chaqirilmasa, HTTP so'rovi hech qachon jo'natilmaydi.
+    supabase
+      .from("site_visits")
+      .insert({ visitor_id: visitorId, path: pathname ?? "/" })
+      .then(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -46,10 +46,12 @@ export function LikesProvider({ children }: { children: ReactNode }) {
         const wasLiked = next.has(productId);
         if (wasLiked) {
           next.delete(productId);
-          supabase.from("product_likes").delete().eq("user_id", userId).eq("product_id", productId);
+          // MUHIM: supabase-js so'rov quruvchilari "lazy thenable" — .then()
+          // chaqirilmasa, HTTP so'rovi hech qachon jo'natilmaydi.
+          supabase.from("product_likes").delete().eq("user_id", userId).eq("product_id", productId).then(() => {});
         } else {
           next.add(productId);
-          supabase.from("product_likes").insert({ user_id: userId, product_id: productId });
+          supabase.from("product_likes").insert({ user_id: userId, product_id: productId }).then(() => {});
         }
         return next;
       });
