@@ -46,7 +46,7 @@ export default function ProductGrid({
   const [hideBar, setHideBar] = useState(false);
   const stickySentinelRef = useRef<HTMLDivElement>(null);
   const lastScrollYRef = useRef(0);
-  const paramsRef = useRef({ activeCategory, sortBy, page, perPage });
+  const paramsRef = useRef({ category: activeCategory, sortBy, page, perPage });
 
   const totalPages = Math.max(1, Math.ceil(totalCount / perPage));
 
@@ -75,7 +75,7 @@ export default function ProductGrid({
   }, [activeCategory, sortBy, page, perPage]);
 
   useEffect(() => {
-    paramsRef.current = { activeCategory, sortBy, page, perPage };
+    paramsRef.current = { category: activeCategory, sortBy, page, perPage };
   }, [activeCategory, sortBy, page, perPage]);
 
   useEffect(() => {
