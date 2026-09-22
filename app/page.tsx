@@ -1,5 +1,5 @@
 import HomeContent from "@/components/HomeContent";
-import { fetchActiveProducts } from "@/lib/supabase/products";
+import { fetchProductsPage, fetchNewProducts } from "@/lib/supabase/products";
 import { fetchActiveBanners } from "@/lib/supabase/banners";
 import { fetchActiveCategories } from "@/lib/supabase/categories";
 
@@ -8,12 +8,25 @@ import { fetchActiveCategories } from "@/lib/supabase/categories";
 // ichidagi real vaqtli (Supabase Realtime) obuna orqali yetkaziladi.
 export const dynamic = "force-dynamic";
 
+// Katalog ProductGrid'ning standart holati (filtrsiz, "mashhur" tartib,
+// birinchi sahifa, 24 tadan) bilan bir xil bo'lishi kerak — aks holda
+// mijoz sahifani ochganda ko'rgan ro'yxati ulanish tugagach bir zumga
+// almashib ketadi.
 export default async function Home() {
-  const [products, banners, categories] = await Promise.all([
-    fetchActiveProducts(),
+  const [productsPage, newProducts, banners, categories] = await Promise.all([
+    fetchProductsPage({ category: "Barchasi", sortBy: "popular", page: 1, perPage: 24 }),
+    fetchNewProducts(),
     fetchActiveBanners(),
     fetchActiveCategories()
   ]);
 
-  return <HomeContent initialProducts={products} initialBanners={banners} initialCategories={categories} />;
+  return (
+    <HomeContent
+      initialProducts={productsPage.products}
+      initialProductsCount={productsPage.totalCount}
+      initialNewProducts={newProducts}
+      initialBanners={banners}
+      initialCategories={categories}
+    />
+  );
 }

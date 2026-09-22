@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Heart, ShoppingBag, Loader2 } from "lucide-react";
 import { useLikes } from "./LikesProvider";
 import { useCart } from "./CartProvider";
-import { fetchActiveProducts } from "@/lib/supabase/products";
+import { fetchProductsByIds } from "@/lib/supabase/products";
 import ProductImage from "./ProductImage";
 import type { Product } from "@/lib/types";
 import { useLanguage } from "./LanguageProvider";
@@ -25,9 +25,9 @@ export default function FavoritesDrawer({ isOpen, onClose }: { isOpen: boolean; 
 
   useEffect(() => {
     if (isOpen && allProducts === null) {
-      fetchActiveProducts().then(setAllProducts);
+      fetchProductsByIds(Array.from(likedIds)).then(setAllProducts);
     }
-  }, [isOpen, allProducts]);
+  }, [isOpen, allProducts, likedIds]);
 
   const liked = (allProducts ?? []).filter((p) => likedIds.has(p.id));
 

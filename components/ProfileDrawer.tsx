@@ -35,7 +35,7 @@ import { useCart } from "./CartProvider";
 import { supabase } from "@/lib/supabase/client";
 import { uploadAvatar } from "@/lib/supabase/storage";
 import type { OrderRow, OrderItem, BranchRow } from "@/lib/supabase/types";
-import { fetchActiveProducts } from "@/lib/supabase/products";
+import { fetchProductsByIds } from "@/lib/supabase/products";
 import { fetchUserComments, deleteComment, type MyComment } from "@/lib/supabase/comments";
 import type { Product } from "@/lib/types";
 import ProductImage from "./ProductImage";
@@ -184,8 +184,9 @@ export default function ProfileDrawer({
           setOrdersLoading(false);
         });
     }
-    if (isOpen && allProducts === null) {
-      fetchActiveProducts().then(setAllProducts);
+    if (isOpen && orders !== null && allProducts === null) {
+      const ids = Array.from(new Set(orders.flatMap((o) => o.items.map((i) => i.id))));
+      fetchProductsByIds(ids).then(setAllProducts);
     }
   }, [isOpen, auth.session, orders, allProducts]);
 

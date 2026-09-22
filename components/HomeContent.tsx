@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
-import { fetchActiveProducts } from "@/lib/supabase/products";
+import { fetchNewProducts } from "@/lib/supabase/products";
 import { fetchActiveBanners, type Banner } from "@/lib/supabase/banners";
 import { fetchActiveCategories, type Category } from "@/lib/supabase/categories";
 import type { Product } from "@/lib/types";
@@ -25,27 +25,33 @@ import CartReminderBanner from "@/components/CartReminderBanner";
 
 export default function HomeContent({
   initialProducts,
+  initialProductsCount,
+  initialNewProducts,
   initialBanners,
   initialCategories
 }: {
   initialProducts: Product[];
+  initialProductsCount: number;
+  initialNewProducts: Product[];
   initialBanners: Banner[];
   initialCategories: Category[];
 }) {
-  const [products, setProducts] = useState(initialProducts);
+  const [newProducts, setNewProducts] = useState(initialNewProducts);
   const [banners, setBanners] = useState(initialBanners);
   const [categories, setCategories] = useState(initialCategories);
 
-  // Admin panelda mahsulot/banner/bo'lim qo'shilsa, tahrirlansa yoki
-  // o'chirilsa, saytni ochib turgan mijozlar sahifani yangilamasdan ham
-  // darhol o'zgarishni ko'rishi uchun — har bir jadval bo'yicha real vaqtli
-  // obuna, o'zgarish kelganda esa faol ro'yxatni qaytadan yuklaymiz.
+  // Admin panelda banner/bo'lim qo'shilsa, tahrirlansa yoki o'chirilsa,
+  // saytni ochib turgan mijozlar sahifani yangilamasdan ham darhol
+  // o'zgarishni ko'rishi uchun. Mahsulotlar katalogi (ProductGrid) esa
+  // katta hajmda ham tez ishlashi uchun o'zining sahifalab yuklaydigan
+  // va real vaqtli obunasiga ega — bu yerda faqat "Yangi mahsulotlar"
+  // qatori uchun yengil ro'yxat yangilanadi.
   useEffect(() => {
     if (!isSupabaseConfigured) return;
     const channel = supabase
       .channel("public-catalog-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => {
-        fetchActiveProducts().then(setProducts);
+        fetchNewProducts().then(setNewProducts);
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "banners" }, () => {
         fetchActiveBanners().then(setBanners);
@@ -60,8 +66,6 @@ export default function HomeContent({
     };
   }, []);
 
-  const newProducts = products.filter((p) => p.isNew);
-
   return (
     <>
       <TopBar />
@@ -72,7 +76,7 @@ export default function HomeContent({
         <PromoRow id="yangiliklar" accent="brand" products={newProducts} />
         <TrustBadges />
         <PartnersMarquee />
-        <ProductGrid products={products} categories={categories} />
+        <ProductGrid initialProducts={initialProducts} initialTotalCount={initialProductsCount} categories={categories} />
         <Testimonials />
         <FAQAccordion />
         <Branches />

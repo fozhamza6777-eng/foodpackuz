@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUpDown, Loader2 } from "lucide-react";
 import { Product } from "@/lib/types";
 import type { Category } from "@/lib/supabase/categories";
+import { fetchProductsPage, type ProductSortOption } from "@/lib/supabase/products";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import ProductCard from "./ProductCard";
 import CategoryFilter from "./CategoryFilter";
 import ProductDetailModal from "./ProductDetailModal";
@@ -12,9 +14,7 @@ import AuthModal from "./AuthModal";
 import { useLanguage } from "./LanguageProvider";
 import { useCatalogFilter } from "./CatalogFilterProvider";
 
-type SortOption = "popular" | "price_asc" | "price_desc";
-
-const sortLabelKeys: Record<SortOption, string> = {
+const sortLabelKeys: Record<ProductSortOption, string> = {
   popular: "grid.sort_popular",
   price_asc: "grid.sort_price_asc",
   price_desc: "grid.sort_price_desc"
@@ -22,12 +22,23 @@ const sortLabelKeys: Record<SortOption, string> = {
 
 const perPageOptions = [12, 24, 48];
 
-export default function ProductGrid({ products, categories }: { products: Product[]; categories: Category[] }) {
+export default function ProductGrid({
+  initialProducts,
+  initialTotalCount,
+  categories
+}: {
+  initialProducts: Product[];
+  initialTotalCount: number;
+  categories: Category[];
+}) {
   const { t } = useLanguage();
   const { activeCategory, setActiveCategory } = useCatalogFilter();
-  const [sortBy, setSortBy] = useState<SortOption>("popular");
+  const [sortBy, setSortBy] = useState<ProductSortOption>("popular");
   const [perPage, setPerPage] = useState<number>(24);
   const [page, setPage] = useState(1);
+  const [products, setProducts] = useState(initialProducts);
+  const [totalCount, setTotalCount] = useState(initialTotalCount);
+  const [loading, setLoading] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -35,34 +46,63 @@ export default function ProductGrid({ products, categories }: { products: Produc
   const [hideBar, setHideBar] = useState(false);
   const stickySentinelRef = useRef<HTMLDivElement>(null);
   const lastScrollYRef = useRef(0);
+  const paramsRef = useRef({ activeCategory, sortBy, page, perPage });
 
-  const filtered = useMemo(
-    () =>
-      activeCategory === "Barchasi" ? products : products.filter((p) => p.categories.includes(activeCategory)),
-    [activeCategory, products]
-  );
+  const totalPages = Math.max(1, Math.ceil(totalCount / perPage));
 
-  const sorted = useMemo(() => {
-    if (sortBy === "popular") return filtered;
-    const copy = [...filtered];
-    copy.sort((a, b) => {
-      const priceA = a.price * a.packSize;
-      const priceB = b.price * b.packSize;
-      return sortBy === "price_asc" ? priceA - priceB : priceB - priceA;
-    });
-    return copy;
-  }, [filtered, sortBy]);
-
-  const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
-  const currentPage = Math.min(page, totalPages);
-  const paginated = useMemo(
-    () => sorted.slice((currentPage - 1) * perPage, currentPage * perPage),
-    [sorted, currentPage, perPage]
-  );
-
+  // Filtr, tartib yoki har-sahifa-soni o'zgarsa — birinchi sahifaga qaytamiz
+  // (aks holda avvalgi sahifa raqami yangi ro'yxatdan tashqarida qolib
+  // ketishi mumkin).
   useEffect(() => {
     setPage(1);
   }, [activeCategory, sortBy, perPage]);
+
+  const loadPage = useCallback(() => {
+    setLoading(true);
+    fetchProductsPage({ category: activeCategory, sortBy, page, perPage }).then((res) => {
+      // Filtr o'zgarganda sahifa 1 ga hali tushmagan bo'lsa (masalan yangi
+      // kategoriyada tanlangan sahifa raqami mavjud bo'lmasa), sahifani
+      // 1 ga qaytaramiz — bo'sh grid ko'rsatish o'rniga.
+      if (res.products.length === 0 && page > 1) {
+        setPage(1);
+        return;
+      }
+      setProducts(res.products);
+      setTotalCount(res.totalCount);
+      setLoading(false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCategory, sortBy, page, perPage]);
+
+  useEffect(() => {
+    paramsRef.current = { activeCategory, sortBy, page, perPage };
+  }, [activeCategory, sortBy, page, perPage]);
+
+  useEffect(() => {
+    loadPage();
+  }, [loadPage]);
+
+  // Admin panelda mahsulot qo'shilsa/tahrirlansa/o'chirilsa — mijoz butun
+  // katalogni qayta yuklamasdan, faqat hozir ko'rib turgan sahifasini
+  // yangilaydi (kanal bir marta ochiladi, doim eng so'nggi filtr/sahifa
+  // parametrlaridan foydalanadi).
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const channel = supabase
+      .channel("product-grid-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => {
+        const p = paramsRef.current;
+        fetchProductsPage(p).then((res) => {
+          setProducts(res.products);
+          setTotalCount(res.totalCount);
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Kategoriya panelini "yopishtirilgan" (sticky) holatga o'tganida ixcham
   // ko'rinishga almashtiradi va mahsulot kartochkalarini ko'rishni
@@ -145,7 +185,7 @@ export default function ProductGrid({ products, categories }: { products: Produc
                         exit={{ opacity: 0, y: -6 }}
                         className="absolute right-0 top-11 w-56 bg-white rounded-lg shadow-card-hover border border-ink/8 overflow-hidden z-40"
                       >
-                        {(Object.keys(sortLabelKeys) as SortOption[]).map((key) => (
+                        {(Object.keys(sortLabelKeys) as ProductSortOption[]).map((key) => (
                           <button
                             key={key}
                             onClick={() => {
@@ -184,9 +224,14 @@ export default function ProductGrid({ products, categories }: { products: Produc
           </div>
         </div>
 
-        <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+        <motion.div
+          layout
+          className={`grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 transition-opacity ${
+            loading ? "opacity-50" : "opacity-100"
+          }`}
+        >
           <AnimatePresence mode="popLayout">
-            {paginated.map((p, i) => (
+            {products.map((p, i) => (
               <motion.div key={p.id} layout exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}>
                 <ProductCard
                   product={p}
@@ -199,26 +244,32 @@ export default function ProductGrid({ products, categories }: { products: Produc
           </AnimatePresence>
         </motion.div>
 
-        {sorted.length === 0 && (
+        {loading && products.length === 0 && (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-7 h-7 animate-spin text-brand-500" />
+          </div>
+        )}
+
+        {!loading && totalCount === 0 && (
           <p className="text-center py-16 text-ink/40 font-semibold">{t("grid.not_found_category")}</p>
         )}
 
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-3 mt-10">
             <button
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
+              onClick={() => goToPage(page - 1)}
+              disabled={page === 1}
               className="w-10 h-10 rounded-full border border-ink/15 flex items-center justify-center hover:bg-surface transition-colors disabled:opacity-30 disabled:pointer-events-none"
               aria-label={t("grid.prev_page")}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <span className="text-sm font-bold text-ink/60 font-mono">
-              {currentPage} / {totalPages}
+              {page} / {totalPages}
             </span>
             <button
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              onClick={() => goToPage(page + 1)}
+              disabled={page === totalPages}
               className="w-10 h-10 rounded-full border border-ink/15 flex items-center justify-center hover:bg-surface transition-colors disabled:opacity-30 disabled:pointer-events-none"
               aria-label={t("grid.next_page")}
             >
