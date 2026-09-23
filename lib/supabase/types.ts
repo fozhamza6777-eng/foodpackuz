@@ -104,7 +104,27 @@ export interface OrderRow {
   payment_method: string;
   payment_receipt_path: string | null;
   payment_status: string;
+  crm_lead_id: number | null;
+  crm_synced_at: string | null;
   created_at: string;
+}
+
+export interface CrmAmocrmSettingsRow {
+  id: number;
+  subdomain: string | null;
+  client_id: string | null;
+  client_secret: string | null;
+  redirect_uri: string | null;
+  access_token: string | null;
+  refresh_token: string | null;
+  token_expires_at: string | null;
+  is_connected: boolean;
+  auto_sync_orders: boolean;
+  chat_widget_script: string | null;
+  webhook_secret: string;
+  oauth_state: string | null;
+  status_mapping: Record<string, { pipeline_id: number; status_id: number } | undefined>;
+  updated_at: string;
 }
 
 export interface BulkRequestRow {

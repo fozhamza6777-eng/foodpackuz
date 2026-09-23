@@ -28,6 +28,7 @@ import type { BranchRow, PaymentCardRow } from "@/lib/supabase/types";
 import { fetchActivePaymentCards } from "@/lib/supabase/paymentCards";
 import { uploadPaymentReceipt } from "@/lib/supabase/storage";
 import { formatNumber } from "@/lib/formatNumber";
+import { notifyOrderSync } from "@/lib/crm/notifyOrderSync";
 import CartItemCard from "./CartItemCard";
 import RegisterForm from "./RegisterForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
@@ -235,26 +236,30 @@ export default function CartDrawer() {
       }
     }
 
-    const { error } = await supabase.from("orders").insert({
-      user_id: auth.session.user.id,
-      items: items.map((i) => ({
-        id: i.product.id,
-        name: tr(i.product.name, i.product.nameRu),
-        price: i.product.price,
-        qty: i.qty,
-        unit: i.product.unit
-      })),
-      total: totalSum,
-      address: addressToSave,
-      note: form.note || null,
-      branch_id: branchId,
-      branch_name: branchName,
-      latitude: geo?.lat ?? null,
-      longitude: geo?.lng ?? null,
-      payment_method: paymentMethod,
-      payment_receipt_path: receiptPath,
-      payment_status: paymentMethod === "karta" ? "kutilmoqda" : "none"
-    });
+    const { data: newOrder, error } = await supabase
+      .from("orders")
+      .insert({
+        user_id: auth.session.user.id,
+        items: items.map((i) => ({
+          id: i.product.id,
+          name: tr(i.product.name, i.product.nameRu),
+          price: i.product.price,
+          qty: i.qty,
+          unit: i.product.unit
+        })),
+        total: totalSum,
+        address: addressToSave,
+        note: form.note || null,
+        branch_id: branchId,
+        branch_name: branchName,
+        latitude: geo?.lat ?? null,
+        longitude: geo?.lng ?? null,
+        payment_method: paymentMethod,
+        payment_receipt_path: receiptPath,
+        payment_status: paymentMethod === "karta" ? "kutilmoqda" : "none"
+      })
+      .select("id")
+      .single();
 
     setSubmitting(false);
 
@@ -262,6 +267,8 @@ export default function CartDrawer() {
       setOrderError(`${t("checkout.order_save_error")}: ${error.message}`);
       return;
     }
+
+    if (newOrder) notifyOrderSync(newOrder.id);
 
     if (checkoutSessionId) {
       await supabase.from("checkout_sessions").update({ completed: true }).eq("id", checkoutSessionId);

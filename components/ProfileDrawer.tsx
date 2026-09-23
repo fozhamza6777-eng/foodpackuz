@@ -41,6 +41,7 @@ import type { Product } from "@/lib/types";
 import ProductImage from "./ProductImage";
 import { useLanguage } from "./LanguageProvider";
 import { formatNumber } from "@/lib/formatNumber";
+import { notifyOrderSync } from "@/lib/crm/notifyOrderSync";
 
 type Screen = "home" | "settings" | "orders" | "cancelled" | "reviews" | "branches";
 type GeoStatus = "idle" | "loading" | "granted" | "denied" | "error";
@@ -383,6 +384,7 @@ export default function ProfileDrawer({
       setCancelError(t("profile.cancel_error"));
       return;
     }
+    notifyOrderSync(order.id);
     setOrders((prev) =>
       prev
         ? prev.map((o) =>

@@ -24,6 +24,7 @@ import { supabase } from "@/lib/supabase/client";
 import { getReceiptSignedUrl } from "@/lib/supabase/storage";
 import type { OrderRow, ProfileRow } from "@/lib/supabase/types";
 import { formatNumber } from "@/lib/formatNumber";
+import { notifyOrderSync } from "@/lib/crm/notifyOrderSync";
 
 const paymentStatusMeta: Record<string, { label: string; color: string }> = {
   kutilmoqda: { label: "To'lov tekshirilmoqda", color: "bg-amber-light text-amber" },
@@ -82,6 +83,7 @@ export default function OrdersTab() {
   const handleStatusChange = async (orderId: string, status: string) => {
     setOrders((prev) => (prev ? prev.map((o) => (o.id === orderId ? { ...o, status } : o)) : prev));
     await supabase.from("orders").update({ status }).eq("id", orderId);
+    notifyOrderSync(orderId);
   };
 
   const handlePaymentStatusChange = async (orderId: string, payment_status: string) => {

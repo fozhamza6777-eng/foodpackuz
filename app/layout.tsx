@@ -13,6 +13,7 @@ import SupportChatWidget from "@/components/SupportChatWidget";
 import BranchSelectModal from "@/components/BranchSelectModal";
 import ErrorLogger from "@/components/ErrorLogger";
 import VisitTracker from "@/components/VisitTracker";
+import AmocrmChatWidget from "@/components/AmocrmChatWidget";
 
 const display = Sora({
   subsets: ["latin"],
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ServiceWorkerRegister />
         <ErrorLogger />
         <VisitTracker />
+        <AmocrmChatWidget />
         <LanguageProvider>
           <CategoryLabelsProvider>
             <CatalogFilterProvider>

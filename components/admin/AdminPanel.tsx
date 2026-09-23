@@ -19,6 +19,7 @@ import {
   Bug,
   BarChart3,
   BadgeCheck,
+  Plug,
   Menu,
   X,
   type LucideIcon
@@ -34,6 +35,7 @@ import PaymentCardsTab from "./PaymentCardsTab";
 import BulkRequestsTab from "./BulkRequestsTab";
 import SupportChatTab from "./SupportChatTab";
 import ErrorLogsTab from "./ErrorLogsTab";
+import CrmTab from "./CrmTab";
 import AdminNotifications from "./AdminNotifications";
 
 type Tab =
@@ -46,6 +48,7 @@ type Tab =
   | "payment-cards"
   | "bulk-requests"
   | "chat"
+  | "crm"
   | "errors";
 
 const navItems: { id: Tab; label: string; icon: LucideIcon }[] = [
@@ -58,6 +61,7 @@ const navItems: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "payment-cards", label: "To'lov kartalari", icon: CreditCard },
   { id: "bulk-requests", label: "Hamkorlik so'rovlari", icon: Handshake },
   { id: "chat", label: "Mijozlar chati", icon: MessageCircle },
+  { id: "crm", label: "CRM (amoCRM)", icon: Plug },
   { id: "errors", label: "Xatoliklar", icon: Bug }
 ];
 
@@ -69,6 +73,11 @@ export default function AdminPanel() {
 
   useEffect(() => {
     setMounted(true);
+    const params = new URLSearchParams(window.location.search);
+    const requestedTab = params.get("tab");
+    if (requestedTab && navItems.some((n) => n.id === requestedTab)) {
+      setTab(requestedTab as Tab);
+    }
   }, []);
 
   if (!auth.hydrated) {
@@ -251,6 +260,7 @@ export default function AdminPanel() {
           {tab === "payment-cards" && <PaymentCardsTab />}
           {tab === "bulk-requests" && <BulkRequestsTab />}
           {tab === "chat" && <SupportChatTab />}
+          {tab === "crm" && <CrmTab />}
           {tab === "errors" && <ErrorLogsTab />}
         </main>
       </div>
