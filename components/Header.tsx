@@ -42,7 +42,9 @@ export default function Header({ categories }: { categories: Category[] }) {
   const { totalCount, totalSum, openCart, lastAdded } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { t, tr } = useLanguage();
-  const { goToCategory } = useCatalogFilter();
+  const { goToCategory, goToSearch } = useCatalogFilter();
+  const [searchInput, setSearchInput] = useState("");
+  const [mobileSearchInput, setMobileSearchInput] = useState("");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -116,14 +118,22 @@ export default function Header({ categories }: { categories: Category[] }) {
         </div>
 
         {/* qidiruv */}
-        <div className="hidden md:flex flex-1 max-w-xl relative">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            goToSearch(searchInput.trim());
+          }}
+          className="hidden md:flex flex-1 max-w-xl relative"
+        >
           <input
             type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             placeholder={t("header.search_placeholder")}
             className="w-full h-11 rounded-lg border border-ink/10 bg-surface pl-11 pr-4 text-sm font-medium focus:outline-none focus:border-brand-400 focus:bg-white transition-colors"
           />
           <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-ink/40" />
-        </div>
+        </form>
 
         <nav className="hidden xl:flex items-center gap-6 font-semibold text-sm ml-auto">
           {navLinks.map((l) => (
@@ -242,6 +252,24 @@ export default function Header({ categories }: { categories: Category[] }) {
               <div className="flex justify-end pb-2">
                 <LanguageSwitcher className="text-ink/70" />
               </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setMenuOpen(false);
+                  const q = mobileSearchInput.trim();
+                  window.setTimeout(() => goToSearch(q), 300);
+                }}
+                className="relative mb-2"
+              >
+                <input
+                  type="text"
+                  value={mobileSearchInput}
+                  onChange={(e) => setMobileSearchInput(e.target.value)}
+                  placeholder={t("header.search_placeholder")}
+                  className="w-full h-11 rounded-lg border border-ink/10 bg-surface pl-11 pr-4 text-sm font-medium focus:outline-none focus:border-brand-400 focus:bg-white transition-colors"
+                />
+                <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-ink/40" />
+              </form>
               <p className="text-xs uppercase tracking-wide text-ink/40 mb-1 mt-1">{t("header.catalog")}</p>
               {categories.map((c) => (
                   <a

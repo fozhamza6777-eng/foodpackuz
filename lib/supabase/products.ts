@@ -44,6 +44,8 @@ export interface ProductsPageParams {
   /** 1 dan boshlanadi. */
   page: number;
   perPage: number;
+  /** Nomi/kodi bo'yicha matnli qidiruv (ixtiyoriy). */
+  search?: string;
 }
 
 export interface ProductsPageResult {
@@ -51,19 +53,34 @@ export interface ProductsPageResult {
   totalCount: number;
 }
 
-/** Katalog ro'yxati uchun — faqat kerakli sahifani, faol filtr/tartib bilan
- *  serverning o'zida (Postgres'da) hisoblab, sahifalab oladi. Mahsulotlar soni
- *  yuzlab/minglabga yetganda ham sayt tezligini saqlab qolish uchun. */
+// PostgREST'ning `.or()` filtr satrida vergul va qavs maxsus ma'noga ega —
+// foydalanuvchi qidiruv matnida shular bo'lsa filtr buzilib ketmasligi
+// uchun ularni ekranlaymiz (backslash bilan).
+function escapeOrFilterValue(value: string): string {
+  return value.replace(/[,()]/g, "\\$&");
+}
+
+/** Katalog ro'yxati uchun — faqat kerakli sahifani, faol filtr/tartib/qidiruv
+ *  bilan serverning o'zida (Postgres'da) hisoblab, sahifalab oladi.
+ *  Mahsulotlar soni yuzlab/minglabga yetganda ham sayt tezligini saqlab
+ *  qolish uchun. */
 export async function fetchProductsPage({
   category,
   sortBy,
   page,
-  perPage
+  perPage,
+  search
 }: ProductsPageParams): Promise<ProductsPageResult> {
   let query = supabase.from("products").select("*", { count: "exact" }).eq("is_active", true);
 
   if (category !== "Barchasi") {
     query = query.contains("categories", [category]);
+  }
+
+  const trimmedSearch = search?.trim();
+  if (trimmedSearch) {
+    const q = escapeOrFilterValue(trimmedSearch);
+    query = query.or(`name.ilike.%${q}%,name_ru.ilike.%${q}%,code.ilike.%${q}%`);
   }
 
   if (sortBy === "price_asc") {

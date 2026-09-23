@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowUpDown, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUpDown, Loader2, Search, X } from "lucide-react";
 import { Product } from "@/lib/types";
 import type { Category } from "@/lib/supabase/categories";
 import { fetchProductsPage, type ProductSortOption } from "@/lib/supabase/products";
@@ -32,7 +32,7 @@ export default function ProductGrid({
   categories: Category[];
 }) {
   const { t } = useLanguage();
-  const { activeCategory, setActiveCategory } = useCatalogFilter();
+  const { activeCategory, setActiveCategory, searchQuery, setSearchQuery } = useCatalogFilter();
   const [sortBy, setSortBy] = useState<ProductSortOption>("popular");
   const [perPage, setPerPage] = useState<number>(24);
   const [page, setPage] = useState(1);
@@ -46,20 +46,20 @@ export default function ProductGrid({
   const [hideBar, setHideBar] = useState(false);
   const stickySentinelRef = useRef<HTMLDivElement>(null);
   const lastScrollYRef = useRef(0);
-  const paramsRef = useRef({ category: activeCategory, sortBy, page, perPage });
+  const paramsRef = useRef({ category: activeCategory, sortBy, page, perPage, search: searchQuery });
 
   const totalPages = Math.max(1, Math.ceil(totalCount / perPage));
 
-  // Filtr, tartib yoki har-sahifa-soni o'zgarsa — birinchi sahifaga qaytamiz
-  // (aks holda avvalgi sahifa raqami yangi ro'yxatdan tashqarida qolib
-  // ketishi mumkin).
+  // Filtr, tartib, qidiruv yoki har-sahifa-soni o'zgarsa — birinchi
+  // sahifaga qaytamiz (aks holda avvalgi sahifa raqami yangi ro'yxatdan
+  // tashqarida qolib ketishi mumkin).
   useEffect(() => {
     setPage(1);
-  }, [activeCategory, sortBy, perPage]);
+  }, [activeCategory, sortBy, perPage, searchQuery]);
 
   const loadPage = useCallback(() => {
     setLoading(true);
-    fetchProductsPage({ category: activeCategory, sortBy, page, perPage }).then((res) => {
+    fetchProductsPage({ category: activeCategory, sortBy, page, perPage, search: searchQuery }).then((res) => {
       // Filtr o'zgarganda sahifa 1 ga hali tushmagan bo'lsa (masalan yangi
       // kategoriyada tanlangan sahifa raqami mavjud bo'lmasa), sahifani
       // 1 ga qaytaramiz — bo'sh grid ko'rsatish o'rniga.
@@ -72,11 +72,11 @@ export default function ProductGrid({
       setLoading(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCategory, sortBy, page, perPage]);
+  }, [activeCategory, sortBy, page, perPage, searchQuery]);
 
   useEffect(() => {
-    paramsRef.current = { category: activeCategory, sortBy, page, perPage };
-  }, [activeCategory, sortBy, page, perPage]);
+    paramsRef.current = { category: activeCategory, sortBy, page, perPage, search: searchQuery };
+  }, [activeCategory, sortBy, page, perPage, searchQuery]);
 
   useEffect(() => {
     loadPage();
@@ -223,6 +223,21 @@ export default function ProductGrid({
             </div>
           </div>
         </div>
+
+        {searchQuery && (
+          <div className="flex items-center gap-2 mb-5 -mt-3">
+            <span className="inline-flex items-center gap-2 bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-full">
+              <Search className="w-3.5 h-3.5" />"{searchQuery}" bo'yicha qidiruv natijasi
+              <button
+                onClick={() => setSearchQuery("")}
+                className="p-0.5 rounded-full hover:bg-brand-100 transition-colors"
+                aria-label={t("common.close")}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </span>
+          </div>
+        )}
 
         <motion.div
           layout
