@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowRight, Package } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, Package } from "lucide-react";
 import ProductArt from "./ProductArt";
 import Counter from "./Counter";
 import type { Banner } from "@/lib/supabase/banners";
@@ -166,12 +166,12 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
           ))}
         </div>
 
-        {/* tezkor kategoriyalar — dizaynni saqlab qolish uchun faqat birinchi
-            7 ta asosiy bo'lim ko'rsatiladi; qolganlari header'dagi "Katalog"
-            tugmasi orqali to'liq ro'yxatda ko'rinadi */}
+        {/* tezkor kategoriyalar — nom yuqori chapda, strelka pastda, mahsulot
+            rasmi pastki o'ng burchakdan "toshib chiqadigan" katta ko'rinishda
+            (havola bergan dizayn namunasiga mos) */}
         {categories.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-3 md:gap-4 mt-8 mb-4">
-            {categories.slice(0, 7).map((c, i) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-ink/8 rounded-2xl overflow-hidden mt-8 mb-4">
+            {categories.slice(0, 8).map((c, i) => (
               <motion.a
                 key={c.id}
                 href="#katalog"
@@ -183,20 +183,20 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05, duration: 0.4 }}
-                whileHover={{ y: -4 }}
-                className="flex flex-col bg-white rounded-xl shadow-card overflow-hidden hover:shadow-card-hover transition-shadow"
+                className="group relative bg-surface hover:bg-white transition-colors h-32 md:h-36 p-4 flex flex-col justify-between overflow-hidden"
               >
-                <div className="w-full aspect-square bg-surface flex items-center justify-center overflow-hidden">
+                <h3 className="relative z-10 font-display font-extrabold text-[11px] md:text-xs uppercase leading-tight text-ink line-clamp-3 max-w-[65%]">
+                  {tr(c.name, c.nameRu)}
+                </h3>
+                <ArrowUpRight className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-brand-500 shrink-0" />
+                <div className="absolute -bottom-3 -right-3 w-20 h-20 md:w-24 md:h-24 pointer-events-none transition-transform group-hover:scale-105">
                   {c.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.imageUrl} alt="" className="w-full h-full object-cover" />
+                    <img src={c.imageUrl} alt="" className="w-full h-full object-contain drop-shadow-md" />
                   ) : (
-                    <Package className="w-8 h-8 md:w-10 md:h-10 text-ink/25" />
+                    <Package className="w-full h-full text-ink/15 p-5" />
                   )}
                 </div>
-                <span className="text-[11px] md:text-xs font-bold text-ink/70 text-center leading-tight px-2 py-2.5">
-                  {tr(c.name, c.nameRu)}
-                </span>
               </motion.a>
             ))}
           </div>
