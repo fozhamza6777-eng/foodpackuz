@@ -12,7 +12,10 @@ export interface UploadResult {
  * Rasmni Supabase Storage'ga yuklaydi va ochiq (public) havolasini qaytaradi.
  * `folder` — bucket ichidagi papka nomi, masalan "products" yoki "banners".
  */
-export async function uploadImage(file: File, folder: "products" | "banners" | "categories"): Promise<UploadResult> {
+export async function uploadImage(
+  file: File,
+  folder: "products" | "banners" | "categories" | "logos"
+): Promise<UploadResult> {
   if (!file.type.startsWith("image/")) {
     return { url: null, error: "Faqat rasm fayllarini yuklash mumkin (JPG, PNG, WEBP)." };
   }

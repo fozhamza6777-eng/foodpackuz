@@ -145,3 +145,14 @@ export interface ErrorLogRow {
   resolved: boolean;
   created_at: string;
 }
+
+export interface TrustedLogoRow {
+  id: string;
+  type: "partner" | "customer";
+  name: string;
+  image_url: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}

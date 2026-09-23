@@ -6,13 +6,14 @@ import { fetchNewProducts } from "@/lib/supabase/products";
 import { fetchActiveBanners, type Banner } from "@/lib/supabase/banners";
 import { fetchActiveCategories, type Category } from "@/lib/supabase/categories";
 import type { Product } from "@/lib/types";
+import type { TrustedLogoRow } from "@/lib/supabase/types";
 import TopBar from "@/components/TopBar";
 import Header from "@/components/Header";
 import AppInstallBanner from "@/components/AppInstallBanner";
 import Hero from "@/components/Hero";
 import PromoRow from "@/components/PromoRow";
 import TrustBadges from "@/components/TrustBadges";
-import PartnersMarquee from "@/components/PartnersMarquee";
+import LogoMarquee from "@/components/LogoMarquee";
 import ProductGrid from "@/components/ProductGrid";
 import Testimonials from "@/components/Testimonials";
 import FAQAccordion from "@/components/FAQAccordion";
@@ -28,13 +29,17 @@ export default function HomeContent({
   initialProductsCount,
   initialNewProducts,
   initialBanners,
-  initialCategories
+  initialCategories,
+  initialPartnerLogos,
+  initialCustomerLogos
 }: {
   initialProducts: Product[];
   initialProductsCount: number;
   initialNewProducts: Product[];
   initialBanners: Banner[];
   initialCategories: Category[];
+  initialPartnerLogos: TrustedLogoRow[];
+  initialCustomerLogos: TrustedLogoRow[];
 }) {
   const [newProducts, setNewProducts] = useState(initialNewProducts);
   const [banners, setBanners] = useState(initialBanners);
@@ -71,11 +76,17 @@ export default function HomeContent({
       <TopBar />
       <Header categories={categories} />
       <main>
+        <LogoMarquee
+          type="customer"
+          title="Bizga ishongan mijozlar"
+          initialLogos={initialCustomerLogos}
+          variant="compact"
+        />
         <AppInstallBanner />
         <Hero banners={banners} categories={categories} />
         <PromoRow id="yangiliklar" accent="brand" products={newProducts} />
         <TrustBadges />
-        <PartnersMarquee />
+        <LogoMarquee type="partner" title="Ishonchli hamkorlarimiz" initialLogos={initialPartnerLogos} />
         <ProductGrid initialProducts={initialProducts} initialTotalCount={initialProductsCount} categories={categories} />
         <Testimonials />
         <FAQAccordion />

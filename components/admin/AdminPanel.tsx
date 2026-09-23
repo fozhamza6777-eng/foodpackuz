@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Bug,
   BarChart3,
+  BadgeCheck,
   Menu,
   X,
   type LucideIcon
@@ -28,6 +29,7 @@ import OrdersTab from "./OrdersTab";
 import ProductsTab from "./ProductsTab";
 import BannersTab from "./BannersTab";
 import CategoriesTab from "./CategoriesTab";
+import LogosTab from "./LogosTab";
 import PaymentCardsTab from "./PaymentCardsTab";
 import BulkRequestsTab from "./BulkRequestsTab";
 import SupportChatTab from "./SupportChatTab";
@@ -40,6 +42,7 @@ type Tab =
   | "products"
   | "categories"
   | "banners"
+  | "logos"
   | "payment-cards"
   | "bulk-requests"
   | "chat"
@@ -51,6 +54,7 @@ const navItems: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "products", label: "Mahsulotlar", icon: Package },
   { id: "categories", label: "Bo'limlar", icon: Layers },
   { id: "banners", label: "Bannerlar", icon: ImageIcon },
+  { id: "logos", label: "Hamkor/mijoz logolari", icon: BadgeCheck },
   { id: "payment-cards", label: "To'lov kartalari", icon: CreditCard },
   { id: "bulk-requests", label: "Hamkorlik so'rovlari", icon: Handshake },
   { id: "chat", label: "Mijozlar chati", icon: MessageCircle },
@@ -243,6 +247,7 @@ export default function AdminPanel() {
           {tab === "products" && <ProductsTab />}
           {tab === "categories" && <CategoriesTab />}
           {tab === "banners" && <BannersTab />}
+          {tab === "logos" && <LogosTab />}
           {tab === "payment-cards" && <PaymentCardsTab />}
           {tab === "bulk-requests" && <BulkRequestsTab />}
           {tab === "chat" && <SupportChatTab />}
