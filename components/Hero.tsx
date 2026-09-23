@@ -166,9 +166,8 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
           ))}
         </div>
 
-        {/* tezkor kategoriyalar — nom yuqori chapda, strelka pastda, mahsulot
-            rasmi pastki o'ng burchakdan "toshib chiqadigan" katta ko'rinishda
-            (havola bergan dizayn namunasiga mos) */}
+        {/* tezkor kategoriyalar — mahsulot rasmi butun kartochkani qamrab
+            oladi, kategoriya nomi esa rasm ustiga (pastki chapga) tushadi */}
         {categories.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-ink/8 rounded-2xl overflow-hidden mt-8 mb-4">
             {categories.slice(0, 8).map((c, i) => (
@@ -183,19 +182,26 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05, duration: 0.4 }}
-                className="group relative bg-surface hover:bg-white transition-colors h-32 md:h-36 p-4 flex flex-col justify-between overflow-hidden"
+                className="group relative bg-surface h-32 md:h-36 overflow-hidden block"
               >
-                <h3 className="relative z-10 font-display font-extrabold text-[11px] md:text-xs uppercase leading-tight text-ink line-clamp-3 max-w-[65%]">
-                  {tr(c.name, c.nameRu)}
-                </h3>
-                <ArrowUpRight className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-brand-500 shrink-0" />
-                <div className="absolute -bottom-3 -right-3 w-20 h-20 md:w-24 md:h-24 pointer-events-none transition-transform group-hover:scale-105">
-                  {c.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.imageUrl} alt="" className="w-full h-full object-contain drop-shadow-md" />
-                  ) : (
-                    <Package className="w-full h-full text-ink/15 p-5" />
-                  )}
+                {c.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={c.imageUrl}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Package className="w-10 h-10 text-ink/20" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/5 to-transparent" />
+                <div className="relative z-10 h-full p-4 flex flex-col justify-between">
+                  <h3 className="font-display font-extrabold text-[11px] md:text-xs uppercase leading-tight text-white line-clamp-3 max-w-[75%] drop-shadow">
+                    {tr(c.name, c.nameRu)}
+                  </h3>
+                  <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-white shrink-0 drop-shadow" />
                 </div>
               </motion.a>
             ))}
