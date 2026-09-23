@@ -196,12 +196,12 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
                     <Package className="w-10 h-10 text-ink/20" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/5 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/30 to-transparent" />
                 <div className="relative z-10 h-full p-4 flex flex-col justify-between">
-                  <h3 className="font-display font-extrabold text-[11px] md:text-xs uppercase leading-tight text-white line-clamp-3 max-w-[75%] drop-shadow">
+                  <h3 className="font-display font-extrabold text-[11px] md:text-xs uppercase leading-tight text-ink line-clamp-3 max-w-[75%]">
                     {tr(c.name, c.nameRu)}
                   </h3>
-                  <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-white shrink-0 drop-shadow" />
+                  <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-brand-500 shrink-0" />
                 </div>
               </motion.a>
             ))}
