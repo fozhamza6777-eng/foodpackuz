@@ -183,18 +183,18 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05, duration: 0.4 }}
-                className="group relative bg-surface hover:bg-white transition-colors h-40 sm:h-44 md:h-52 p-4 flex flex-col justify-between overflow-hidden"
+                className="group relative bg-surface hover:bg-white transition-colors h-32 md:h-36 p-4 flex flex-col justify-between overflow-hidden"
               >
-                <h3 className="relative z-10 font-display font-extrabold text-[11px] md:text-xs uppercase leading-tight text-ink line-clamp-3 max-w-[55%]">
+                <h3 className="relative z-10 font-display font-extrabold text-[11px] md:text-xs uppercase leading-tight text-ink line-clamp-3 max-w-[65%]">
                   {tr(c.name, c.nameRu)}
                 </h3>
                 <ArrowUpRight className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-brand-500 shrink-0" />
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 sm:w-36 sm:h-36 md:w-44 md:h-44 pointer-events-none transition-transform group-hover:scale-105">
+                <div className="absolute -bottom-3 -right-3 w-20 h-20 md:w-24 md:h-24 pointer-events-none transition-transform group-hover:scale-105">
                   {c.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={c.imageUrl} alt="" className="w-full h-full object-contain drop-shadow-md" />
                   ) : (
-                    <Package className="w-full h-full text-ink/15 p-8" />
+                    <Package className="w-full h-full text-ink/15 p-5" />
                   )}
                 </div>
               </motion.a>
