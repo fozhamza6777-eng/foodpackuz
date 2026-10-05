@@ -35,6 +35,8 @@ export interface ProductRow {
   carton_size: number | null;
   image: string;
   image_url: string | null;
+  /** Galereya: 4 tagacha rasm, birinchisi — asosiy (image_url bilan bir xil). */
+  images: string[] | null;
   badges: string[];
   material: string;
   sizes: string[];

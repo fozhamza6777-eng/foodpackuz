@@ -8,6 +8,7 @@ import { useCart } from "./CartProvider";
 import { useLikes } from "./LikesProvider";
 import { useAuth } from "./AuthProvider";
 import ProductImage from "./ProductImage";
+import ProductGallery, { getProductImages } from "./ProductGallery";
 import ProductInfoBadge from "./ProductInfoBadge";
 import { useLanguage } from "./LanguageProvider";
 import { formatNumber } from "@/lib/formatNumber";
@@ -46,6 +47,7 @@ export default function ProductCard({
   const unitPrice = product.price * unitSize;
   const oldUnitPrice = product.oldPrice ? product.oldPrice * unitSize : undefined;
   const liked = isLiked(product.id);
+  const images = getProductImages(product);
 
   const handleAdd = () => {
     addItem(product, packQty * unitSize);
@@ -76,7 +78,9 @@ export default function ProductCard({
         onClick={() => onOpenDetail?.(product)}
         className={`relative h-40 sm:h-44 bg-surface overflow-hidden ${onOpenDetail ? "cursor-pointer" : ""}`}
       >
-        {product.imageUrl ? (
+        {images.length > 1 ? (
+          <ProductGallery images={images} alt={tr(product.name, product.nameRu)} className="absolute inset-0" />
+        ) : product.imageUrl ? (
           <motion.div className="absolute inset-0" whileHover={{ scale: 1.06 }} transition={{ duration: 0.3 }}>
             <ProductImage imageUrl={product.imageUrl} art={product.image} className="w-full h-full" />
           </motion.div>

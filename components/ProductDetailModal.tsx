@@ -8,6 +8,7 @@ import { useCart } from "./CartProvider";
 import { useLikes } from "./LikesProvider";
 import { useAuth } from "./AuthProvider";
 import ProductImage from "./ProductImage";
+import ProductGallery, { getProductImages } from "./ProductGallery";
 import ProductInfoBadge from "./ProductInfoBadge";
 import AuthModal from "./AuthModal";
 import { useLanguage } from "./LanguageProvider";
@@ -53,6 +54,7 @@ export default function ProductDetailModal({
   const unitPrice = product.price * unitSize;
   const oldUnitPrice = product.oldPrice ? product.oldPrice * unitSize : undefined;
   const liked = isLiked(product.id);
+  const images = getProductImages(product);
   const cartItem = items.find((i) => i.product.id === product.id);
   const cartDona = cartItem ? cartItem.qty : 0;
 
@@ -113,29 +115,56 @@ export default function ProductDetailModal({
 
             <div className="flex-1 overflow-y-auto">
               <div className="p-5">
-                <div className="relative h-64 sm:h-72 bg-surface rounded-xl overflow-hidden mb-4">
-                  {product.imageUrl ? (
-                    <ProductImage imageUrl={product.imageUrl} art={product.image} className="w-full h-full" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-32 h-32">
-                        <ProductImage imageUrl={product.imageUrl} art={product.image} />
-                      </div>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => (auth.session ? toggleLike(product.id) : setAuthOpen(true))}
-                    className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow-card flex items-center justify-center"
-                    aria-label={t("product.like")}
-                  >
-                    <Heart className={`w-4 h-4 ${liked ? "fill-danger text-danger" : "text-ink/40"}`} />
-                  </button>
-                  {product.isNew && (
+                {(() => {
+                  const likeButton = (
+                    <button
+                      onClick={() => (auth.session ? toggleLike(product.id) : setAuthOpen(true))}
+                      className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow-card flex items-center justify-center"
+                      aria-label={t("product.like")}
+                    >
+                      <Heart className={`w-4 h-4 ${liked ? "fill-danger text-danger" : "text-ink/40"}`} />
+                    </button>
+                  );
+                  const newBadge = product.isNew && (
                     <span className="absolute top-3 left-3 text-[10px] font-extrabold uppercase bg-brand-500 text-white px-2 py-1 rounded-md">
                       {t("product.new")}
                     </span>
-                  )}
-                </div>
+                  );
+
+                  if (images.length > 1) {
+                    return (
+                      <div className="mb-4">
+                        <ProductGallery
+                          key={product.id}
+                          images={images}
+                          alt={tr(product.name, product.nameRu)}
+                          className="h-64 sm:h-72 rounded-xl"
+                          showThumbs
+                          alwaysShowArrows
+                        >
+                          {likeButton}
+                          {newBadge}
+                        </ProductGallery>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="relative h-64 sm:h-72 bg-surface rounded-xl overflow-hidden mb-4">
+                      {product.imageUrl ? (
+                        <ProductImage imageUrl={product.imageUrl} art={product.image} className="w-full h-full" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-32 h-32">
+                            <ProductImage imageUrl={product.imageUrl} art={product.image} />
+                          </div>
+                        </div>
+                      )}
+                      {likeButton}
+                      {newBadge}
+                    </div>
+                  );
+                })()}
 
                 {product.infoBadgeType && (
                   <div className="mb-3">

@@ -11,6 +11,8 @@ import ProductArt from "@/components/ProductArt";
 
 const artOptions = ["clamshell", "cup", "pizza", "deli", "bag", "cutlery", "sauce", "thermo"];
 
+const MAX_IMAGES = 4;
+
 interface FormState {
   id: string;
   name: string;
@@ -23,7 +25,7 @@ interface FormState {
   packSize: string;
   cartonSize: string;
   image: string;
-  imageUrl: string;
+  images: string[];
   badges: string;
   material: string;
   sizes: string;
@@ -49,7 +51,7 @@ function rowToForm(row: ProductRow | null): FormState {
       packSize: "50",
       cartonSize: "",
       image: "clamshell",
-      imageUrl: "",
+      images: [],
       badges: "",
       material: "",
       sizes: "",
@@ -73,7 +75,7 @@ function rowToForm(row: ProductRow | null): FormState {
     packSize: String(row.pack_size),
     cartonSize: row.carton_size ? String(row.carton_size) : "",
     image: row.image,
-    imageUrl: row.image_url ?? "",
+    images: row.images && row.images.length > 0 ? row.images : row.image_url ? [row.image_url] : [],
     badges: (row.badges ?? []).join(", "),
     material: row.material,
     sizes: (row.sizes ?? []).join(", "),
@@ -123,18 +125,47 @@ export default function ProductFormModal({
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((f) => ({ ...f, [key]: value }));
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selected = Array.from(e.target.files ?? []);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (selected.length === 0) return;
+
+    const free = MAX_IMAGES - form.images.length;
+    const files = selected.slice(0, Math.max(free, 0));
+    if (files.length === 0) return;
+
     setUploading(true);
     setError(null);
-    const { url, error: uploadError } = await uploadImage(file, "products");
-    setUploading(false);
-    if (uploadError) {
-      setError(uploadError);
-      return;
+
+    const urls: string[] = [];
+    let firstError: string | null = null;
+    for (const file of files) {
+      const { url, error: uploadError } = await uploadImage(file, "products");
+      if (uploadError) {
+        firstError ??= uploadError;
+      } else if (url) {
+        urls.push(url);
+      }
     }
-    if (url) set("imageUrl", url);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    setUploading(false);
+    if (urls.length > 0) setForm((f) => ({ ...f, images: [...f.images, ...urls].slice(0, MAX_IMAGES) }));
+    if (firstError) {
+      setError(firstError);
+    } else if (selected.length > files.length) {
+      setError(`Bitta mahsulotga ko'pi bilan ${MAX_IMAGES} ta rasm yuklash mumkin — ortiqchalari qo'shilmadi.`);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+  };
+
+  /** Tanlangan rasmni birinchi (asosiy) o'ringa chiqaradi. */
+  const makeMainImage = (index: number) => {
+    setForm((f) => {
+      const picked = f.images[index];
+      return { ...f, images: [picked, ...f.images.filter((_, i) => i !== index)] };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,7 +201,9 @@ export default function ProductFormModal({
       pack_size: Number(form.packSize) || 1,
       carton_size: form.cartonSize ? Number(form.cartonSize) : null,
       image: form.image,
-      image_url: form.imageUrl || null,
+      images: form.images,
+      // Eski ustun doim galereyaning birinchi (asosiy) rasmi bilan bir xil bo'ladi.
+      image_url: form.images[0] ?? null,
       badges: form.badges
         .split(",")
         .map((b) => b.trim())
@@ -301,58 +334,78 @@ export default function ProductFormModal({
 
             <div>
               <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
-                Haqiqiy mahsulot rasmi (tavsiya etiladi)
+                Mahsulot rasmlari — {form.images.length}/{MAX_IMAGES} (tavsiya etiladi)
               </label>
-              <div className="flex items-center gap-3 mt-1">
-                <div className="w-36 h-36 shrink-0 bg-surface rounded-lg overflow-hidden flex items-center justify-center border border-ink/10 p-2">
-                  {form.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={form.imageUrl} alt="" className="w-full h-full object-contain rounded-md" />
-                  ) : (
-                    <ImageOff className="w-6 h-6 text-ink/25" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    disabled={uploading}
-                    className="hidden"
-                    id="product-image-upload"
-                  />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileSelect}
+                disabled={uploading || form.images.length >= MAX_IMAGES}
+                className="hidden"
+                id="product-image-upload"
+              />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                {form.images.map((url, i) => (
+                  <div key={url + i} className="flex flex-col gap-1.5">
+                    <div className="relative aspect-square bg-surface rounded-lg overflow-hidden border border-ink/10 p-1.5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt="" className="w-full h-full object-contain rounded-md" />
+                      {i === 0 && (
+                        <span className="absolute top-1.5 left-1.5 text-[10px] font-extrabold uppercase bg-violet-600 text-white px-1.5 py-0.5 rounded">
+                          Asosiy
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center text-danger hover:bg-danger hover:text-white transition-colors"
+                        aria-label="Rasmni olib tashlash"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    {i > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => makeMainImage(i)}
+                        className="text-[11px] font-semibold text-violet-700 hover:underline text-left"
+                      >
+                        Asosiy qilish
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {form.images.length < MAX_IMAGES && (
                   <label
                     htmlFor="product-image-upload"
-                    className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-lg py-2.5 text-sm font-bold cursor-pointer transition-colors ${
+                    className={`aspect-square flex flex-col items-center justify-center gap-1.5 border-2 border-dashed rounded-lg text-xs font-bold text-center px-2 cursor-pointer transition-colors ${
                       uploading
-                        ? "border-ink/10 text-ink/30"
+                        ? "border-ink/10 text-ink/30 pointer-events-none"
                         : "border-ink/15 text-ink/60 hover:border-violet-400 hover:text-violet-700"
                     }`}
                   >
                     {uploading ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" /> Yuklanmoqda...
+                        <Loader2 className="w-5 h-5 animate-spin" /> Yuklanmoqda...
+                      </>
+                    ) : form.images.length === 0 ? (
+                      <>
+                        <ImageOff className="w-5 h-5" /> <Upload className="w-4 h-4" /> Rasm yuklash
                       </>
                     ) : (
                       <>
-                        <Upload className="w-4 h-4" /> {form.imageUrl ? "Rasmni almashtirish" : "Rasm yuklash"}
+                        <Upload className="w-5 h-5" /> Yana rasm qo'shish
                       </>
                     )}
                   </label>
-                  {form.imageUrl && (
-                    <button
-                      type="button"
-                      onClick={() => set("imageUrl", "")}
-                      className="text-xs text-danger font-semibold mt-1.5 hover:underline"
-                    >
-                      Rasmni olib tashlash
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
               <p className="text-[11px] text-ink/40 mt-1.5">
-                Rasm yuklanmasa, quyidagi rasm belgisi (SVG) ishlatiladi.
+                4 tagacha rasm yuklash mumkin (mahsulotni turli tomondan ko'rsating) — birinchisi katalogda
+                asosiy bo'lib ko'rinadi. Rasm yuklanmasa, quyidagi rasm belgisi (SVG) ishlatiladi.
               </p>
             </div>
 

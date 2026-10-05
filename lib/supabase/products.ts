@@ -16,6 +16,7 @@ export function mapRowToProduct(row: ProductRow): Product {
     cartonSize: row.carton_size ?? undefined,
     image: row.image,
     imageUrl: row.image_url ?? undefined,
+    images: row.images && row.images.length > 0 ? row.images : row.image_url ? [row.image_url] : [],
     badges: row.badges ?? [],
     material: row.material,
     sizes: row.sizes ?? [],

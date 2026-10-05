@@ -11,6 +11,8 @@ export interface Product {
   cartonSize?: number;
   image: string;
   imageUrl?: string;
+  /** Galereya (4 tagacha rasm). Bo'sh bo'lsa, faqat `imageUrl` ishlatiladi. */
+  images?: string[];
   badges: string[];
   material: string;
   sizes: string[];
