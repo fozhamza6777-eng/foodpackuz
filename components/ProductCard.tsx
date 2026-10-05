@@ -70,8 +70,8 @@ export default function ProductCard({
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.4, delay: (index % 6) * 0.04 }}
       whileHover={{ y: -5 }}
-      className={`group relative bg-white border rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 h-full flex flex-col ${
-        cartDona > 0 ? "border-success ring-2 ring-success/25" : "border-ink/8"
+      className={`group relative bg-white rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 h-full flex flex-col ${
+        cartDona > 0 ? "ring-2 ring-success" : ""
       }`}
     >
       <div
