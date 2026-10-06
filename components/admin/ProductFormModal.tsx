@@ -94,20 +94,39 @@ function rowToForm(row: ProductRow | null): FormState {
   };
 }
 
+/** Asosiy mahsulotdan yangi o'lcham yaratish: umumiy ma'lumotlar (nom, bo'lim, material, tavsif...)
+ *  ko'chiriladi, har bir o'lchamda farq qiladiganlari (ID, kod, o'lcham nomi) bo'sh qoldiriladi. */
+function templateToForm(template: ProductRow): FormState {
+  return {
+    ...rowToForm(template),
+    id: "",
+    code: "",
+    sizes: "",
+    variantOf: template.id,
+    variantLabel: ""
+  };
+}
+
 export default function ProductFormModal({
   initial,
+  template,
   allProducts,
   onClose,
   onSaved
 }: {
   initial: ProductRow | null;
+  /** Berilsa (va `initial` yo'q bo'lsa) — shu mahsulot kartochkasiga yangi o'lcham qo'shiladi. */
+  template?: ProductRow;
   /** Barcha mahsulotlar — "boshqa mahsulotning o'lchami" ro'yxati uchun. */
   allProducts: ProductRow[];
   onClose: () => void;
   onSaved: (row: ProductRow, mode: "create" | "edit") => void;
 }) {
   const isEdit = !!initial;
-  const [form, setForm] = useState<FormState>(rowToForm(initial));
+  const isNewVariant = !initial && !!template;
+  const [form, setForm] = useState<FormState>(
+    initial ? rowToForm(initial) : template ? templateToForm(template) : rowToForm(null)
+  );
 
   // Shu mahsulot kartochkasidagi boshqa o'lchamlar (agar u asosiy bo'lsa).
   const ownVariants = initial ? allProducts.filter((p) => p.variant_of === initial.id) : [];
@@ -199,6 +218,10 @@ export default function ProductFormModal({
       setError("Narx to'g'ri kiritilmagan.");
       return;
     }
+    if (form.variantOf && !form.variantLabel.trim() && !form.sizes.split(",")[0]?.trim()) {
+      setError("O'lcham tugmasi uchun \"O'lchamlar\" yoki \"O'lcham tugmasidagi yozuv\" maydonini to'ldiring.");
+      return;
+    }
 
     setSaving(true);
 
@@ -283,7 +306,7 @@ export default function ProductFormModal({
         >
           <div className="flex items-center justify-between px-6 py-4 border-b border-ink/8 sticky top-0 bg-white z-10">
             <h3 className="font-display font-extrabold text-lg text-ink">
-              {isEdit ? "Mahsulotni tahrirlash" : "Yangi mahsulot qo'shish"}
+              {isEdit ? "Mahsulotni tahrirlash" : isNewVariant ? "Yangi o'lcham qo'shish" : "Yangi mahsulot qo'shish"}
             </h3>
             <button onClick={onClose} className="p-1.5 hover:bg-surface rounded-lg">
               <X className="w-5 h-5" />
@@ -291,6 +314,13 @@ export default function ProductFormModal({
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+            {isNewVariant && template && (
+              <div className="bg-violet-50 border border-violet-200 text-violet-900 text-sm font-medium rounded-lg p-3">
+                "{template.name}" kartochkasiga yangi o'lcham qo'shyapsiz. Umumiy ma'lumotlar shu mahsulotdan
+                ko'chirildi — faqat kod, o'lcham, narx, qadoq hajmi va rasmni o'zgartiring.
+              </div>
+            )}
+
             {error && (
               <div className="flex items-start gap-2 bg-danger/10 border border-danger/20 text-danger text-sm font-medium rounded-lg p-3">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
