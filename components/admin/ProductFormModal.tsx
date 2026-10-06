@@ -35,6 +35,8 @@ interface FormState {
   isActive: boolean;
   infoBadgeType: string;
   infoBadgeText: string;
+  variantOf: string;
+  variantLabel: string;
 }
 
 function rowToForm(row: ProductRow | null): FormState {
@@ -60,7 +62,9 @@ function rowToForm(row: ProductRow | null): FormState {
       code: "",
       isActive: true,
       infoBadgeType: "",
-      infoBadgeText: ""
+      infoBadgeText: "",
+      variantOf: "",
+      variantLabel: ""
     };
   }
   return {
@@ -84,21 +88,31 @@ function rowToForm(row: ProductRow | null): FormState {
     code: row.code,
     isActive: row.is_active,
     infoBadgeType: row.info_badge_type ?? "",
-    infoBadgeText: row.info_badge_text ?? ""
+    infoBadgeText: row.info_badge_text ?? "",
+    variantOf: row.variant_of ?? "",
+    variantLabel: row.variant_label ?? ""
   };
 }
 
 export default function ProductFormModal({
   initial,
+  allProducts,
   onClose,
   onSaved
 }: {
   initial: ProductRow | null;
+  /** Barcha mahsulotlar — "boshqa mahsulotning o'lchami" ro'yxati uchun. */
+  allProducts: ProductRow[];
   onClose: () => void;
   onSaved: (row: ProductRow, mode: "create" | "edit") => void;
 }) {
   const isEdit = !!initial;
   const [form, setForm] = useState<FormState>(rowToForm(initial));
+
+  // Shu mahsulot kartochkasidagi boshqa o'lchamlar (agar u asosiy bo'lsa).
+  const ownVariants = initial ? allProducts.filter((p) => p.variant_of === initial.id) : [];
+  // Faqat o'zi o'lcham bo'lmagan mahsulotni asosiy qilib tanlash mumkin (ichma-ich bo'lmaydi).
+  const parentOptions = allProducts.filter((p) => !p.variant_of && p.id !== form.id);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -218,7 +232,9 @@ export default function ProductFormModal({
       code: form.code.trim(),
       is_active: form.isActive,
       info_badge_type: form.infoBadgeType || null,
-      info_badge_text: form.infoBadgeType ? form.infoBadgeText.trim() || null : null
+      info_badge_text: form.infoBadgeType ? form.infoBadgeText.trim() || null : null,
+      variant_of: form.variantOf || null,
+      variant_label: form.variantLabel.trim() || null
     };
 
     if (isEdit) {
@@ -553,6 +569,51 @@ export default function ProductFormModal({
                 placeholder="S — 12×12 sm, M — 15×15 sm, L — 18×18 sm"
                 className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
               />
+            </div>
+
+            <div className="bg-surface rounded-xl p-4">
+              <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                Boshqa mahsulotning o'lchami (ixtiyoriy)
+              </label>
+              <p className="text-[11px] text-ink/40 mt-0.5 mb-2">
+                Faqat o'lchami bilan farq qiladigan mahsulotlarni bitta kartochkada ko'rsatish uchun. Tanlasangiz, bu
+                mahsulot alohida kartochka bo'lmaydi — tanlangan mahsulot kartochkasida o'lcham tugmasi bo'lib
+                chiqadi. Narx, qadoq, rasm va kod esa shu mahsulotning o'zinikiga qarab ishlaydi.
+              </p>
+              {ownVariants.length > 0 ? (
+                <p className="text-sm font-semibold text-ink/70">
+                  Bu mahsulot kartochkasida yana {ownVariants.length} ta o'lcham bor:{" "}
+                  {ownVariants.map((v) => v.variant_label || v.sizes?.[0] || v.name).join(", ")}. Shuning uchun uni
+                  boshqa mahsulotga bog'lab bo'lmaydi. Uni yashirsangiz (faol emas), butun kartochka yashiriladi.
+                </p>
+              ) : (
+                <select
+                  value={form.variantOf}
+                  onChange={(e) => set("variantOf", e.target.value)}
+                  className="w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
+                >
+                  <option value="">Yo'q — alohida kartochka</option>
+                  {parentOptions.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                      {p.code ? ` (${p.code})` : ` (${p.id})`}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {(form.variantOf || ownVariants.length > 0) && (
+                <div className="mt-3">
+                  <label className="text-xs font-bold uppercase tracking-wide text-ink/45">
+                    O'lcham tugmasidagi yozuv
+                  </label>
+                  <input
+                    value={form.variantLabel}
+                    onChange={(e) => set("variantLabel", e.target.value)}
+                    placeholder="Masalan: 30×30×3.5 sm (bo'sh qoldirsangiz, 'O'lchamlar' maydonining birinchisi olinadi)"
+                    className="mt-1 w-full border border-ink/15 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-violet-400"
+                  />
+                </div>
+              )}
             </div>
 
             <div>

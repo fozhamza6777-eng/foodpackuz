@@ -14,9 +14,10 @@ import AuthModal from "./AuthModal";
 import { useLanguage } from "./LanguageProvider";
 import { fetchComments, addComment, deleteComment, type Comment } from "@/lib/supabase/comments";
 import { formatNumber } from "@/lib/formatNumber";
+import { getVariantLabel } from "@/lib/productVariants";
 
 export default function ProductDetailModal({
-  product,
+  product: head,
   onClose
 }: {
   product: Product | null;
@@ -28,22 +29,43 @@ export default function ProductDetailModal({
   const { t, tr, locale } = useLanguage();
   const [packQty, setPackQty] = useState(1);
   const [unitMode, setUnitMode] = useState<"pack" | "carton">("pack");
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
+  // Bir kartochkadagi barcha o'lchamlar: sharhlar hammasi uchun umumiy ko'rinadi, yangi sharh esa
+  // asosiy mahsulotga yoziladi.
+  const variants = head?.variants ?? [];
+  const reviewIds = variants.length > 1 ? variants.map((v) => v.id) : head ? [head.id] : [];
+  const reviewProductId = head ? (variants.length > 1 ? head.variantOf ?? head.id : head.id) : "";
+
   useEffect(() => {
     setPackQty(1);
     setUnitMode("pack");
+    setActiveId(head?.id ?? null);
     setComments(null);
     setNewComment("");
-    if (product) {
-      fetchComments(product.id).then(setComments);
+    if (head) {
+      fetchComments(reviewIds).then(setComments);
     }
-  }, [product?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [head?.id]);
 
-  if (!product) return null;
+  if (!head) return null;
+
+  // Hozir tanlangan o'lcham (alohida haqiqiy mahsulot) — narx, qadoq, rasm va savat shu bo'yicha.
+  const hasVariants = variants.length > 1;
+  const product = variants.find((v) => v.id === activeId) ?? head;
+
+  const handleSelectVariant = (id: string) => {
+    const next = variants.find((v) => v.id === id);
+    if (!next) return;
+    setActiveId(id);
+    setPackQty(1);
+    if (!next.cartonSize) setUnitMode("pack");
+  };
 
   const discount = product.oldPrice
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
@@ -71,14 +93,14 @@ export default function ProductDetailModal({
     if (!newComment.trim()) return;
     setSubmitting(true);
     await addComment({
-      productId: product.id,
+      productId: reviewProductId,
       userId: auth.session.user.id,
       authorName: auth.user.name,
       body: newComment.trim()
     });
     setNewComment("");
     setSubmitting(false);
-    fetchComments(product.id).then(setComments);
+    fetchComments(reviewIds).then(setComments);
   };
 
   const handleDeleteComment = async (id: string) => {
@@ -169,6 +191,36 @@ export default function ProductDetailModal({
                 {product.infoBadgeType && (
                   <div className="mb-3">
                     <ProductInfoBadge type={product.infoBadgeType} text={product.infoBadgeText} />
+                  </div>
+                )}
+
+                {hasVariants && (
+                  <div className="mb-4">
+                    <p className="text-[11px] text-ink/40 font-bold uppercase mb-1.5">{t("product.size")}</p>
+                    <div className="flex flex-wrap gap-2" role="group" aria-label={t("product.size")}>
+                      {variants.map((v) => {
+                        const selected = v.id === product.id;
+                        const inCart = !selected && items.some((i) => i.product.id === v.id);
+                        return (
+                          <button
+                            key={v.id}
+                            type="button"
+                            onClick={() => handleSelectVariant(v.id)}
+                            aria-pressed={selected}
+                            className={`relative text-xs font-bold px-3.5 py-2 rounded-lg border transition-colors ${
+                              selected
+                                ? "bg-brand-500 text-white border-brand-500"
+                                : "border-ink/15 text-ink/60 hover:border-brand-400 hover:text-brand-600"
+                            }`}
+                          >
+                            {getVariantLabel(v)}
+                            {inCart && (
+                              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-success border-2 border-white" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 

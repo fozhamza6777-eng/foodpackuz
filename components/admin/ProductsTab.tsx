@@ -39,6 +39,17 @@ export default function ProductsTab() {
     );
   }, [products, search]);
 
+  // Asosiy mahsulot ID -> unga bog'langan o'lchamlar soni, va ID -> nom (ro'yxatda ko'rsatish uchun).
+  const { variantCounts, nameById } = useMemo(() => {
+    const counts = new Map<string, number>();
+    const names = new Map<string, string>();
+    for (const p of products ?? []) {
+      names.set(p.id, p.name);
+      if (p.variant_of) counts.set(p.variant_of, (counts.get(p.variant_of) ?? 0) + 1);
+    }
+    return { variantCounts: counts, nameById: names };
+  }, [products]);
+
   const handleToggleActive = async (p: ProductRow) => {
     setProducts((prev) => (prev ? prev.map((x) => (x.id === p.id ? { ...x, is_active: !x.is_active } : x)) : prev));
     await supabase.from("products").update({ is_active: !p.is_active }).eq("id", p.id);
@@ -112,6 +123,17 @@ export default function ProductsTab() {
                 <p className="text-xs text-ink/45 font-medium mt-0.5">
                   {(p.categories && p.categories.length > 0 ? p.categories : [p.category]).join(" · ")}
                 </p>
+                {p.variant_of && (
+                  <p className="text-[11px] font-bold text-violet-700 mt-1 truncate">
+                    ↳ {p.variant_label || p.sizes?.[0] || "O'lcham"} — "{nameById.get(p.variant_of) ?? p.variant_of}"
+                    kartochkasida
+                  </p>
+                )}
+                {variantCounts.get(p.id) ? (
+                  <p className="text-[11px] font-bold text-violet-700 mt-1">
+                    + yana {variantCounts.get(p.id)} ta o'lcham shu kartochkada
+                  </p>
+                ) : null}
                 <div className="flex items-baseline gap-1.5 mt-1">
                   <span className="font-display font-extrabold text-sm text-ink">
                     {formatNumber(p.price)}
@@ -158,6 +180,7 @@ export default function ProductsTab() {
       {modal && (
         <ProductFormModal
           initial={modal === "create" ? null : modal}
+          allProducts={products ?? []}
           onClose={() => setModal(null)}
           onSaved={handleSaved}
         />

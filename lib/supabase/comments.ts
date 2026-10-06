@@ -16,11 +16,13 @@ export interface MyComment extends Comment {
   productImageUrl?: string;
 }
 
-export async function fetchComments(productId: string): Promise<Comment[]> {
+/** Bitta mahsulot yoki bir kartochkadagi barcha o'lchamlar (ID'lar ro'yxati) sharhlari. */
+export async function fetchComments(productIds: string | string[]): Promise<Comment[]> {
+  const ids = Array.isArray(productIds) ? productIds : [productIds];
   const { data } = await supabase
     .from("product_comments")
     .select("*")
-    .eq("product_id", productId)
+    .in("product_id", ids)
     .order("created_at", { ascending: false });
 
   return (data ?? []).map((r: any) => ({

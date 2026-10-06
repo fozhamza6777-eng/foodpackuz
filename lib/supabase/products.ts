@@ -24,8 +24,45 @@ export function mapRowToProduct(row: ProductRow): Product {
     descriptionRu: row.description_ru ?? undefined,
     code: row.code,
     infoBadgeType: (row.info_badge_type as Product["infoBadgeType"]) ?? undefined,
-    infoBadgeText: row.info_badge_text ?? undefined
+    infoBadgeText: row.info_badge_text ?? undefined,
+    variantOf: row.variant_of ?? undefined,
+    variantLabel: row.variant_label ?? undefined
   };
+}
+
+/** Kartochkadagi o'lchamlar tartibi: arzonidan qimmatiga (odatda kichikdan kattaga). */
+function compareVariants(a: Product, b: Product): number {
+  return a.price - b.price || a.id.localeCompare(b.id);
+}
+
+/** Katalogdagi asosiy mahsulotlarga ularning (faol) o'lchamlarini biriktiradi — bitta qo'shimcha
+ *  so'rov bilan. O'lchami yo'q mahsulotlar o'zgarishsiz qaytadi. */
+async function attachVariants(rows: ProductRow[]): Promise<Product[]> {
+  const heads = rows.map(mapRowToProduct);
+  if (heads.length === 0) return heads;
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("is_active", true)
+    .in(
+      "variant_of",
+      heads.map((h) => h.id)
+    );
+  if (error || !data || data.length === 0) return heads;
+
+  const byParent = new Map<string, Product[]>();
+  for (const row of data as ProductRow[]) {
+    const list = byParent.get(row.variant_of as string) ?? [];
+    list.push(mapRowToProduct(row));
+    byParent.set(row.variant_of as string, list);
+  }
+
+  return heads.map((head) => {
+    const others = byParent.get(head.id);
+    if (!others) return head;
+    return { ...head, variants: [head, ...others].sort(compareVariants) };
+  });
 }
 
 /** Barcha mahsulotlarni (faol va yashiringan) oladi — faqat admin panel uchun. */
@@ -61,6 +98,26 @@ function escapeOrFilterValue(value: string): string {
   return value.replace(/[,()]/g, "\\$&");
 }
 
+/** `in.(...)` ichidagi qiymatni qo'sh tirnoqqa olib, ichidagi maxsus belgilarni ekranlaydi. */
+function quoteInFilterValue(value: string): string {
+  return `"${value.replace(/[\\"]/g, "\\$&")}"`;
+}
+
+/** Qidiruv matniga mos keladigan o'lchamlarning asosiy mahsulot ID'lari — shunda "40x40" deb
+ *  qidirganda, o'sha o'lcham yashiringan kartochka ham topiladi. */
+async function fetchParentIdsOfMatchingVariants(escapedSearch: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("variant_of")
+    .eq("is_active", true)
+    .not("variant_of", "is", null)
+    .or(
+      `name.ilike.%${escapedSearch}%,name_ru.ilike.%${escapedSearch}%,code.ilike.%${escapedSearch}%,variant_label.ilike.%${escapedSearch}%`
+    );
+  if (error || !data) return [];
+  return Array.from(new Set((data as { variant_of: string | null }[]).map((r) => r.variant_of).filter(Boolean) as string[]));
+}
+
 /** Katalog ro'yxati uchun — faqat kerakli sahifani, faol filtr/tartib/qidiruv
  *  bilan serverning o'zida (Postgres'da) hisoblab, sahifalab oladi.
  *  Mahsulotlar soni yuzlab/minglabga yetganda ham sayt tezligini saqlab
@@ -72,7 +129,13 @@ export async function fetchProductsPage({
   perPage,
   search
 }: ProductsPageParams): Promise<ProductsPageResult> {
-  let query = supabase.from("products").select("*", { count: "exact" }).eq("is_active", true);
+  // Faqat asosiy mahsulotlar kartochka bo'ladi — o'lchamlar (variant_of bo'sh emas) shu
+  // kartochka ichida tugma bo'lib chiqadi.
+  let query = supabase
+    .from("products")
+    .select("*", { count: "exact" })
+    .eq("is_active", true)
+    .is("variant_of", null);
 
   if (category !== "Barchasi") {
     query = query.contains("categories", [category]);
@@ -81,7 +144,11 @@ export async function fetchProductsPage({
   const trimmedSearch = search?.trim();
   if (trimmedSearch) {
     const q = escapeOrFilterValue(trimmedSearch);
-    query = query.or(`name.ilike.%${q}%,name_ru.ilike.%${q}%,code.ilike.%${q}%`);
+    const parentIds = await fetchParentIdsOfMatchingVariants(q);
+    const parentFilter = parentIds.length > 0 ? `,id.in.(${parentIds.map(quoteInFilterValue).join(",")})` : "";
+    query = query.or(
+      `name.ilike.%${q}%,name_ru.ilike.%${q}%,code.ilike.%${q}%,variant_label.ilike.%${q}%${parentFilter}`
+    );
   }
 
   if (sortBy === "price_asc") {
@@ -97,7 +164,7 @@ export async function fetchProductsPage({
   const { data, error, count } = await query.range(from, to);
 
   if (error || !data) return { products: [], totalCount: 0 };
-  return { products: (data as ProductRow[]).map(mapRowToProduct), totalCount: count ?? 0 };
+  return { products: await attachVariants(data as ProductRow[]), totalCount: count ?? 0 };
 }
 
 /** Bosh sahifadagi "Yangi mahsulotlar" qatori uchun — butun katalogni
@@ -108,11 +175,12 @@ export async function fetchNewProducts(limit = 8): Promise<Product[]> {
     .select("*")
     .eq("is_active", true)
     .eq("is_new", true)
+    .is("variant_of", null)
     .order("sort_order", { ascending: true })
     .limit(limit);
 
   if (error || !data) return [];
-  return (data as ProductRow[]).map(mapRowToProduct);
+  return attachVariants(data as ProductRow[]);
 }
 
 /** Faqat berilgan ID'lardagi (faol) mahsulotlarni oladi — masalan sevimlilar

@@ -12,9 +12,10 @@ import ProductGallery, { getProductImages } from "./ProductGallery";
 import ProductInfoBadge from "./ProductInfoBadge";
 import { useLanguage } from "./LanguageProvider";
 import { formatNumber } from "@/lib/formatNumber";
+import { getVariantLabel } from "@/lib/productVariants";
 
 export default function ProductCard({
-  product,
+  product: head,
   index,
   onOpenDetail,
   onRequireAuth
@@ -30,7 +31,16 @@ export default function ProductCard({
   const { t, tr } = useLanguage();
   const [packQty, setPackQty] = useState(1);
   const [unitMode, setUnitMode] = useState<"pack" | "carton">("pack");
-  const [cartUnitMode, setCartUnitMode] = useState<"pack" | "carton">("pack");
+  // Savatga qaysi birlikda (pachka/karobka) qo'shilgani har bir o'lcham uchun alohida eslab qolinadi.
+  const [cartUnitModes, setCartUnitModes] = useState<Record<string, "pack" | "carton">>({});
+  const [activeId, setActiveId] = useState(head.id);
+
+  // Kartochkada bir nechta o'lcham bo'lsa — hozir tanlangan o'lcham (alohida haqiqiy mahsulot).
+  // Narx, qadoq, rasm, kod va savat shu mahsulot bo'yicha ishlaydi.
+  const variants = head.variants ?? [];
+  const hasVariants = variants.length > 1;
+  const product = variants.find((v) => v.id === activeId) ?? head;
+  const cartUnitMode = cartUnitModes[product.id] ?? "pack";
 
   const discount = product.oldPrice
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
@@ -51,7 +61,20 @@ export default function ProductCard({
 
   const handleAdd = () => {
     addItem(product, packQty * unitSize);
-    setCartUnitMode(unitMode);
+    setCartUnitModes((m) => ({ ...m, [product.id]: unitMode }));
+  };
+
+  const handleSelectVariant = (id: string) => {
+    const next = variants.find((v) => v.id === id);
+    if (!next) return;
+    setActiveId(id);
+    setPackQty(1);
+    if (!next.cartonSize) setUnitMode("pack");
+  };
+
+  const openDetail = () => {
+    // Batafsil oyna ham shu o'lchamlar ro'yxati bilan ochiladi (hozir tanlangani birinchi bo'lib ko'rinadi).
+    onOpenDetail?.(hasVariants ? { ...product, variants } : product);
   };
 
   const handleToggleLike = (e: React.MouseEvent) => {
@@ -75,11 +98,16 @@ export default function ProductCard({
       }`}
     >
       <div
-        onClick={() => onOpenDetail?.(product)}
+        onClick={openDetail}
         className={`relative h-40 sm:h-44 bg-surface overflow-hidden ${onOpenDetail ? "cursor-pointer" : ""}`}
       >
         {images.length > 1 ? (
-          <ProductGallery images={images} alt={tr(product.name, product.nameRu)} className="absolute inset-0" />
+          <ProductGallery
+            key={product.id}
+            images={images}
+            alt={tr(product.name, product.nameRu)}
+            className="absolute inset-0"
+          />
         ) : product.imageUrl ? (
           <motion.div className="absolute inset-0" whileHover={{ scale: 1.06 }} transition={{ duration: 0.3 }}>
             <ProductImage imageUrl={product.imageUrl} art={product.image} className="w-full h-full" />
@@ -128,7 +156,7 @@ export default function ProductCard({
 
       <div className="p-4 flex flex-col flex-1">
         <h3
-          onClick={() => onOpenDetail?.(product)}
+          onClick={openDetail}
           className={`font-bold text-sm leading-snug text-ink mb-1 line-clamp-2 min-h-[2.5em] ${
             onOpenDetail ? "cursor-pointer hover:text-brand-600" : ""
           }`}
@@ -136,15 +164,47 @@ export default function ProductCard({
           {tr(product.name, product.nameRu)}
         </h3>
         <p className="text-xs text-ink/45 font-medium mb-3">
-          {product.sizes[0]}
-          {product.sizes.length > 1 ? ` +${product.sizes.length - 1}` : ""} · {t("product.package_size_label")}{" "}
-          {product.packSize} {product.unit}
+          {/* O'lcham tugmalari bor kartochkada o'lchamni takrorlamaymiz */}
+          {!hasVariants && (
+            <>
+              {product.sizes[0]}
+              {product.sizes.length > 1 ? ` +${product.sizes.length - 1}` : ""} ·{" "}
+            </>
+          )}
+          {t("product.package_size_label")} {product.packSize} {product.unit}
           {product.cartonSize
             ? ` · ${t("product.carton").toLowerCase()} ${product.cartonSize} ${product.unit}`
             : ""}
         </p>
 
         <div className="mt-auto">
+          {hasVariants && (
+            <div className="flex flex-wrap gap-1.5 mb-2.5" role="group" aria-label={t("product.size")}>
+              {variants.map((v) => {
+                const selected = v.id === product.id;
+                const inCart = !selected && items.some((i) => i.product.id === v.id);
+                return (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => handleSelectVariant(v.id)}
+                    aria-pressed={selected}
+                    className={`relative text-[11px] font-bold px-2.5 py-1.5 rounded-md border transition-colors ${
+                      selected
+                        ? "bg-brand-500 text-white border-brand-500"
+                        : "border-ink/15 text-ink/60 hover:border-brand-400 hover:text-brand-600"
+                    }`}
+                  >
+                    {getVariantLabel(v)}
+                    {inCart && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-success border-2 border-white" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {hasCarton && (
             <div className="flex gap-1.5 mb-2.5">
               <button

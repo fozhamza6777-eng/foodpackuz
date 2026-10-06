@@ -47,6 +47,10 @@ export interface ProductRow {
   sort_order: number;
   info_badge_type: string | null;
   info_badge_text: string | null;
+  /** Bo'sh emas bo'lsa — bu mahsulot alohida kartochka emas, shu ID dagi mahsulot kartochkasida o'lcham tugmasi. */
+  variant_of: string | null;
+  /** O'lcham tugmasidagi yozuv (bo'sh bo'lsa `sizes[0]` ishlatiladi). */
+  variant_label: string | null;
   created_at: string;
   updated_at: string;
 }
