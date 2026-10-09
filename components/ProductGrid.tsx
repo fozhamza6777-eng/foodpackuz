@@ -241,7 +241,7 @@ export default function ProductGrid({
 
         <motion.div
           layout
-          className={`grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 transition-opacity ${
+          className={`grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 transition-opacity ${
             loading ? "opacity-50" : "opacity-100"
           }`}
         >
@@ -253,6 +253,7 @@ export default function ProductGrid({
                   index={i}
                   onOpenDetail={setSelected}
                   onRequireAuth={() => setAuthOpen(true)}
+                  compact
                 />
               </motion.div>
             ))}
