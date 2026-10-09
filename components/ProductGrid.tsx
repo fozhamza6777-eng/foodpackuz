@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowUpDown, Loader2, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ArrowUpDown, Loader2, Search, SlidersHorizontal, X } from "lucide-react";
 import { Product } from "@/lib/types";
 import type { Category } from "@/lib/supabase/categories";
 import { fetchProductsPage, type ProductSortOption } from "@/lib/supabase/products";
@@ -31,7 +31,7 @@ export default function ProductGrid({
   initialTotalCount: number;
   categories: Category[];
 }) {
-  const { t } = useLanguage();
+  const { t, tr } = useLanguage();
   const { activeCategory, setActiveCategory, searchQuery, setSearchQuery } = useCatalogFilter();
   const [sortBy, setSortBy] = useState<ProductSortOption>("popular");
   const [perPage, setPerPage] = useState<number>(24);
@@ -40,6 +40,8 @@ export default function ProductGrid({
   const [totalCount, setTotalCount] = useState(initialTotalCount);
   const [loading, setLoading] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  // Bo'limlar (kategoriya tugmalari) paneli — odatda yopiq, tugma bilan ochiladi.
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
@@ -118,8 +120,13 @@ export default function ProductGrid({
       const pastThreshold = sentinel.getBoundingClientRect().top < 73;
       const delta = currentY - lastScrollYRef.current;
       if (pastThreshold) {
-        if (delta > 4) setHideBar(true);
-        else if (delta < -4) setHideBar(false);
+        if (delta > 4) {
+          setHideBar(true);
+          // Panel ochiq qolib, qaytib chiqqanda yana joy egallamasligi uchun yopamiz.
+          setFiltersOpen(false);
+        } else if (delta < -4) {
+          setHideBar(false);
+        }
       } else {
         setHideBar(false);
       }
@@ -130,6 +137,21 @@ export default function ProductGrid({
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Tanlangan bo'lim nomi — Bo'limlar tugmasida ko'rinadi (panel yopiq bo'lsa ham qaysi bo'lim ochiqligi bilinadi).
+  const activeCategoryLabel =
+    activeCategory === "Barchasi"
+      ? t("grid.all_categories")
+      : (() => {
+          const c = categories.find((x) => x.name === activeCategory);
+          return c ? tr(c.name, c.nameRu) : activeCategory;
+        })();
+
+  // Bo'lim tanlangach panel o'zi yopiladi — ro'yxat ixcham qoladi.
+  const handleCategoryChange = (c: string) => {
+    setActiveCategory(c);
+    setFiltersOpen(false);
+  };
 
   const goToPage = (p: number) => {
     setPage(p);
@@ -161,12 +183,26 @@ export default function ProductGrid({
             isCompact && hideBar ? "-translate-y-[150%]" : "translate-y-0"
           } ${isCompact ? "py-1.5 border-ink/10 shadow-card" : "py-3 border-ink/8"}`}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <CategoryFilter active={activeCategory} onChange={setActiveCategory} categories={categories} />
-            </div>
+          <div className="flex items-center gap-2">
+            {/* Bo'limlar tugmasi: bosilganda kategoriya tugmalari paneli ochiladi/yopiladi */}
+            <button
+              onClick={() => setFiltersOpen((v) => !v)}
+              aria-expanded={filtersOpen}
+              className={`flex items-center gap-2 min-w-0 flex-1 sm:flex-none sm:max-w-xs border rounded-lg px-3 py-2 text-xs font-bold transition-colors ${
+                activeCategory !== "Barchasi"
+                  ? "border-brand-300 bg-brand-50 text-brand-700"
+                  : "border-ink/15 text-ink/70 hover:border-brand-300"
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">
+                <span className="hidden sm:inline">{t("grid.categories_toggle")}: </span>
+                {activeCategoryLabel}
+              </span>
+              <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
+            </button>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 sm:ml-auto">
               <div className="relative">
                 <button
                   onClick={() => setSortOpen((v) => !v)}
@@ -222,6 +258,23 @@ export default function ProductGrid({
               )}
             </div>
           </div>
+
+          <AnimatePresence initial={false}>
+            {filtersOpen && (
+              <motion.div
+                key="category-panel"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="pt-3 pb-1">
+                  <CategoryFilter active={activeCategory} onChange={handleCategoryChange} categories={categories} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {searchQuery && (

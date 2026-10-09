@@ -12,6 +12,7 @@ import Header from "@/components/Header";
 import AppInstallBanner from "@/components/AppInstallBanner";
 import Hero from "@/components/Hero";
 import PromoRow from "@/components/PromoRow";
+import StatsStrip from "@/components/StatsStrip";
 import TrustBadges from "@/components/TrustBadges";
 import LogoMarquee from "@/components/LogoMarquee";
 import ProductGrid from "@/components/ProductGrid";
@@ -85,13 +86,15 @@ export default function HomeContent({
         <AppInstallBanner />
         <Hero banners={banners} categories={categories} />
         <PromoRow id="yangiliklar" accent="brand" products={newProducts} />
-        <TrustBadges />
-        <LogoMarquee type="partner" title="Ishonchli hamkorlarimiz" initialLogos={initialPartnerLogos} />
         <ProductGrid initialProducts={initialProducts} initialTotalCount={initialProductsCount} categories={categories} />
         <Testimonials />
         <FAQAccordion />
         <Branches />
         <BulkCTA />
+        {/* Footer'dan oldingi oxirgi bo'limlar: raqamlar, afzalliklar va hamkorlar */}
+        <StatsStrip />
+        <TrustBadges />
+        <LogoMarquee type="partner" title="Ishonchli hamkorlarimiz" initialLogos={initialPartnerLogos} />
       </main>
       <Footer />
       <CartDrawer />

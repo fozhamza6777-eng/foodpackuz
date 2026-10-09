@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, Package } from "lucide-react";
 import ProductArt from "./ProductArt";
-import Counter from "./Counter";
 import type { Banner } from "@/lib/supabase/banners";
 import type { Category } from "@/lib/supabase/categories";
 import { useLanguage } from "./LanguageProvider";
@@ -148,28 +147,10 @@ export default function Hero({ banners, categories }: { banners: Banner[]; categ
           )}
         </div>
 
-        {/* statistikalar */}
-        <div className="grid grid-cols-3 gap-3 md:gap-6 mt-5">
-          {[
-            { to: 1200, suffix: "+", label: t("hero.stat_customers") },
-            { to: 24, suffix: ` ${t("common.hour_short")}`, label: t("hero.stat_delivery") },
-            { to: 35, suffix: "+", label: t("hero.stat_product_types") }
-          ].map((s) => (
-            <div key={s.label} className="bg-white rounded-xl shadow-card px-4 py-4 md:py-5 text-center">
-              <div className="font-display font-extrabold text-xl md:text-3xl text-brand-500">
-                <Counter to={s.to} suffix={s.suffix} />
-              </div>
-              <div className="text-[11px] md:text-xs font-semibold text-ink/50 uppercase tracking-wide mt-1">
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* tezkor kategoriyalar — mahsulot rasmi butun kartochkani qamrab
             oladi, kategoriya nomi esa rasm ustiga (pastki chapga) tushadi */}
         {categories.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-ink/8 rounded-2xl overflow-hidden mt-8 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-ink/8 rounded-2xl overflow-hidden mt-5 mb-4">
             {categories.slice(0, 8).map((c, i) => (
               <motion.a
                 key={c.id}
