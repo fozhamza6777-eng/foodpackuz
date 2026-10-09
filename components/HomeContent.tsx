@@ -77,12 +77,6 @@ export default function HomeContent({
       <TopBar />
       <Header categories={categories} />
       <main>
-        <LogoMarquee
-          type="customer"
-          title="Bizga ishongan mijozlar"
-          initialLogos={initialCustomerLogos}
-          variant="compact"
-        />
         <AppInstallBanner />
         <Hero banners={banners} categories={categories} />
         <PromoRow id="yangiliklar" accent="brand" products={newProducts} />
@@ -91,10 +85,16 @@ export default function HomeContent({
         <FAQAccordion />
         <Branches />
         <BulkCTA />
-        {/* Footer'dan oldingi oxirgi bo'limlar: raqamlar, afzalliklar va hamkorlar */}
+        {/* Footer'dan oldingi oxirgi bo'limlar: raqamlar, afzalliklar, hamkorlar va mijozlar logotiplari */}
         <StatsStrip />
         <TrustBadges />
         <LogoMarquee type="partner" title="Ishonchli hamkorlarimiz" initialLogos={initialPartnerLogos} />
+        <LogoMarquee
+          type="customer"
+          title="Bizga ishongan mijozlar"
+          initialLogos={initialCustomerLogos}
+          variant="compact"
+        />
       </main>
       <Footer />
       <CartDrawer />
