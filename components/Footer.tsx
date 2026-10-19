@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Phone, Mail, MapPin, Instagram, Send } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 
@@ -34,6 +35,7 @@ export default function Footer() {
               <li><a href="#nega-biz" className="hover:text-brand-500 transition-colors">{t("footer.why_us")}</a></li>
               <li><a href="#mijozlar" className="hover:text-brand-500 transition-colors">{t("footer.reviews")}</a></li>
               <li><a href="#hamkorlik" className="hover:text-brand-500 transition-colors">{t("footer.partnership_terms")}</a></li>
+              <li><Link href="/ai" className="hover:text-brand-500 transition-colors">{t("footer.ai_agents")}</Link></li>
             </ul>
           </div>
 

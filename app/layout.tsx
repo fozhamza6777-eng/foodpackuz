@@ -14,6 +14,8 @@ import BranchSelectModal from "@/components/BranchSelectModal";
 import ErrorLogger from "@/components/ErrorLogger";
 import VisitTracker from "@/components/VisitTracker";
 import AmocrmChatWidget from "@/components/AmocrmChatWidget";
+import StructuredData from "@/components/StructuredData";
+import { SITE_URL } from "@/lib/site";
 
 const display = Sora({
   subsets: ["latin"],
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
   title: "FOOD BOX — HoReCa uchun qadoqlash va bir martalik idishlar ulgurji",
   description:
     "Restoran, kafe va dostavka biznesi uchun bir martalik idishlar, qadoqlash materiallari. Bepul yetkazib berish, QQS bilan ishlaymiz, onlayn buyurtma.",
-  metadataBase: new URL("https://foodbox.example.uz"),
+  metadataBase: new URL(SITE_URL),
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -69,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${display.variable} ${body.variable} ${mono.variable} font-body bg-surface text-ink antialiased`}
       >
+        <StructuredData />
         <ServiceWorkerRegister />
         <ErrorLogger />
         <VisitTracker />

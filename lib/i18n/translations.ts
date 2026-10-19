@@ -400,6 +400,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.why_us": "Nega FOOD BOX",
     "footer.reviews": "Mijozlar fikri",
     "footer.partnership_terms": "Hamkorlik shartlari",
+    "footer.ai_agents": "AI agentlar uchun",
     "footer.contact": "Aloqa",
     "footer.rights": "Barcha huquqlar himoyalangan.",
     "footer.tagline": "HoReCa uchun qadoqlash yechimlari"
@@ -795,6 +796,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "footer.why_us": "Почему FOOD BOX",
     "footer.reviews": "Отзывы клиентов",
     "footer.partnership_terms": "Условия партнёрства",
+    "footer.ai_agents": "Для AI-агентов",
     "footer.contact": "Контакты",
     "footer.rights": "Все права защищены.",
     "footer.tagline": "Упаковочные решения для HoReCa"
