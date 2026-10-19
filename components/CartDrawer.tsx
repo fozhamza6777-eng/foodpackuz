@@ -39,7 +39,7 @@ type AuthMode = "register" | "login" | "forgot";
 type GeoStatus = "idle" | "loading" | "granted" | "denied" | "error";
 
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, setQty, removeItem, totalSum, totalCount, clearCart } = useCart();
+  const { items, isOpen, closeCart, setQty, removeItem, totalSum, totalCount, clearCart, refreshPrices } = useCart();
   const auth = useAuth();
   const { t, tr } = useLanguage();
   const [step, setStep] = useState<Step>("cart");
@@ -194,6 +194,15 @@ export default function CartDrawer() {
     setOrderError(null);
     setSubmitting(true);
 
+    // Narxlar bazada tekshiriladi, shuning uchun savatda eski narx qolgan bo'lsa (masalan admin narxni
+    // o'zgartirgan) avval savatni yangilaymiz va mijozga yangi summani ko'rsatamiz.
+    const priceCheck = await refreshPrices();
+    if (priceCheck.changed) {
+      setSubmitting(false);
+      setOrderError(t("checkout.prices_changed"));
+      return;
+    }
+
     let receiptPath: string | null = null;
     if (paymentMethod === "karta" && receiptFile) {
       const { path, error: uploadError } = await uploadPaymentReceipt(receiptFile, auth.session.user.id);
@@ -264,6 +273,12 @@ export default function CartDrawer() {
     setSubmitting(false);
 
     if (error) {
+      if (/Narxlar o'zgargan/.test(error.message)) {
+        // Baza narxni rad etdi (tekshiruvdan keyin ham o'zgargan bo'lishi mumkin) — savatni yangilaymiz.
+        refreshPrices();
+        setOrderError(t("checkout.prices_changed"));
+        return;
+      }
       setOrderError(`${t("checkout.order_save_error")}: ${error.message}`);
       return;
     }

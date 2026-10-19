@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef, ReactNode } from "react";
 import { CartItem, Product } from "@/lib/types";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
-import { mapRowToProduct } from "@/lib/supabase/products";
+import { fetchActiveProductsByIdsOrNull, mapRowToProduct } from "@/lib/supabase/products";
 import type { ProductRow } from "@/lib/supabase/types";
 import { useAuth } from "./AuthProvider";
 
@@ -24,6 +24,10 @@ interface CartContextValue {
   removeItem: (id: string) => void;
   setQty: (id: string, qty: number) => void;
   clearCart: () => void;
+  /** Savatdagi mahsulotlarni bazadagi joriy narx/mavjudlik bilan yangilaydi (eski narx qolib ketgan bo'lishi
+   *  mumkin: brauzerda saqlangan savat yoki admin narxni o'zgartirgan). `changed` — narx, qadoq hajmi o'zgargan
+   *  yoki mahsulot sotuvdan olingan bo'lsa. `failed` — bazaga ulanib bo'lmadi (savatga tegilmaydi). */
+  refreshPrices: () => Promise<{ changed: boolean; failed: boolean }>;
   totalCount: number;
   totalSum: number;
   lastAdded: string | null;
@@ -196,6 +200,42 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCartStartedAt(null);
   }, [auth.session?.user?.id]);
 
+  // Eng so'nggi savat holati — refreshPrices() ichida eski (yopilib qolgan) qiymatni ishlatmaslik uchun.
+  const itemsRef = useRef<CartItem[]>(items);
+  itemsRef.current = items;
+
+  const refreshPrices = useCallback(async () => {
+    const snapshot = itemsRef.current;
+    if (snapshot.length === 0) return { changed: false, failed: false };
+
+    const fresh = await fetchActiveProductsByIdsOrNull(snapshot.map((i) => i.product.id));
+    if (fresh === null) return { changed: false, failed: true };
+
+    const byId = new Map(fresh.map((p) => [p.id, p]));
+    let changed = false;
+    const next: CartItem[] = [];
+    for (const item of snapshot) {
+      const current = byId.get(item.product.id);
+      if (!current) {
+        // Mahsulot sotuvdan olingan yoki o'chirilgan.
+        changed = true;
+        syncToServer(item.product.id, 0);
+        continue;
+      }
+      if (current.price !== item.product.price || current.packSize !== item.product.packSize) changed = true;
+      // Qadoq hajmi o'zgargan bo'lsa, miqdorni eng yaqin butun qadoqqa (yuqoriga) keltiramiz.
+      const pack = current.packSize > 0 ? current.packSize : 1;
+      const qty = item.qty % pack === 0 ? item.qty : Math.ceil(item.qty / pack) * pack;
+      if (qty !== item.qty) {
+        changed = true;
+        syncToServer(item.product.id, qty);
+      }
+      next.push({ product: current, qty });
+    }
+    if (changed) setItems(next);
+    return { changed, failed: false };
+  }, [syncToServer]);
+
   const totalCount = useMemo(() => items.reduce((s, i) => s + i.qty, 0), [items]);
   const totalSum = useMemo(
     () => items.reduce((s, i) => s + i.qty * i.product.price, 0),
@@ -211,6 +251,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     removeItem,
     setQty,
     clearCart,
+    refreshPrices,
     totalCount,
     totalSum,
     lastAdded,

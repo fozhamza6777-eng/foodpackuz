@@ -183,6 +183,15 @@ export async function fetchNewProducts(limit = 8): Promise<Product[]> {
   return attachVariants(data as ProductRow[]);
 }
 
+/** Savatdagi mahsulotlarning joriy (faol) holatini oladi. `fetchProductsByIds`dan farqi: baza xatosi bo'lsa `null`
+ *  qaytaradi (bo'sh ro'yxat emas) — aks holda tarmoq xatosi savatdagi hamma narsani "mavjud emas" deb ko'rsatib qo'yardi. */
+export async function fetchActiveProductsByIdsOrNull(ids: string[]): Promise<Product[] | null> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase.from("products").select("*").eq("is_active", true).in("id", ids);
+  if (error || !data) return null;
+  return (data as ProductRow[]).map(mapRowToProduct);
+}
+
 /** Faqat berilgan ID'lardagi (faol) mahsulotlarni oladi — masalan sevimlilar
  *  yoki buyurtma tarixidagi mahsulotlarni butun katalogni yuklamasdan
  *  qayta ko'rsatish/qayta buyurtma berish uchun. */
