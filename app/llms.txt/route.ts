@@ -21,8 +21,8 @@ export async function GET() {
 
 ## For AI agents
 
-- [MCP server](${MCP_URL}): remote MCP (Streamable HTTP). Catalog tools need no authentication: search_products, get_product, list_categories, get_shop_info, calculate_quote. Ordering tools (list_my_addresses, place_order, get_order_status) need the customer's personal AI key ("Authorization: Bearer <key>").
-- [REST API](${SITE_URL}/api/v1/products): JSON. Public: GET /api/v1/products, GET /api/v1/products/{id}, GET /api/v1/categories, GET /api/v1/shop, POST /api/v1/quote. With AI key: GET /api/v1/addresses, POST /api/v1/orders, GET /api/v1/orders/{id}.
+- [MCP server](${MCP_URL}): remote MCP (Streamable HTTP, no authentication). Tools: search_products, get_product, list_categories, get_shop_info, calculate_quote. Read-only.
+- [REST API](${SITE_URL}/api/v1/products): JSON, no authentication. Endpoints: GET /api/v1/products, GET /api/v1/products/{id}, GET /api/v1/categories, GET /api/v1/shop, POST /api/v1/quote.
 - [OpenAPI description](${OPENAPI_URL})
 - [How to connect (for people)](${SITE_URL}/ai)
 
@@ -31,8 +31,7 @@ export async function GET() {
 - Products are sold in packs (see pack_size); quantities must be whole packs. Search with Uzbek or Russian words (e.g. "pitsa qutisi", "stakan") or a product code.
 - Delivery: Tashkent and Qo'qon; minimum order for delivery ${SHOP.delivery.minOrderForDeliveryUzs} UZS; no minimum for pickup.
 - Payment on receipt: cash or card to the courier. VAT (QQS) invoices and full document package available.
-- Ordering: on the website ${SITE_URL} (quick registration with name and phone at checkout) or by phone.
-- Ordering through an AI agent: the customer registers on the website and creates a personal AI key in their profile (Profile → AI agent). The agent creates an order REQUEST (place_order); it becomes a real order only after the account owner presses "Confirm" on the website. Cash on delivery only. Agents must never tell the customer an order is placed before it is confirmed.
+- Ordering: on the website ${SITE_URL} (quick registration with name and phone at checkout) or by phone. Ordering through AI agents is not available; use calculate_quote to price a basket.
 - Wholesale (100+ packs): special prices, contract, branding — ${SITE_URL}/#hamkorlik
 
 ## Product categories

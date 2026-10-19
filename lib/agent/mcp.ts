@@ -8,14 +8,7 @@ import {
   type QuoteItemInput
 } from "./catalog";
 import { getShopInfo, parseShopLang } from "./shopInfo";
-import { draftView, getOrderStatus, listAddresses, placeOrderDraft, type Failure } from "./orders";
-import type { AgentContext } from "./auth";
 import { SITE_URL } from "@/lib/site";
-
-/** So'rov kontekst: AI kalit bilan kelgan bo'lsa — kim nomidan ishlayotgani. */
-export interface McpContext {
-  agent: AgentContext | null;
-}
 
 // Minimal, saqlanadigan holatsiz (stateless) MCP server — "Streamable HTTP" transporti uchun.
 // Har bir so'rov mustaqil: seans yo'q, shuning uchun serverless muhitda (Vercel) ishonchli ishlaydi.
@@ -30,9 +23,7 @@ const INSTRUCTIONS = [
   "The catalog is in Uzbek (Latin script) and Russian: search with Uzbek or Russian words (e.g. 'pitsa qutisi', 'stakan'), product codes (SKU) or sizes like '30x30'.",
   "Prices are in UZS (so'm). Products are sold in packs (pack_size units) — quantities must be whole packs.",
   "Use calculate_quote to price a basket and to check the delivery minimum.",
-  "Ordering (requires the customer's personal AI key, sent as 'Authorization: Bearer <key>'): place_order creates an order REQUEST — it is NOT a placed order.",
-  "The account owner must confirm it with one button on foodbox.uz (confirm_url) before it is processed. Always tell the customer to confirm and never say the order is placed until get_order_status shows 'confirmed'.",
-  "Only cash on delivery is available; the delivery minimum applies. Without a key only the read-only tools work."
+  "This server is read-only: it cannot place orders. For ordering, send the customer to the website or the phone numbers returned by get_shop_info."
 ].join(" ");
 
 type JsonRpcId = string | number | null;
@@ -138,61 +129,6 @@ const TOOLS = [
       additionalProperties: false
     },
     annotations: { title: "Calculate quote", ...READ_ONLY }
-  },
-  {
-    name: "list_my_addresses",
-    title: "List my saved delivery addresses",
-    description:
-      "Requires the customer's AI key. Lists the customer's saved delivery addresses (id, name, address). Use an id as address_id in place_order.",
-    inputSchema: { type: "object", properties: {}, additionalProperties: false },
-    annotations: { title: "My addresses", ...READ_ONLY }
-  },
-  {
-    name: "place_order",
-    title: "Create an order request (needs owner confirmation)",
-    description:
-      "Requires the customer's AI key. Creates an order REQUEST from a basket — it is NOT placed yet: the account owner must press Confirm on foodbox.uz (confirm_url) within 24 hours. Prices are always taken from the catalog, never from you. Cash on delivery only; delivery minimum and a maximum order size apply. Provide either address_id (from list_my_addresses) or address text. Use idempotency_key to make retries safe. After calling, tell the customer to confirm and share confirm_url; check get_order_status afterwards.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        items: {
-          type: "array",
-          minItems: 1,
-          maxItems: 50,
-          items: {
-            type: "object",
-            properties: {
-              product_id: { type: "string", description: "Product id or SKU." },
-              packs: { type: "integer", minimum: 1 },
-              cartons: { type: "integer", minimum: 1 },
-              units: { type: "integer", minimum: 1, description: "Multiple of pack size." }
-            },
-            required: ["product_id"],
-            additionalProperties: false
-          }
-        },
-        address_id: { type: "string", description: "Saved address id from list_my_addresses." },
-        address: { type: "string", minLength: 5, maxLength: 300, description: "Delivery address (if no address_id)." },
-        note: { type: "string", maxLength: 500, description: "Optional note for the order." },
-        idempotency_key: { type: "string", maxLength: 100, description: "Unique string per intended order; repeating it returns the same request." }
-      },
-      required: ["items"],
-      additionalProperties: false
-    },
-    annotations: { title: "Place order request", readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
-  },
-  {
-    name: "get_order_status",
-    title: "Get order request / order status",
-    description:
-      "Requires the customer's AI key. Status of an order request created by place_order: awaiting_owner_confirmation, confirmed (with the real order and its processing status), rejected_by_owner or expired.",
-    inputSchema: {
-      type: "object",
-      properties: { id: { type: "string", description: "The id returned by place_order." } },
-      required: ["id"],
-      additionalProperties: false
-    },
-    annotations: { title: "Order status", ...READ_ONLY }
   }
 ];
 
@@ -235,32 +171,10 @@ function optionalString(value: unknown, max: number): string | undefined | null 
   return value;
 }
 
-const AUTH_REQUIRED =
-  "This tool needs the customer's personal AI key. The customer creates it on foodbox.uz (Profile → AI agent) and adds it to the MCP connection as the header 'Authorization: Bearer <key>' (or as ?key=<key> in the URL for apps that cannot set headers).";
-
-function failureToResult(f: Failure): ToolResult {
-  return toolError(JSON.stringify({ error: f.code, message: f.message, details: f.details ?? null }, null, 2));
-}
-
-async function callTool(name: string, rawArgs: unknown, ctx: McpContext): Promise<ToolResult | null> {
+async function callTool(name: string, rawArgs: unknown): Promise<ToolResult | null> {
   const args = asRecord(rawArgs);
   try {
     switch (name) {
-      case "list_my_addresses": {
-        if (!ctx.agent) return toolError(AUTH_REQUIRED);
-        return ok({ items: await listAddresses(ctx.agent) });
-      }
-      case "place_order": {
-        if (!ctx.agent) return toolError(AUTH_REQUIRED);
-        const result = await placeOrderDraft(ctx.agent, args);
-        if (!result.ok) return failureToResult(result);
-        return ok({ ...draftView(result.draft), duplicate_request: result.duplicate });
-      }
-      case "get_order_status": {
-        if (!ctx.agent) return toolError(AUTH_REQUIRED);
-        const result = await getOrderStatus(ctx.agent, args.id);
-        return result.ok ? ok(result.result) : failureToResult(result);
-      }
       case "search_products": {
         const query = optionalString(args.query, 200);
         const category = optionalString(args.category, 100);
@@ -305,7 +219,7 @@ async function callTool(name: string, rawArgs: unknown, ctx: McpContext): Promis
 // --- JSON-RPC yo'naltirish -----------------------------------------------------
 
 /** Bitta JSON-RPC xabarini qayta ishlaydi. Bildirishnoma (id yo'q) yoki javob bo'lsa `null` qaytaradi. */
-export async function handleMessage(message: unknown, ctx: McpContext = { agent: null }): Promise<JsonRpcResponse | null> {
+export async function handleMessage(message: unknown): Promise<JsonRpcResponse | null> {
   if (!message || typeof message !== "object" || Array.isArray(message)) {
     return rpcError(null, ERR.invalidRequest, "Invalid Request");
   }
@@ -348,7 +262,7 @@ export async function handleMessage(message: unknown, ctx: McpContext = { agent:
     case "tools/call": {
       const name = typeof params.name === "string" ? params.name : "";
       if (!name) return rpcError(id, ERR.invalidParams, "Missing tool name");
-      const result = await callTool(name, params.arguments, ctx);
+      const result = await callTool(name, params.arguments);
       if (!result) return rpcError(id, ERR.invalidParams, `Unknown tool: ${name}`);
       return { jsonrpc: "2.0", id, result };
     }

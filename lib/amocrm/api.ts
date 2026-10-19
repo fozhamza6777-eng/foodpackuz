@@ -96,9 +96,6 @@ function buildOrderNoteText(order: OrderRow): string {
   const lines = [
     `FOOD BOX buyurtma #${order.id.slice(0, 8)}`,
     `Holat: ${ORDER_STATUS_LABELS[order.status] ?? order.status}`,
-    order.source === "ai_agent"
-      ? `Manba: AI agent${order.agent_name ? ` (${order.agent_name})` : ""} — mijoz saytda tasdiqlagan`
-      : null,
     `Summa: ${order.total.toLocaleString("ru-RU")} so'm`,
     order.branch_name ? `Filial: ${order.branch_name}` : null,
     order.address ? `Manzil: ${order.address}` : null,

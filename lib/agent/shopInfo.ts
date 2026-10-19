@@ -1,6 +1,5 @@
 import { translations, type Locale } from "@/lib/i18n/translations";
 import { MCP_URL, OPENAPI_URL, SHOP, SITE_URL } from "@/lib/site";
-import { AGENT_LIMITS } from "./orders";
 
 export type ShopLang = Locale;
 
@@ -9,8 +8,8 @@ export function parseShopLang(value: unknown): ShopLang {
 }
 
 const ORDER_NOTE: Record<ShopLang, string> = {
-  uz: "Buyurtmani foodbox.uz saytida yoki telefon orqali berish mumkin. AI agent orqali: mijoz saytda ro'yxatdan o'tib, profilidan shaxsiy AI kalit oladi; agent buyurtma so'rovi yaratadi, buyurtma esa faqat mijoz saytda «Tasdiqlash» tugmasini bosgandan keyin qabul qilinadi. To'lov — kuryerga naqd.",
-  ru: "Заказ можно оформить на сайте foodbox.uz или по телефону. Через AI-агента: клиент регистрируется на сайте и получает в профиле личный AI-ключ; агент создаёт запрос на заказ, а заказ принимается только после того, как клиент нажмёт «Подтвердить» на сайте. Оплата — наличными курьеру."
+  uz: "Buyurtmani foodbox.uz saytida (buyurtmani rasmiylashtirishda ism va telefon bilan tezkor ro'yxatdan o'tiladi) yoki telefon orqali bering. AI orqali buyurtma berish mavjud emas — narxni hisoblash (calculate_quote) mumkin.",
+  ru: "Заказ можно оформить на сайте foodbox.uz (при оформлении заказа быстрая регистрация по имени и телефону) или по телефону. Оформление заказа через AI недоступно — доступен расчёт стоимости (calculate_quote)."
 };
 
 /** Do'kon haqida AI agentga kerak bo'ladigan ma'lumotlar. Matnlar saytning o'z tarjimalaridan
@@ -60,11 +59,7 @@ export function getShopInfo(lang: ShopLang) {
     },
     faq,
     ordering: {
-      via_ai_agent: true,
-      requires_customer_api_key: true,
-      owner_confirmation_required: true,
-      payment_via_ai_agent: "cash_on_delivery",
-      max_order_total_via_ai_agent: AGENT_LIMITS.maxOrderTotal,
+      via_ai_agent: false,
       website: SITE_URL,
       phones: SHOP.branches.map((b) => ({ city: b.city, phone: b.phone })),
       note: ORDER_NOTE[lang]
