@@ -18,7 +18,8 @@ import {
   Image as ImageIcon,
   ShieldCheck,
   ShieldX,
-  Clock3
+  Clock3,
+  Bot
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { getReceiptSignedUrl } from "@/lib/supabase/storage";
@@ -218,6 +219,14 @@ export default function OrdersTab() {
                     {profile?.company_name && (
                       <span className="flex items-center gap-1 text-xs text-ink/45 font-medium">
                         <Building2 className="w-3 h-3" /> {profile.company_name}
+                      </span>
+                    )}
+                    {order.source === "ai_agent" && (
+                      <span
+                        className="flex items-center gap-1 text-[11px] font-extrabold text-white bg-violet-600 px-2 py-0.5 rounded-full"
+                        title="Bu buyurtmani AI agent yaratgan, mijoz esa saytda tasdiqlagan"
+                      >
+                        <Bot className="w-3 h-3" /> AI{order.agent_name ? `: ${order.agent_name}` : ""}
                       </span>
                     )}
                     {hasGeo && (

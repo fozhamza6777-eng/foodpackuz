@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Bot, Code2, MessageSquareText, Search, Wrench } from "lucide-react";
+import { ArrowLeft, Bot, Code2, MessageSquareText, Search, ShoppingBag, Wrench } from "lucide-react";
 import CopyBox from "@/components/CopyBox";
 import { API_BASE_URL, MCP_URL, OPENAPI_URL, SITE_URL } from "@/lib/site";
 
@@ -18,10 +18,25 @@ const tools: { name: string; text: string }[] = [
   { name: "calculate_quote", text: "Savat narxini hisoblash va yetkazib berish uchun minimal summaga yetishini tekshirish (buyurtma bermaydi)." }
 ];
 
+const orderTools: { name: string; text: string }[] = [
+  { name: "list_my_addresses", text: "Profilingizdagi saqlangan yetkazish manzillari." },
+  { name: "place_order", text: "Buyurtma so'rovini yaratadi — siz tasdiqlamaguningizcha buyurtma qabul qilinmaydi." },
+  { name: "get_order_status", text: "So'rov tasdiqlanganmi, buyurtma qaysi holatda ekanini ko'rsatadi." }
+];
+
+const orderSteps = [
+  "foodbox.uz saytida ro'yxatdan o'ting yoki tizimga kiring.",
+  "Profil → «AI agent (kalitlar)» bo'limida kalit yarating va nusxalang (u faqat bir marta ko'rsatiladi).",
+  "Kalitni AI ilovangizdagi MCP ulanishiga qo'shing (profilda tayyor ko'rsatma bor).",
+  "AI'dan buyurtma bering — u sizga tasdiqlash havolasini beradi.",
+  "Saytda chiqadigan «AI agent buyurtma yaratdi» oynasida buyurtmani ko'rib chiqib, «Tasdiqlash» tugmasini bosing."
+];
+
 const examples = [
   "FOOD BOX da 30x30 pitsa qutisi narxi qancha va bir pachkada nechta dona bor?",
   "FOOD BOX'dan 500 dona burger qutisi va 200 dona stakan uchun narxni hisoblab ber. Toshkentga yetkazib berish minimal summasiga yetadimi?",
-  "FOOD BOX qaysi shaharlarga yetkazib beradi va to'lov qanday amalga oshiriladi?"
+  "FOOD BOX qaysi shaharlarga yetkazib beradi va to'lov qanday amalga oshiriladi?",
+  "Ofisimga 4 pachka 30x30 pitsa qutisi buyurtma qil (menga tasdiqlash havolasini ber)."
 ];
 
 const mcpJson = `{
@@ -57,15 +72,12 @@ export default function AiAgentsPage() {
           <p className="text-sm text-ink/65 leading-relaxed">
             Katalogimizni o&apos;zingiz ishlatadigan AI yordamchi (Claude, ChatGPT, Cursor va boshqalar) orqali ko&apos;rishingiz
             mumkin: mahsulotlarni qidirish, narxlarni solishtirish, savatingiz narxini hisoblash va filial hamda yetkazib berish
-            shartlarini so&apos;rash. Buning uchun kalit yoki parol kerak emas — ma&apos;lumotlar ochiq.
+            shartlarini so&apos;rash. Katalogni ko&apos;rish uchun kalit yoki parol kerak emas — ma&apos;lumotlar ochiq.
           </p>
           <div className="mt-4 rounded-xl bg-brand-50 border border-brand-100 p-4 text-sm text-brand-700 font-medium leading-relaxed">
-            Buyurtmani hozircha{" "}
-            <a href={SITE_URL} className="underline font-bold">
-              foodbox.uz
-            </a>{" "}
-            saytida yoki telefon orqali bering. AI orqali to&apos;g&apos;ridan-to&apos;g&apos;ri buyurtma berish hozircha mavjud emas
-            — AI faqat qidirish va narx hisoblash uchun.
+            AI yordamchingiz sizning nomingizdan <b>buyurtma so&apos;rovini</b> ham yarata oladi — buning uchun saytda ro&apos;yxatdan
+            o&apos;ting va profilingizdan shaxsiy AI kalit oling. Lekin buyurtma <b>faqat siz saytda «Tasdiqlash» tugmasini bosgandan
+            keyin</b> qabul qilinadi: AI o&apos;zi buyurtma bera olmaydi.
           </div>
         </section>
 
@@ -100,6 +112,34 @@ export default function AiAgentsPage() {
           </ul>
         </section>
 
+        <section className="bg-white rounded-2xl shadow-card p-6 sm:p-8 flex flex-col gap-4">
+          <h2 className="font-display font-extrabold text-lg text-ink flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-brand-500" /> AI orqali buyurtma berish
+          </h2>
+          <ol className="flex flex-col gap-2 list-decimal pl-5">
+            {orderSteps.map((s) => (
+              <li key={s} className="text-sm text-ink/70 leading-relaxed">
+                {s}
+              </li>
+            ))}
+          </ol>
+          <ul className="flex flex-col gap-2.5">
+            {orderTools.map((t) => (
+              <li key={t.name} className="text-sm text-ink/70 leading-relaxed">
+                <code className="font-mono text-[13px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">
+                  {t.name}
+                </code>{" "}
+                — {t.text}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-ink/50 font-medium leading-relaxed">
+            Faqat kuryerga naqd to&apos;lov. Yetkazib berish uchun buyurtma kamida 300 000 so&apos;m bo&apos;lishi kerak, AI orqali bitta
+            buyurtma 20 000 000 so&apos;mgacha. Kattaroq va ulgurji buyurtmalar uchun menejerimiz bilan bog&apos;laning. Kalitni
+            istalgan payt profilingizda bekor qilishingiz mumkin.
+          </p>
+        </section>
+
         <section className="bg-white rounded-2xl shadow-card p-6 sm:p-8 flex flex-col gap-3">
           <h2 className="font-display font-extrabold text-lg text-ink flex items-center gap-2">
             <MessageSquareText className="w-5 h-5 text-brand-500" /> Ulagandan keyin so&apos;rab ko&apos;ring
@@ -118,7 +158,8 @@ export default function AiAgentsPage() {
             <Code2 className="w-5 h-5 text-brand-500" /> 2. Dasturchilar uchun (REST API)
           </h2>
           <p className="text-sm text-ink/65 leading-relaxed">
-            Xuddi shu ma&apos;lumotlar oddiy JSON API orqali ham ochiq. Autentifikatsiya kerak emas.
+            Xuddi shu ma&apos;lumotlar oddiy JSON API orqali ham ochiq (katalog uchun autentifikatsiya kerak emas). Buyurtma
+            so&apos;rovi uchun <code className="font-mono text-[13px]">Authorization: Bearer &lt;AI kalit&gt;</code> sarlavhasi kerak.
           </p>
           <CopyBox label="Namuna so'rov" value={`curl "${API_BASE_URL}/products?q=pitsa&limit=5"`} />
           <ul className="text-sm text-ink/70 leading-relaxed flex flex-col gap-1.5 font-mono text-[13px]">
@@ -127,6 +168,9 @@ export default function AiAgentsPage() {
             <li>GET {API_BASE_URL.replace(SITE_URL, "")}/categories</li>
             <li>GET {API_BASE_URL.replace(SITE_URL, "")}/shop</li>
             <li>POST {API_BASE_URL.replace(SITE_URL, "")}/quote</li>
+            <li>GET {API_BASE_URL.replace(SITE_URL, "")}/addresses (kalit bilan)</li>
+            <li>POST {API_BASE_URL.replace(SITE_URL, "")}/orders (kalit bilan)</li>
+            <li>GET {API_BASE_URL.replace(SITE_URL, "")}/orders/&#123;id&#125; (kalit bilan)</li>
           </ul>
           <p className="text-sm text-ink/65 leading-relaxed">
             To&apos;liq tavsif:{" "}

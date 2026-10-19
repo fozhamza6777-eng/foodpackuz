@@ -28,7 +28,8 @@ import {
   Minus,
   Trash2,
   Star,
-  Pencil
+  Pencil,
+  Bot
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useCart } from "./CartProvider";
@@ -42,8 +43,9 @@ import ProductImage from "./ProductImage";
 import { useLanguage } from "./LanguageProvider";
 import { formatNumber } from "@/lib/formatNumber";
 import { notifyOrderSync } from "@/lib/crm/notifyOrderSync";
+import AgentKeysSection from "./AgentKeysSection";
 
-type Screen = "home" | "settings" | "orders" | "cancelled" | "reviews" | "branches";
+type Screen = "home" | "settings" | "orders" | "cancelled" | "reviews" | "branches" | "ai";
 type GeoStatus = "idle" | "loading" | "granted" | "denied" | "error";
 
 const statusLabelKeys: Record<string, string> = {
@@ -503,7 +505,8 @@ export default function ProfileDrawer({
     orders: t("profile.screen_orders"),
     cancelled: t("profile.screen_cancelled"),
     reviews: t("profile.screen_reviews"),
-    branches: t("profile.screen_branches")
+    branches: t("profile.screen_branches"),
+    ai: t("profile.screen_ai")
   };
 
   const renderOrderRow = (order: OrderRow) => {
@@ -520,12 +523,20 @@ export default function ProfileDrawer({
           className="w-full flex items-center justify-between p-4 text-left cursor-pointer"
         >
           <div>
-            <p className="font-bold text-sm text-ink">
+            <p className="font-bold text-sm text-ink flex items-center gap-2 flex-wrap">
               {new Date(order.created_at).toLocaleDateString(dateLocale, {
                 day: "2-digit",
                 month: "long",
                 year: "numeric"
               })}
+              {order.source === "ai_agent" && (
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase text-white bg-violet-600 px-1.5 py-0.5 rounded"
+                  title={t("agent.badge_title")}
+                >
+                  <Bot className="w-3 h-3" /> AI{order.agent_name ? `: ${order.agent_name}` : ""}
+                </span>
+              )}
             </p>
             <p className="text-xs text-ink/45 font-medium mt-0.5">
               {order.items.length} {t("profile.product_unit")} · {formatNumber(order.total)}{" "}
@@ -852,7 +863,8 @@ export default function ProfileDrawer({
                         }
                       },
                       { icon: MessageCircle, label: t("profile.menu_reviews"), onClick: () => setScreen("reviews") },
-                      { icon: MapPin, label: t("profile.menu_branches"), onClick: () => setScreen("branches") }
+                      { icon: MapPin, label: t("profile.menu_branches"), onClick: () => setScreen("branches") },
+                      { icon: Bot, label: t("profile.menu_ai"), onClick: () => setScreen("ai") }
                     ].map((item) => (
                       <button
                         key={item.label}
@@ -1102,6 +1114,8 @@ export default function ProfileDrawer({
                   {(screen === "orders" ? activeOrders : cancelledOrders).map(renderOrderRow)}
                 </div>
               )}
+
+              {screen === "ai" && <AgentKeysSection />}
 
               {screen === "reviews" && (
                 <div className="p-5 flex flex-col gap-3">

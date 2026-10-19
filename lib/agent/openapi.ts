@@ -63,9 +63,18 @@ export const openApiDocument = {
     title: "FOOD BOX public API",
     version: "1.0.0",
     description:
-      "Read-only API of FOOD BOX (foodbox.uz) — disposable packaging for restaurants, cafes and delivery businesses in Uzbekistan. The catalog is in Uzbek (Latin) and Russian; prices are in UZS. No authentication. This API cannot place orders yet. An MCP server with the same data is available at /api/mcp."
+      "API of FOOD BOX (foodbox.uz) — disposable packaging for restaurants, cafes and delivery businesses in Uzbekistan. The catalog is in Uzbek (Latin) and Russian; prices are in UZS. Catalog endpoints are public. Ordering endpoints need the customer's personal AI key (Bearer): POST /api/v1/orders creates an order REQUEST, which becomes a real order only after the account owner presses Confirm on foodbox.uz. An MCP server with the same capabilities is available at /api/mcp."
   },
   servers: [{ url: SITE_URL }],
+  components: {
+    securitySchemes: {
+      aiKey: {
+        type: "http",
+        scheme: "bearer",
+        description: "Personal AI key created by the customer on foodbox.uz (Profile → AI agent). Looks like fbk_..."
+      }
+    }
+  },
   paths: {
     "/api/v1/products": {
       get: {
@@ -137,6 +146,92 @@ export const openApiDocument = {
         summary: "Contacts, branches, delivery rules, payment, FAQ",
         parameters: [{ name: "lang", in: "query", schema: { type: "string", enum: ["uz", "ru"], default: "uz" } }],
         responses: { "200": { description: "Shop information", content: json({ type: "object" }) } }
+      }
+    },
+    "/api/v1/addresses": {
+      get: {
+        operationId: "listMyAddresses",
+        summary: "The customer's saved delivery addresses",
+        security: [{ aiKey: [] }],
+        responses: {
+          "200": {
+            description: "Saved addresses",
+            content: json({
+              type: "object",
+              properties: {
+                items: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string", format: "uuid" },
+                      name: { type: "string" },
+                      address: { type: "string" },
+                      has_gps_location: { type: "boolean" }
+                    }
+                  }
+                }
+              }
+            })
+          },
+          "401": { description: "Missing or invalid AI key", content: json(errorSchema) }
+        }
+      }
+    },
+    "/api/v1/orders": {
+      post: {
+        operationId: "createOrderRequest",
+        summary: "Create an order REQUEST (the account owner must confirm it on foodbox.uz)",
+        description:
+          "Not a placed order: it has state awaiting_owner_confirmation until the owner presses Confirm via confirm_url (valid 24 hours). Prices come from the catalog. Cash on delivery only; delivery minimum and a maximum order size apply.",
+        security: [{ aiKey: [] }],
+        requestBody: {
+          required: true,
+          content: json({
+            type: "object",
+            required: ["items"],
+            properties: {
+              items: {
+                type: "array",
+                minItems: 1,
+                maxItems: 50,
+                items: {
+                  type: "object",
+                  required: ["product_id"],
+                  properties: {
+                    product_id: { type: "string" },
+                    packs: { type: "integer", minimum: 1 },
+                    cartons: { type: "integer", minimum: 1 },
+                    units: { type: "integer", minimum: 1 }
+                  }
+                }
+              },
+              address_id: { type: "string", format: "uuid", description: "From GET /api/v1/addresses." },
+              address: { type: "string", minLength: 5, maxLength: 300, description: "Used when address_id is not given." },
+              note: { type: "string", maxLength: 500 },
+              idempotency_key: { type: "string", maxLength: 100 }
+            }
+          })
+        },
+        responses: {
+          "201": { description: "Order request created", content: json({ type: "object" }) },
+          "200": { description: "Same idempotency_key as an earlier request — that request is returned", content: json({ type: "object" }) },
+          "401": { description: "Missing or invalid AI key", content: json(errorSchema) },
+          "422": { description: "Invalid items / below delivery minimum / too large", content: json(errorSchema) },
+          "429": { description: "Too many pending requests or rate limited", content: json(errorSchema) }
+        }
+      }
+    },
+    "/api/v1/orders/{id}": {
+      get: {
+        operationId: "getOrderStatus",
+        summary: "Status of an order request or order",
+        security: [{ aiKey: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: {
+          "200": { description: "State: awaiting_owner_confirmation, confirmed, rejected_by_owner or expired", content: json({ type: "object" }) },
+          "404": errorResponses["404"]
+        }
       }
     },
     "/api/v1/quote": {

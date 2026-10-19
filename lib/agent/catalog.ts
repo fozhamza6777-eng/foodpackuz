@@ -60,8 +60,9 @@ export class CatalogUnavailableError extends Error {
 
 /** Faol mahsulotlar (1 daqiqa keshlanadi). Baza javob bermasa — eski keshni, u ham bo'lmasa xatoni qaytaradi:
  *  AI agent "katalog bo'sh" deb o'ylab qolmasligi uchun bo'sh ro'yxat qaytarilmaydi. */
-async function loadActiveRows(): Promise<ProductRow[]> {
-  if (productsCache && Date.now() - productsCache.at < CACHE_TTL_MS) return productsCache.rows;
+export async function loadActiveRows(options: { fresh?: boolean } = {}): Promise<ProductRow[]> {
+  // `fresh` — keshni chetlab o'tadi: buyurtmani tasdiqlashda narxlar eng so'nggi holatda tekshiriladi.
+  if (!options.fresh && productsCache && Date.now() - productsCache.at < CACHE_TTL_MS) return productsCache.rows;
 
   const { data, error } = await supabase
     .from("products")
@@ -202,7 +203,7 @@ export async function searchProducts(params: SearchParams): Promise<SearchResult
   return { total: scored.length, limit, offset, items: page };
 }
 
-function findRow(rows: ProductRow[], idOrSku: string): ProductRow | undefined {
+export function findRow(rows: ProductRow[], idOrSku: string): ProductRow | undefined {
   const key = idOrSku.trim().toLowerCase();
   if (!key) return undefined;
   return rows.find((r) => r.id.toLowerCase() === key) ?? rows.find((r) => r.code.trim().toLowerCase() === key);
@@ -271,8 +272,8 @@ export interface QuoteResult {
 const MAX_QUOTE_ITEMS = 50;
 const MAX_PACKS_PER_LINE = 100000;
 
-export async function buildQuote(inputs: QuoteItemInput[]): Promise<QuoteResult> {
-  const rows = await loadActiveRows();
+export async function buildQuote(inputs: QuoteItemInput[], options: { fresh?: boolean } = {}): Promise<QuoteResult> {
+  const rows = await loadActiveRows(options);
   const lines: QuoteLine[] = [];
   const errors: QuoteResult["errors"] = [];
 

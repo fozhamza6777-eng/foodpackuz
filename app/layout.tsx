@@ -15,6 +15,7 @@ import ErrorLogger from "@/components/ErrorLogger";
 import VisitTracker from "@/components/VisitTracker";
 import AmocrmChatWidget from "@/components/AmocrmChatWidget";
 import StructuredData from "@/components/StructuredData";
+import AgentOrderBanner from "@/components/AgentOrderBanner";
 import { SITE_URL } from "@/lib/site";
 
 const display = Sora({
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <CartProvider>
                       {children}
                       <SupportChatWidget />
+                      <AgentOrderBanner />
                       <BranchSelectModal />
                     </CartProvider>
                   </LikesProvider>

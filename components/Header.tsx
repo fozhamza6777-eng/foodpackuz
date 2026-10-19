@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Menu, X, Search, Package, LayoutGrid, Heart, User, ShieldCheck, LogIn } from "lucide-react";
+import { ShoppingBag, Menu, X, Search, Package, LayoutGrid, Heart, User, ShieldCheck, LogIn, Bot } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "./CartProvider";
 import { useAuth } from "./AuthProvider";
@@ -62,7 +62,7 @@ export default function Header({ categories }: { categories: Category[] }) {
       <div className="mx-auto max-w-7xl px-5 lg:px-8 h-[72px] flex items-center gap-4 lg:gap-8">
         <a href="#top" className="flex items-center shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="FOOD BOX" className="h-9 lg:h-11 w-auto" />
+          <img src="/logo.svg" alt="FOOD BOX" className="h-8 sm:h-9 lg:h-11 w-auto" />
         </a>
 
         {/* katalog tugmasi */}
@@ -151,7 +151,19 @@ export default function Header({ categories }: { categories: Category[] }) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 ml-auto lg:ml-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto lg:ml-0">
+          {/* AI agentlar uchun MCP / API — tashrif buyuruvchi darhol ko'rishi uchun headerda */}
+          <Link
+            href="/ai"
+            title={t("header.ai_agents")}
+            aria-label={t("header.ai_agents")}
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 lg:px-3 py-2 rounded-lg text-xs font-extrabold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 transition-colors whitespace-nowrap"
+          >
+            <Bot className="w-4 h-4 shrink-0" />
+            {/* Torroq ekranda (telefon/planshet) qidiruv maydoni siqilib qolmasligi uchun qisqa yozuv */}
+            <span className="lg:hidden">AI</span>
+            <span className="hidden lg:inline">AI · API</span>
+          </Link>
           <LanguageSwitcher className="hidden md:block text-ink/70" />
           {isAuthenticated && user?.isAdmin && (
             <Link
@@ -198,7 +210,7 @@ export default function Header({ categories }: { categories: Category[] }) {
           {!isAuthenticated && (
             <button
               onClick={() => setAuthOpen(true)}
-              className="flex md:hidden p-2.5 rounded-lg border border-ink/15 text-ink/70 hover:border-brand-400 hover:text-brand-600 transition-colors"
+              className="flex md:hidden p-2 sm:p-2.5 rounded-lg border border-ink/15 text-ink/70 hover:border-brand-400 hover:text-brand-600 transition-colors"
               aria-label={t("header.login_or_register")}
             >
               <LogIn className="w-5 h-5" />
@@ -210,7 +222,7 @@ export default function Header({ categories }: { categories: Category[] }) {
             whileTap={{ scale: 0.92 }}
             animate={lastAdded ? { scale: [1, 1.12, 1] } : {}}
             transition={{ duration: 0.35 }}
-            className="relative flex items-center gap-2 bg-ink text-white px-3.5 py-2.5 rounded-lg font-bold text-sm hover:bg-brand-600 transition-colors"
+            className="relative flex items-center gap-2 bg-ink text-white px-2.5 sm:px-3.5 py-2.5 rounded-lg font-bold text-sm hover:bg-brand-600 transition-colors"
             aria-label={t("header.cart_open")}
           >
             <ShoppingBag className="w-5 h-5" />
@@ -232,7 +244,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            className="lg:hidden p-2.5 rounded-lg border border-ink/10"
+            className="lg:hidden p-2 sm:p-2.5 rounded-lg border border-ink/10"
             aria-label={t("header.menu")}
           >
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -249,6 +261,17 @@ export default function Header({ categories }: { categories: Category[] }) {
             className="lg:hidden overflow-hidden bg-white border-t border-ink/5"
           >
             <div className="flex flex-col px-5 py-4 gap-1 font-semibold">
+              <Link
+                href="/ai"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl bg-brand-50 border border-brand-200 px-4 py-3 mb-2 text-brand-700"
+              >
+                <Bot className="w-5 h-5 shrink-0" />
+                <span className="flex flex-col leading-tight">
+                  <span className="font-extrabold text-sm">AI · API · MCP</span>
+                  <span className="text-xs font-medium text-brand-700/80">{t("header.ai_agents")}</span>
+                </span>
+              </Link>
               <div className="flex justify-end pb-2">
                 <LanguageSwitcher className="text-ink/70" />
               </div>

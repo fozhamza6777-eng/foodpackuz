@@ -112,7 +112,44 @@ export interface OrderRow {
   payment_status: string;
   crm_lead_id: number | null;
   crm_synced_at: string | null;
+  /** "web" — saytdan; "ai_agent" — AI agent yaratgan va mijoz tasdiqlagan buyurtma. */
+  source: "web" | "ai_agent";
+  /** AI agent orqali bo'lsa — mijoz bergan kalit nomi (masalan "Claude"). */
+  agent_name: string | null;
   created_at: string;
+}
+
+export interface AgentApiKeyRow {
+  id: string;
+  user_id: string;
+  name: string;
+  key_hash: string;
+  key_prefix: string;
+  created_at: string;
+  last_used_at: string | null;
+  revoked_at: string | null;
+}
+
+export interface AgentOrderRow {
+  id: string;
+  user_id: string;
+  key_id: string | null;
+  agent_name: string;
+  items: OrderItem[];
+  total: number;
+  address: string;
+  branch_id: string | null;
+  branch_name: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  note: string | null;
+  payment_method: "naqd";
+  idempotency_key: string | null;
+  status: "pending" | "confirmed" | "rejected" | "expired";
+  order_id: string | null;
+  created_at: string;
+  expires_at: string;
+  decided_at: string | null;
 }
 
 export interface CrmAmocrmSettingsRow {

@@ -4,7 +4,17 @@ import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
 /** Matn/kod bloki + "Nusxalash" tugmasi. */
-export default function CopyBox({ value, label }: { value: string; label?: string }) {
+export default function CopyBox({
+  value,
+  label,
+  copyLabel = "Nusxalash",
+  copiedLabel = "Nusxalandi"
+}: {
+  value: string;
+  label?: string;
+  copyLabel?: string;
+  copiedLabel?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -30,7 +40,7 @@ export default function CopyBox({ value, label }: { value: string; label?: strin
           className="absolute top-2.5 right-2.5 flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-2.5 py-1.5 rounded-lg transition-colors"
         >
           {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-          {copied ? "Nusxalandi" : "Nusxalash"}
+          {copied ? copiedLabel : copyLabel}
         </button>
       </div>
     </div>
