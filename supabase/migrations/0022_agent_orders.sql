@@ -74,6 +74,8 @@ end;
 $$;
 
 revoke all on function public.create_agent_api_key(text, text, text) from public;
+-- Supabase yangi funksiyalarga anon uchun ham ruxsat beradi — kalitni faqat tizimga kirganlar yarata olsin.
+revoke execute on function public.create_agent_api_key(text, text, text) from anon;
 grant execute on function public.create_agent_api_key(text, text, text) to authenticated;
 
 -- Mijoz kalitda faqat "bekor qilish"ni (revoked_at) bajara oladi; qolgan maydonlarni o'zgartirib bo'lmaydi.
