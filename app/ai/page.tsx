@@ -27,7 +27,7 @@ const orderTools: { name: string; text: string }[] = [
 const orderSteps = [
   "foodbox.uz saytida ro'yxatdan o'ting yoki tizimga kiring.",
   "Profil → «AI agent (kalitlar)» bo'limida kalit yarating va nusxalang (u faqat bir marta ko'rsatiladi).",
-  "Kalitni AI ilovangizdagi MCP ulanishiga qo'shing (profilda tayyor ko'rsatma bor).",
+  "Profil sizga kalit joylangan tayyor manzilni beradi — uni AI ilovangizdagi konnektor manziliga qo'ying (ko'rsatma profilda bor).",
   "AI'dan buyurtma bering — u sizga tasdiqlash havolasini beradi.",
   "Saytda chiqadigan «AI agent buyurtma yaratdi» oynasida buyurtmani ko'rib chiqib, «Tasdiqlash» tugmasini bosing."
 ];
@@ -86,14 +86,27 @@ export default function AiAgentsPage() {
             <Wrench className="w-5 h-5 text-brand-500" /> 1. AI ilovangizga ulash (MCP)
           </h2>
           <p className="text-sm text-ink/65 leading-relaxed">
-            MCP — AI ilovalarni tashqi xizmatlarga ulaydigan ochiq standart. AI ilovangizning MCP / konnektorlar sozlamalarida{" "}
-            <b>uzoq (remote) MCP server</b> qo&apos;shing va quyidagi manzilni kiriting:
+            Claude misolida (boshqa AI ilovalarda ham xuddi shunday — «konnektor» yoki «MCP server» bo&apos;limini qidiring):
           </p>
+          <ol className="list-decimal pl-5 flex flex-col gap-1.5 text-sm text-ink/70 leading-relaxed">
+            <li>Claude&apos;ni oching → Sozlamalar (Settings) → Konnektorlar (Connectors).</li>
+            <li>«Maxsus konnektor qo&apos;shish» (Add custom connector) tugmasini bosing.</li>
+            <li>Nomiga «FOOD BOX» yozing, manzilga quyidagi manzilni qo&apos;ying va saqlang.</li>
+          </ol>
           <CopyBox label="MCP server manzili" value={MCP_URL} />
-          <p className="text-sm text-ink/65 leading-relaxed">Sozlamalar faylida (JSON) ishlatiladigan ilovalar uchun:</p>
-          <CopyBox value={mcpJson} />
-          <p className="text-sm text-ink/65 leading-relaxed">Claude Code uchun buyruq:</p>
-          <CopyBox value={`claude mcp add --transport http foodbox ${MCP_URL}`} />
+          <p className="text-sm text-ink/65 leading-relaxed">
+            Katalog va narxlar uchun boshqa hech narsa kerak emas. <b>Buyurtma berish</b> uchun saytda profilingizdan shaxsiy
+            kalit oling — profil sizga kalit ichiga joylangan tayyor manzilni beradi, uni shu yerga qo&apos;yasiz.
+          </p>
+          <details className="rounded-xl bg-surface p-3">
+            <summary className="cursor-pointer text-sm font-bold text-ink/70 select-none">Dasturchilar uchun sozlamalar</summary>
+            <div className="flex flex-col gap-3 mt-3">
+              <p className="text-sm text-ink/65 leading-relaxed">Sozlamalar faylida (JSON) ishlatiladigan ilovalar uchun:</p>
+              <CopyBox value={mcpJson} />
+              <p className="text-sm text-ink/65 leading-relaxed">Claude Code uchun buyruq:</p>
+              <CopyBox value={`claude mcp add --transport http foodbox ${MCP_URL}`} />
+            </div>
+          </details>
         </section>
 
         <section className="bg-white rounded-2xl shadow-card p-6 sm:p-8 flex flex-col gap-3">

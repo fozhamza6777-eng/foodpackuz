@@ -106,17 +106,28 @@ export default function AgentKeysSection({ api = supabaseKeysApi }: { api?: Agen
         <div className="flex flex-col gap-3 rounded-2xl border-2 border-brand-300 bg-white p-4">
           <h4 className="font-display font-extrabold text-ink">{t("agent.key_created_title")}</h4>
           <p className="text-sm text-amber font-semibold leading-relaxed">{t("agent.key_copy_warning")}</p>
-          <CopyBox value={newKey} {...copyProps} />
 
-          <p className="text-xs font-bold uppercase tracking-wide text-ink/45 mt-1">{t("agent.setup_title")}</p>
-          <p className="text-sm text-ink/65">{t("agent.setup_header")}</p>
-          <CopyBox value={headerConfig} {...copyProps} />
-          <CopyBox
-            value={`claude mcp add --transport http foodbox ${MCP_URL} --header "Authorization: Bearer ${newKey}"`}
-            {...copyProps}
-          />
-          <p className="text-sm text-ink/65">{t("agent.setup_url")}</p>
-          <CopyBox value={`${MCP_URL}?key=${newKey}`} {...copyProps} />
+          {/* Oddiy yo'l: kalit manzilning ichida — bitta narsani nusxalab qo'yish kifoya */}
+          <p className="text-xs font-bold uppercase tracking-wide text-ink/45 mt-1">{t("agent.claude_title")}</p>
+          <ol className="list-decimal pl-5 flex flex-col gap-1.5 text-sm text-ink/70 leading-relaxed">
+            <li>{t("agent.claude_step1")}</li>
+            <li>{t("agent.claude_step2")}</li>
+            <li>{t("agent.claude_step3")}</li>
+          </ol>
+          <CopyBox label={t("agent.claude_url_label")} value={`${MCP_URL}?key=${newKey}`} {...copyProps} />
+
+          <details className="group rounded-xl bg-surface p-3">
+            <summary className="cursor-pointer text-sm font-bold text-ink/70 select-none">{t("agent.other_title")}</summary>
+            <div className="flex flex-col gap-3 mt-3">
+              <CopyBox label={t("agent.raw_key_label")} value={newKey} {...copyProps} />
+              <p className="text-sm text-ink/65">{t("agent.setup_header")}</p>
+              <CopyBox value={headerConfig} {...copyProps} />
+              <CopyBox
+                value={`claude mcp add --transport http foodbox ${MCP_URL} --header "Authorization: Bearer ${newKey}"`}
+                {...copyProps}
+              />
+            </div>
+          </details>
         </div>
       )}
 
